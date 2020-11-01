@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "tallestegg.bigbrain.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "bigbrain.refmap.json",
+  "mixins": [
+     "MeleeAttackGoalMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
