@@ -23,9 +23,6 @@ public class MeleeAttackGoalMixin {
 
     @Inject(method = "startExecuting()V", at = @At(value = "FIELD", target = "net/minecraft/entity/ai/goal/MeleeAttackGoal.delayCounter"), cancellable = true)
     public void startExecuting(CallbackInfo info) {
-        if (this.field_234037_i_ <= 0) {
-            this.field_234037_i_ = 0;
-        }
         info.cancel();
     }
     
