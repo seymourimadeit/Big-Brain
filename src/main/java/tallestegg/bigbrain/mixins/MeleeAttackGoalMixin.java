@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 
 @Mixin(MeleeAttackGoal.class)
@@ -21,7 +20,7 @@ public class MeleeAttackGoalMixin {
     @Final
     protected CreatureEntity attacker;
 
-    @Inject(method = "startExecuting()V", at = @At(value = "FIELD", target = "net/minecraft/entity/ai/goal/MeleeAttackGoal.delayCounter"), cancellable = true)
+    @Inject(at = @At(value = "FIELD", target = "net/minecraft/entity/ai/goal/MeleeAttackGoal.delayCounter"), cancellable = true, method = "startExecuting()V")
     public void startExecuting(CallbackInfo info) {
         info.cancel();
     }
@@ -31,10 +30,5 @@ public class MeleeAttackGoalMixin {
         if (this.field_234037_i_ <= 0) {
             this.field_234037_i_ = 20;
         }
-    }
-
-    @Shadow
-    protected double getAttackReachSqr(LivingEntity attackTarget) {
-        return 0;
     }
 }
