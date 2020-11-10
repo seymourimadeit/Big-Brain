@@ -2,7 +2,6 @@ package tallestegg.bigbrain;
 
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.goal.RangedCrossbowAttackGoal;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -31,12 +30,8 @@ public class BigBrainEvents {
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof PillagerEntity) {
             PillagerEntity pillager = (PillagerEntity) event.getEntity();
-            pillager.targetSelector.addGoal(3, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 2.0F));
-            pillager.goalSelector.goals.stream().map(it -> it.inner).filter(it -> it instanceof RangedCrossbowAttackGoal<?>).findFirst().ifPresent(crossbowGoal -> {
-                pillager.goalSelector.removeGoal(crossbowGoal);
-                pillager.targetSelector.addGoal(3, new RangedCrossbowAttackGoal<>(pillager, 1.0D, 8.0F));
-                pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 1.6D));
-            });
+            pillager.goalSelector.addGoal(3, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 2.0F));
+            pillager.goalSelector.addGoal(2, new RunWhileChargingGoal(pillager, 0.9D));
         }
     }
 }

@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "bigbrain.refmap.json",
   "mixins": [
-     "MeleeAttackGoalMixin"
+     "MeleeAttackGoalMixin",
+     "RangedCrossbowAttackGoalMixin",
+     "PillagerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

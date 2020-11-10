@@ -7,6 +7,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.ai.goal.RandomWalkingGoal;
 import net.minecraft.entity.monster.PillagerEntity;
+import net.minecraft.entity.projectile.ProjectileHelper;
+import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -20,7 +24,7 @@ public class RunWhileChargingGoal extends RandomWalkingGoal {
 
     @Override
     public boolean shouldExecute() {
-        return ((PillagerEntity) creature).isCharging() && creature.getAttackTarget() != null && this.findPosition();
+        return ((PillagerEntity) creature).isCharging() && creature.getAttackTarget() != null && this.findPosition() && !CrossbowItem.isCharged(creature.getActiveItemStack());
     }
 
     public boolean findPosition() {
@@ -38,6 +42,8 @@ public class RunWhileChargingGoal extends RandomWalkingGoal {
     @Override
     public void startExecuting() {
         super.startExecuting();
+        this.creature.setActiveHand(ProjectileHelper.getHandWith(this.creature, Items.CROSSBOW));
+        ((PillagerEntity) creature).setCharging(true);
         if (creature.getAttackTarget() != null) {
             creature.faceEntity(creature.getAttackTarget(), 30.0F, 30.0F);
             creature.getLookController().setLookPositionWithEntity(creature.getAttackTarget(), 30.0F, 30.0F);
@@ -45,36 +51,30 @@ public class RunWhileChargingGoal extends RandomWalkingGoal {
     }
 
     @Override
+    public void tick() {
+        int i = this.creature.getItemInUseMaxCount();
+        ItemStack itemstack = this.creature.getActiveItemStack();
+        if (i >= CrossbowItem.getChargeTime(itemstack)) {
+            this.creature.stopActiveHand();
+            ((PillagerEntity) creature).setCharging(false);
+        }
+    }
+
+    @Override
+    public void resetTask() {
+        super.resetTask();
+        this.creature.stopActiveHand();
+        ((PillagerEntity) creature).setCharging(false);
+    }
+
+    @Override
+    public boolean shouldContinueExecuting() {
+        return !CrossbowItem.isCharged(creature.getActiveItemStack()) && ((PillagerEntity) creature).isCharging() && super.shouldContinueExecuting();
+    }
+
+    @Override
     @Nullable
     protected Vector3d getPosition() {
         return RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.creature, 16, 7, this.creature.getAttackTarget().getPositionVec());
-    }
-
-    @Nullable
-    protected BlockPos getRandPos(IBlockReader worldIn, Entity entityIn, int horizontalRange, int verticalRange) {
-        BlockPos blockpos = entityIn.getPosition();
-        int i = blockpos.getX();
-        int j = blockpos.getY();
-        int k = blockpos.getZ();
-        float f = (float) (horizontalRange * horizontalRange * verticalRange * 2);
-        BlockPos blockpos1 = null;
-        BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
-
-        for (int l = i - horizontalRange; l <= i + horizontalRange; ++l) {
-            for (int i1 = j - verticalRange; i1 <= j + verticalRange; ++i1) {
-                for (int j1 = k - horizontalRange; j1 <= k + horizontalRange; ++j1) {
-                    blockpos$mutable.setPos(l, i1, j1);
-                    if (worldIn.getFluidState(blockpos$mutable).isTagged(FluidTags.WATER)) {
-                        float f1 = (float) ((l - i) * (l - i) + (i1 - j) * (i1 - j) + (j1 - k) * (j1 - k));
-                        if (f1 < f) {
-                            f = f1;
-                            blockpos1 = new BlockPos(blockpos$mutable);
-                        }
-                    }
-                }
-            }
-        }
-
-        return blockpos1;
     }
 }
