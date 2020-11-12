@@ -27,7 +27,7 @@ public class RangedCrossbowAttackGoalMixin<T extends MonsterEntity & IRangedAtta
     @Shadow
     private int field_220753_f;
 
-    @Inject(at = @At(value = "HEAD", target = "net/minecraft/entity/ai/controller/LookController.setLookPositionWithEntity(Lnet/minecraft/entity/Entity;FF)V)"), method = "tick()V")
+    @Inject(at = @At(value = "HEAD"), method = "tick")
     public void tick(CallbackInfo info) {
         if (CrossbowItem.isCharged(field_220748_a.getActiveItemStack()) && this.field_220749_b == RangedCrossbowAttackGoal.CrossbowState.CHARGING && this.field_220749_b != RangedCrossbowAttackGoal.CrossbowState.CHARGED) {
             this.field_220748_a.stopActiveHand();

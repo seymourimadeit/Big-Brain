@@ -20,8 +20,8 @@ public class MeleeAttackGoalMixin {
     @Final
     protected CreatureEntity attacker;
 
-    @Inject(at = @At(value = "FIELD", target = "net/minecraft/entity/ai/goal/MeleeAttackGoal.delayCounter"), cancellable = true, method = "startExecuting()V")
-    public void startExecuting(CallbackInfo info) {
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;delayCounter:I"), cancellable = true, method = "startExecuting()V")
+    public void a(CallbackInfo info) {
         info.cancel();
     }
     
