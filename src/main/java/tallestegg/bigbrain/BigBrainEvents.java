@@ -30,8 +30,8 @@ public class BigBrainEvents {
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof PillagerEntity) {
             PillagerEntity pillager = (PillagerEntity) event.getEntity();
-            pillager.goalSelector.addGoal(3, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 2.0F));
-            pillager.goalSelector.addGoal(2, new RunWhileChargingGoal(pillager, 0.9D));
+            pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
+            pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
         }
     }
 }

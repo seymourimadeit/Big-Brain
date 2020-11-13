@@ -11,13 +11,18 @@ public class PressureEntityWithMultishotCrossbowGoal<T extends MonsterEntity & I
     private final T field_220748_a;
     
     public PressureEntityWithMultishotCrossbowGoal(T shooter, double speed, float p_i50322_4_) {
-        super(shooter, 1.0D, 2.0F);
+        super(shooter, speed, p_i50322_4_);
         this.field_220748_a = shooter;
     }
     
     @Override
     public boolean shouldExecute() {
-        return super.shouldExecute() && EnchantmentHelper.getEnchantmentLevel(Enchantments.MULTISHOT, this.field_220748_a.getHeldItemMainhand()) > 0;
+        return EnchantmentHelper.getEnchantmentLevel(Enchantments.MULTISHOT, this.field_220748_a.getHeldItemMainhand()) > 0 && super.shouldExecute();
+    }
+    
+    @Override
+    public void startExecuting() {
+        super.startExecuting();
     }
 
 }

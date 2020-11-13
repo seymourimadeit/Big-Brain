@@ -25,6 +25,9 @@ public class MeleeAttackGoalMixin {
         info.cancel();
     }
     
+    /**
+     * @author tall 
+     */
     @Overwrite
     public void func_234039_g_() {
         if (this.field_234037_i_ <= 0) {
