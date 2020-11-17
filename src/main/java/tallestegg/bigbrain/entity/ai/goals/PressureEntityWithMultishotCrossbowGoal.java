@@ -19,10 +19,4 @@ public class PressureEntityWithMultishotCrossbowGoal<T extends MonsterEntity & I
     public boolean shouldExecute() {
         return EnchantmentHelper.getEnchantmentLevel(Enchantments.MULTISHOT, this.field_220748_a.getHeldItemMainhand()) > 0 && super.shouldExecute();
     }
-    
-    @Override
-    public void startExecuting() {
-        super.startExecuting();
-    }
-
 }
