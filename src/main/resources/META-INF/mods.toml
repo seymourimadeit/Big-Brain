@@ -17,7 +17,7 @@ displayURL="http://example.com/" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="bigbrain.png" #optional
 # A text field displayed in the mod UI
-credits="TallestRed" #optional
+credits="TallestEgg" #optional
 # A text field displayed in the mod UI
 authors="TallestEgg" #optional
 # The description text for the mod (multi line!) (#mandatory)
