@@ -15,7 +15,7 @@ import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
 public class BigBrainEvents {
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
-        if (event.getParentA() instanceof PigEntity && event.getParentB() instanceof PigEntity) {
+        if (event.getParentA() instanceof PigEntity && event.getParentB() instanceof PigEntity && BigBrainConfig.PigBreeding) {
             PigEntity pig = (PigEntity) event.getParentA();
             for (int i = 0; i < 2 + pig.world.rand.nextInt(3); ++i) {
                 AgeableEntity baby = EntityType.PIG.create(event.getChild().world);
@@ -30,8 +30,10 @@ public class BigBrainEvents {
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof PillagerEntity) {
             PillagerEntity pillager = (PillagerEntity) event.getEntity();
-            pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
-            pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
+            if (BigBrainConfig.PillagerMultishot)
+                pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
+            if (BigBrainConfig.PillagerCover)
+                pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
         }
     }
 }
