@@ -5,7 +5,8 @@
   "refmap": "bigbrain.refmap.json",
   "mixins": [
      "MeleeAttackGoalMixin",
-     "RangedCrossbowAttackGoalMixin"
+     "RangedCrossbowAttackGoalMixin",
+     "SquidEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
