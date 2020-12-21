@@ -6,7 +6,9 @@
   "mixins": [
      "MeleeAttackGoalMixin",
      "RangedCrossbowAttackGoalMixin",
-     "SquidEntityMixin"
+     "SquidEntityMixin",
+     "PlayerEntityMixin",
+     "PlayerModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

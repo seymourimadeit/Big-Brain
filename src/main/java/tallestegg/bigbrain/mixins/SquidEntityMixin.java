@@ -22,6 +22,7 @@ public class SquidEntityMixin extends WaterMobEntity {
         super(type, p_i48565_2_);
     }
 
+    //TODO make squids squirt an AOE cloud instead of just particles
     @Inject(at = @At(value = "HEAD", target = "net/minecraft/world/server/ServerWorld.spawnParticle(Lnet/minecraft/particles/IParticleData;DDDIDDDD)I"), method = "squirtInk()V")
     public void squirtInk(CallbackInfo info) {
         Vector3d vector3d1 = this.func_207400_b(new Vector3d((double)this.rand.nextFloat() * 0.6D - 0.3D, -1.0D, (double)this.rand.nextFloat() * 0.6D - 0.3D));
