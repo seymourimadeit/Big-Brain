@@ -25,19 +25,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
         super(type, worldIn);
     }
 
+    // We can't use a forge event for this due to the fact we have to do to this
+    // stuff on the
+    // livingTick() method.
     @Inject(at = @At(value = "TAIL"), method = "livingTick()V")
     public void livingTick(CallbackInfo info) {
         if (!this.isCharging()) {
             ++this.cooldown;
-            if (this.cooldown > 100)
-                this.cooldown = 100;
+            if (this.cooldown > 15)
+                this.cooldown = 15;
         }
 
         if (this.isCharging()) {
             BucklerItem.moveFowards(this);
             this.cooldown--;
         }
-        if (cooldown == 0) {
+        if (cooldown == 0 || cooldown < 0) {
             this.setCharging(false);
             this.cooldown = 0;
         }

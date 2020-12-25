@@ -8,11 +8,12 @@ import javax.annotation.Nullable;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
@@ -34,16 +35,29 @@ public class BucklerItem extends ShieldItem {
     }
 
     @Override
+    public void onUse(World worldIn, LivingEntity livingEntityIn, ItemStack stack, int count) {
+        if (((IBucklerUser) livingEntityIn).getCooldown() > 0) {
+            ((IBucklerUser) livingEntityIn).setCharging(true);
+            stack.damageItem(1, livingEntityIn, (player1) -> {
+                player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
+             });
+        }
+        
+    }
+
+    @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        playerIn.setActiveHand(handIn);
-        ((IBucklerUser)playerIn).setCharging(true);
+        playerIn.playSound(SoundEvents.ENTITY_PHANTOM_FLAP, 1.0F, 1.0F);
         return super.onItemRightClick(worldIn, playerIn, handIn);
     }
 
     public static void moveFowards(LivingEntity entity) {
-        Vector3d d3 = entity.getLookVec();
-        Vector3d motion = entity.getMotion();
-        entity.setMotion(d3.x * 1.0D, motion.y, d3.z * 1.0D);
+        if (entity.isAlive()) {
+            Vector3d d3 = entity.getLookVec();
+            Vector3d motion = entity.getMotion();
+            entity.setMotion(d3.x * 1.0D, motion.y, d3.z * 1.0D);
+            //entity.playSound(SoundEvents.ITEM_ELYTRA_FLYING, 1.0F, 1.0F);
+        }
     }
 
     @Override
