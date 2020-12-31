@@ -8,7 +8,9 @@ import javax.annotation.Nullable;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.util.ActionResult;
@@ -40,9 +42,15 @@ public class BucklerItem extends ShieldItem {
             ((IBucklerUser) livingEntityIn).setCharging(true);
             stack.damageItem(1, livingEntityIn, (player1) -> {
                 player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
-             });
+            });
+            if (livingEntityIn instanceof PlayerEntity)
+                ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 100);
+            livingEntityIn.resetActiveHand();
+            if (livingEntityIn instanceof AbstractPiglinEntity)
+                livingEntityIn.playSound(SoundEvents.ENTITY_PIGLIN_BRUTE_CONVRTED_TO_ZOMBIFIED, 1.0F,
+                        livingEntityIn.isChild() ? (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.5F : (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.0F);
         }
-        
+
     }
 
     @Override
@@ -56,7 +64,7 @@ public class BucklerItem extends ShieldItem {
             Vector3d d3 = entity.getLookVec();
             Vector3d motion = entity.getMotion();
             entity.setMotion(d3.x * 1.0D, motion.y, d3.z * 1.0D);
-            //entity.playSound(SoundEvents.ITEM_ELYTRA_FLYING, 1.0F, 1.0F);
+            // entity.playSound(SoundEvents.ITEM_ELYTRA_FLYING, 1.0F, 1.0F);
         }
     }
 
