@@ -8,4 +8,8 @@ public interface IBucklerUser {
     void setCharging(boolean charging);
     
     boolean isCharging();
+    
+    int getBucklerUseTimer();
+    
+    void setBucklerUseTimer(int useTimer);
 }

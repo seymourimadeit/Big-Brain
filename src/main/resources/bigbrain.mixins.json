@@ -10,7 +10,8 @@
      "PlayerEntityMixin",
      "PlayerModelMixin",
      "BruteBrainMixin",
-     "PiglinBruteMixin"
+     "PiglinBruteMixin",
+     "MouseHelperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

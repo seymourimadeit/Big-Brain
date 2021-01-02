@@ -1,13 +1,17 @@
 package tallestegg.bigbrain;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
 
@@ -23,6 +27,14 @@ public class BigBrainEvents {
                 baby.setChild(true);
                 pig.world.addEntity(baby);
             }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onInputKey(InputEvent.ClickInputEvent event) {
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+        if (((IBucklerUser) player).isCharging()) {
+            ((IBucklerUser) player).setCharging(false);
         }
     }
 
