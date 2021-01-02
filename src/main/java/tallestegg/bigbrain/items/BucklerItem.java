@@ -51,7 +51,7 @@ public class BucklerItem extends ShieldItem {
                 player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
             });
             if (livingEntityIn instanceof PlayerEntity) {
-                ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 1);
+                ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
             }
             livingEntityIn.resetActiveHand();
             if (livingEntityIn instanceof AbstractPiglinEntity)

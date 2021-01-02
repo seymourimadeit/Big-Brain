@@ -75,7 +75,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
     }
 
     public void setCharging(boolean charging) {
-        this.charging = charging;
         if (!charging) {
             ModifiableAttributeInstance modifiableattributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
             if (modifiableattributeinstance == null) {
@@ -83,6 +82,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
             }
             modifiableattributeinstance.removeModifier(BucklerItem.CHARGE_SPEED_BOOST);
         }
+        this.charging = charging;
     }
 
     public boolean isCharging() {
