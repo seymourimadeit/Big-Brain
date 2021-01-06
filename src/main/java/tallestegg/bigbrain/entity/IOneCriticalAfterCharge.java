@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.entity.ai;
+package tallestegg.bigbrain.entity;
 
 public interface IOneCriticalAfterCharge {
     boolean isCritical();

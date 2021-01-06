@@ -16,26 +16,26 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import tallestegg.bigbrain.entity.IBucklerUser;
-import tallestegg.bigbrain.entity.ai.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.items.BucklerItem;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements IBucklerUser, IOneCriticalAfterCharge {
     private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");
     private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_TOTAL);
-
+    private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CRITICAL = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
+    
     @Unique
     private int cooldown;
-
-    @Unique
-    private boolean charging;
-
-    @Unique
-    private boolean critical;
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> type, World worldIn) {
         super(type, worldIn);
@@ -44,7 +44,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
     @Override
     protected void collideWithEntity(Entity entityIn) {
         if (this.isCharging()) {
-            this.setCritical(true); // Why isn't this being called on the client side?
+            this.setCritical(true);
             float f = 5.0F + this.getRNG().nextInt(1);
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
@@ -77,19 +77,28 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
             this.cooldown = 0;
         }
     }
+    
+    /*@Override
+    public void swing(Hand handIn, boolean updateSelf) {
+        super.swing(handIn, updateSelf);
+        if (this.isCritical()) 
+            this.setCritical(false);
+    }*/
 
     @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
     public void writeAdditional(CompoundNBT compound, CallbackInfo info) {
-        compound.putBoolean("Charging", this.isCharging());
-        compound.putBoolean("Critical", this.isCritical());
         compound.putInt("ChargeCooldown", this.getCooldown());
     }
 
     @Inject(at = @At(value = "TAIL"), method = "readAdditional")
     public void readAdditional(CompoundNBT compound, CallbackInfo info) {
-        this.setCritical(compound.getBoolean("Critical"));
-        this.setCharging(compound.getBoolean("Charging"));
         this.setCooldown(compound.getInt("ChargeCooldown"));
+    }
+    
+    @Inject(at = @At(value = "TAIL"), method = "registerData")
+    protected void registerData(CallbackInfo info) {
+        this.dataManager.register(CHARGING, false);
+        this.dataManager.register(CRITICAL, false);
     }
 
     public int getCooldown() {
@@ -101,11 +110,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
     }
 
     public boolean isCritical() {
-        return this.critical;
+        return this.dataManager.get(CRITICAL);
     }
 
     public void setCritical(boolean critical) {
-        this.critical = critical;
+        this.dataManager.set(CRITICAL, critical);
     }
 
     public void setCharging(boolean charging) {
@@ -125,10 +134,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
 
             modifiableattributeinstance.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
         }
-        this.charging = charging;
+        this.dataManager.set(CHARGING, charging);
     }
 
     public boolean isCharging() {
-        return this.charging;
+        return this.dataManager.get(CHARGING);
     }
 }

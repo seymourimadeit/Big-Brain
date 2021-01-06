@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundEvents;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -19,7 +18,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import tallestegg.bigbrain.entity.IBucklerUser;
-import tallestegg.bigbrain.entity.ai.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
 
@@ -41,7 +40,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onMouseKeyPressed(ClickInputEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (((IOneCriticalAfterCharge) player).isCritical()) {
+        if (((IOneCriticalAfterCharge) player).isCritical() && event.isAttack()) {
             ((IOneCriticalAfterCharge) player).setCritical(false);
         }
     }
