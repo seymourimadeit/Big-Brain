@@ -1,7 +1,6 @@
 package tallestegg.bigbrain.items;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
@@ -9,9 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -27,9 +24,6 @@ import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
 public class BucklerItem extends ShieldItem {
-    private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");
-    public static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Sprinting speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_TOTAL);
-
     public BucklerItem(Properties p_i48470_1_) {
         super(p_i48470_1_.setISTER(BucklerItem::getISTER));
     }
@@ -51,7 +45,7 @@ public class BucklerItem extends ShieldItem {
                 player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
             });
             if (livingEntityIn instanceof PlayerEntity) {
-                ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
+                ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 1);
             }
             livingEntityIn.resetActiveHand();
             if (livingEntityIn instanceof AbstractPiglinEntity)
@@ -71,13 +65,6 @@ public class BucklerItem extends ShieldItem {
             Vector3d d3 = entity.getLookVec();
             Vector3d motion = entity.getMotion();
             if (entity instanceof PlayerEntity) {
-                ModifiableAttributeInstance modifiableattributeinstance = entity.getAttribute(Attributes.MOVEMENT_SPEED);
-                if (modifiableattributeinstance == null) {
-                    return;
-                }
-                modifiableattributeinstance.removeModifier(CHARGE_SPEED_BOOST);
-
-                modifiableattributeinstance.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
                 entity.setMotion(d3.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y, d3.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
             } else {
                 // This is the only way to make the piglin brute go faster without having it

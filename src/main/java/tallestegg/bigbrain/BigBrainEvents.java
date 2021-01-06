@@ -6,12 +6,20 @@ import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.SoundEvents;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
+import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.entity.ai.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
 
@@ -29,12 +37,31 @@ public class BigBrainEvents {
             }
         }
     }
-    
+
     @SubscribeEvent
-    public static void onInputKey(InputEvent.ClickInputEvent event) {
+    public static void onMouseKeyPressed(ClickInputEvent event) {
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+        if (((IOneCriticalAfterCharge) player).isCritical()) {
+            ((IOneCriticalAfterCharge) player).setCritical(false);
+        }
+    }
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void onMovementKeyPressed(InputUpdateEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (((IBucklerUser) player).isCharging()) {
-            ((IBucklerUser) player).setCharging(false);
+            event.getMovementInput().jump = false;
+            event.getMovementInput().moveStrafe = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerAttack(AttackEntityEvent event) {
+        if (((IOneCriticalAfterCharge) event.getPlayer()).isCritical()) {
+            event.getPlayer().world.playSound((PlayerEntity) null, event.getPlayer().getPosX(), event.getPlayer().getPosY(), event.getPlayer().getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, event.getPlayer().getSoundCategory(), 1.0F, 1.0F);
+            event.getPlayer().onCriticalHit(event.getTarget());
+            ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
         }
     }
 

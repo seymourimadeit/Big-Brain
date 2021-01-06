@@ -8,10 +8,12 @@
      "RangedCrossbowAttackGoalMixin",
      "SquidEntityMixin",
      "PlayerEntityMixin",
-     "PlayerModelMixin",
      "BruteBrainMixin",
      "PiglinBruteMixin",
      "MouseHelperMixin"
+  ],
+  "client": [
+     "PlayerModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

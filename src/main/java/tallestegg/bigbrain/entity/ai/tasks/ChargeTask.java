@@ -39,7 +39,8 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
 
     @Override
     protected void updateTask(ServerWorld worldIn, T entityIn, long gameTime) {
-        entityIn.faceEntity(this.getAttackTarget(entityIn), 30.0F, 30.0F);
+        if (!((IBucklerUser) entityIn).isCharging())
+            entityIn.faceEntity(this.getAttackTarget(entityIn), 30.0F, 30.0F);
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0) {
             entityIn.getMoveHelper().strafe(-2.0F, 0.0F);
             strafeTicks--;
@@ -56,7 +57,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
     @Override
     protected void startExecuting(ServerWorld worldIn, T entityIn, long gameTimeIn) {
         chargePhase = ChargePhases.STRAFE;
-        strafeTicks = 15;
+        strafeTicks = 20;
     }
 
     @Override

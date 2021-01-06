@@ -15,8 +15,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.monster.piglin.PiglinAction;
 import net.minecraft.entity.monster.piglin.PiglinBruteEntity;
@@ -61,7 +59,7 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
                 ((LivingEntity) entityIn).applyKnockback(f1 * 0.5F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
-                this.setMotion(this.getMotion().mul(0.6D, 5.0D, 0.6D));
+                this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
             }
 
             entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
@@ -90,11 +88,6 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
         }
         if (bucklerUseTimer <= 0) {
             this.setCharging(false);
-            ModifiableAttributeInstance modifiableattributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (modifiableattributeinstance == null) {
-               return;
-            }
-            modifiableattributeinstance.removeModifier(BucklerItem.CHARGE_SPEED_BOOST);
             this.cooldown = 0;
             this.bucklerUseTimer = 0;
             this.resetActiveHand();
