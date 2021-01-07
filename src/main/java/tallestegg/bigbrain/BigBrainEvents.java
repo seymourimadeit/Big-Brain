@@ -21,6 +21,7 @@ import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
+import tallestegg.bigbrain.networking.PlayerCriticalPacket;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
@@ -38,10 +39,11 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
     public static void onMouseKeyPressed(ClickInputEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (((IOneCriticalAfterCharge) player).isCritical() && event.isAttack()) {
-            ((IOneCriticalAfterCharge) player).setCritical(false);
+            BigBrainPackets.INSTANCE.sendToServer(new PlayerCriticalPacket(player.getEntityId()));
         }
     }
 
