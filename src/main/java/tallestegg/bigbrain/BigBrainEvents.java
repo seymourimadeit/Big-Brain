@@ -58,9 +58,9 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onPlayerAttack(AttackEntityEvent event) {
         if (((IOneCriticalAfterCharge) event.getPlayer()).isCritical()) {
+            ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
             event.getPlayer().world.playSound((PlayerEntity) null, event.getPlayer().getPosX(), event.getPlayer().getPosY(), event.getPlayer().getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, event.getPlayer().getSoundCategory(), 1.0F, 1.0F);
             event.getPlayer().onCriticalHit(event.getTarget());
-            ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
         }
     }
 

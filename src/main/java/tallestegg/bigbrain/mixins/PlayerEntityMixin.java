@@ -20,7 +20,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import tallestegg.bigbrain.entity.IBucklerUser;
@@ -44,7 +43,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
     @Override
     protected void collideWithEntity(Entity entityIn) {
         if (this.isCharging()) {
-            this.setCritical(true);
             float f = 5.0F + this.getRNG().nextInt(1);
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
@@ -53,6 +51,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
             }
 
             entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+            this.setCritical(true);
         }
         super.collideWithEntity(entityIn);
     }
@@ -87,11 +86,15 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
 
     @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
     public void writeAdditional(CompoundNBT compound, CallbackInfo info) {
+        compound.putBoolean("Charging", this.isCharging());
+        compound.putBoolean("Critical", this.isCritical());
         compound.putInt("ChargeCooldown", this.getCooldown());
     }
 
     @Inject(at = @At(value = "TAIL"), method = "readAdditional")
     public void readAdditional(CompoundNBT compound, CallbackInfo info) {
+        this.setCritical(compound.getBoolean("Critical"));
+        this.setCharging(compound.getBoolean("Charging"));
         this.setCooldown(compound.getInt("ChargeCooldown"));
     }
     
