@@ -29,7 +29,9 @@ import tallestegg.bigbrain.items.BucklerItem;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements IBucklerUser, IOneCriticalAfterCharge {
     private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");
-    private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("0DE9EFF3-457A-4060-BB03-F520F25713AF");
+    private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback Reduction", 0.10D, AttributeModifier.Operation.ADDITION);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CRITICAL = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
     
@@ -76,13 +78,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
             this.cooldown = 0;
         }
     }
-    
-    /*@Override
-    public void swing(Hand handIn, boolean updateSelf) {
-        super.swing(handIn, updateSelf);
-        if (this.isCritical()) 
-            this.setCritical(false);
-    }*/
 
     @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
     public void writeAdditional(CompoundNBT compound, CallbackInfo info) {
@@ -122,20 +117,24 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
 
     public void setCharging(boolean charging) {
         if (!charging) {
-            ModifiableAttributeInstance modifiableattributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (modifiableattributeinstance == null) {
+            ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+            if (speed == null || knockback == null) {
                 return;
             }
-            modifiableattributeinstance.removeModifier(CHARGE_SPEED_BOOST);
+            knockback.removeModifier(KNOCKBACK_RESISTANCE);
+            speed.removeModifier(CHARGE_SPEED_BOOST);
         }
         if (charging) {
-            ModifiableAttributeInstance modifiableattributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (modifiableattributeinstance == null) {
+            ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+            if (speed == null || knockback == null) {
                 return;
             }
-            modifiableattributeinstance.removeModifier(CHARGE_SPEED_BOOST);
-
-            modifiableattributeinstance.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
+            knockback.removeModifier(KNOCKBACK_RESISTANCE);
+            knockback.applyNonPersistentModifier(KNOCKBACK_RESISTANCE);
+            speed.removeModifier(CHARGE_SPEED_BOOST);
+            speed.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
         }
         this.dataManager.set(CHARGING, charging);
     }

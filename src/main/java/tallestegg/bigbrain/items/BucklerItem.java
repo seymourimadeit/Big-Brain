@@ -44,7 +44,7 @@ public class BucklerItem extends ShieldItem {
             stack.damageItem(1, livingEntityIn, (player1) -> {
                 player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
             });
-            if (livingEntityIn instanceof PlayerEntity) {
+            if (livingEntityIn instanceof PlayerEntity && !((PlayerEntity)livingEntityIn).abilities.isCreativeMode) {
                 ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
             }
             livingEntityIn.resetActiveHand();

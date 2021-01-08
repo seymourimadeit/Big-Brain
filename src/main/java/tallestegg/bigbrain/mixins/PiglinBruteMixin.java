@@ -1,5 +1,7 @@
 package tallestegg.bigbrain.mixins;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,12 +17,19 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.monster.piglin.PiglinAction;
 import net.minecraft.entity.monster.piglin.PiglinBruteEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
@@ -34,14 +43,14 @@ import tallestegg.bigbrain.items.BucklerItem;
 //This is where the magic happens, and by magic, I mean mechanically automated goring into commodities!
 @Mixin(PiglinBruteEntity.class)
 public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUser {
+    private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
+    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback Reduction", 0.10D, AttributeModifier.Operation.ADDITION);
+    private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
     @Unique
     private int cooldown;
 
     @Unique
     private int bucklerUseTimer;
-
-    @Unique
-    private boolean charging;
 
     protected PiglinBruteMixin(EntityType<? extends AbstractPiglinEntity> type, World worldIn) {
         super(type, worldIn);
@@ -104,6 +113,12 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
         this.cooldown = 240;
         return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
     }
+    
+    @Override
+    protected void registerData() {
+        super.registerData();
+        this.dataManager.register(CHARGING, false);
+    }
 
     @Override
     public void writeAdditional(CompoundNBT compound) {
@@ -130,11 +145,26 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
     }
 
     public void setCharging(boolean charging) {
-        this.charging = charging;
+        if (!charging) {
+            ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+            if (knockback == null) {
+                return;
+            }
+            knockback.removeModifier(KNOCKBACK_RESISTANCE);
+        }
+        if (charging) {
+            ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+            if (knockback == null) {
+                return;
+            }
+            knockback.removeModifier(KNOCKBACK_RESISTANCE);
+            knockback.applyNonPersistentModifier(KNOCKBACK_RESISTANCE);
+        }
+        this.dataManager.set(CHARGING, charging);
     }
 
     public boolean isCharging() {
-        return this.charging;
+        return this.dataManager.get(CHARGING);
     }
 
     @Shadow
