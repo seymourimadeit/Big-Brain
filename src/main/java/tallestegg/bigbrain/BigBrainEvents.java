@@ -7,11 +7,16 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
+import net.minecraft.loot.ConstantRange;
+import net.minecraft.loot.ItemLootEntry;
+import net.minecraft.loot.LootPool;
 import net.minecraft.util.SoundEvents;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -54,6 +59,16 @@ public class BigBrainEvents {
         if (((IBucklerUser) player).isCharging()) {
             event.getMovementInput().jump = false;
             event.getMovementInput().moveStrafe = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLootTableLoad(LootTableLoadEvent event) {
+        if (event.getName().toString().contains("minecraft:chests/bastion")) {
+            LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry
+                    (ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry
+                    (ItemLootEntry.builder(Items.AIR).weight(90)).build(); //This is hacky, but this will make do for now.
+            event.getTable().addPool(pool);
         }
     }
 

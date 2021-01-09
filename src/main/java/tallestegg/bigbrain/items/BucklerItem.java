@@ -20,6 +20,7 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.Tags.Items;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
@@ -44,7 +45,7 @@ public class BucklerItem extends ShieldItem {
             stack.damageItem(1, livingEntityIn, (player1) -> {
                 player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
             });
-            if (livingEntityIn instanceof PlayerEntity && !((PlayerEntity)livingEntityIn).abilities.isCreativeMode) {
+            if (livingEntityIn instanceof PlayerEntity && !((PlayerEntity) livingEntityIn).abilities.isCreativeMode) {
                 ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
             }
             livingEntityIn.resetActiveHand();
@@ -73,6 +74,12 @@ public class BucklerItem extends ShieldItem {
             }
         }
     }
+
+    @Override
+    public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
+        return Items.INGOTS_GOLD.contains(repair.getItem()) || super.getIsRepairable(toRepair, repair);
+    }
+    
 
     @Override
     public boolean isShield(ItemStack stack, @Nullable LivingEntity entity) {

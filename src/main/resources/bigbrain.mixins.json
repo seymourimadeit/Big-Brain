@@ -9,11 +9,11 @@
      "SquidEntityMixin",
      "PlayerEntityMixin",
      "BruteBrainMixin",
-     "PiglinBruteMixin",
-     "MouseHelperMixin"
+     "PiglinBruteMixin"
   ],
   "client": [
-     "PlayerModelMixin"
+     "PlayerModelMixin",
+     "MouseHelperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

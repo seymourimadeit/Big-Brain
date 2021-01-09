@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
@@ -113,7 +114,25 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
         this.cooldown = 240;
         return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
     }
-    
+
+    @Override
+    protected void dropSpecialItems(DamageSource source, int looting, boolean recentlyHitIn) {
+        super.dropSpecialItems(source, looting, recentlyHitIn);
+        ItemStack itemstack = this.getHeldItemOffhand();
+        if (itemstack.getItem() instanceof BucklerItem) {
+            float f = 0.10F;
+            boolean flag = f > 1.0F;
+            if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack) && (recentlyHitIn || flag) && Math.max(this.rand.nextFloat() - (float) looting * 0.01F, 0.0F) < f) {
+                if (!flag && itemstack.isDamageable()) {
+                    itemstack.setDamage(itemstack.getMaxDamage() - this.rand.nextInt(1 + this.rand.nextInt(Math.max(itemstack.getMaxDamage() - 3, 1))));
+                }
+
+                this.entityDropItem(itemstack);
+                this.setItemStackToSlot(EquipmentSlotType.OFFHAND, ItemStack.EMPTY);
+            }
+        }
+    }
+
     @Override
     protected void registerData() {
         super.registerData();
