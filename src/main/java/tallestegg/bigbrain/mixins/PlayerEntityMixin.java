@@ -34,7 +34,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
     private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback Reduction", 0.10D, AttributeModifier.Operation.ADDITION);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CRITICAL = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
-    
+
     @Unique
     private int cooldown;
 
@@ -51,8 +51,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
                 ((LivingEntity) entityIn).applyKnockback(f1 * 0.5F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
                 this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
             }
-
             entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+            this.setLastAttackedEntity(entityIn);
+            this.world.setEntityState(this, (byte) 43);
             this.setCritical(true);
         }
         super.collideWithEntity(entityIn);
@@ -92,7 +93,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
         this.setCharging(compound.getBoolean("Charging"));
         this.setCooldown(compound.getInt("ChargeCooldown"));
     }
-    
+
     @Inject(at = @At(value = "TAIL"), method = "registerData")
     protected void registerData(CallbackInfo info) {
         this.dataManager.register(CHARGING, false);

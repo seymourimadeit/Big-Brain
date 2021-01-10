@@ -31,11 +31,15 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import tallestegg.bigbrain.BigBrainItems;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.ai.PiglinBruteLookController;
@@ -73,8 +77,9 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
                 ((LivingEntity) entityIn).applyKnockback(f1 * 0.5F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
                 this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
             }
-
             entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+            this.setLastAttackedEntity(entityIn);
+            this.world.setEntityState(this, (byte) 43);
         }
         super.collideWithEntity(entityIn);
     }
@@ -115,6 +120,20 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
         this.setItemStackToSlot(EquipmentSlotType.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
         this.cooldown = 240;
         return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
+    }
+
+    @Override
+    public void handleStatusUpdate(byte id) {
+        if (id == 43) {
+            for (int i = 0; i < 5; ++i) {
+                double d0 = this.rand.nextGaussian() * 0.02D;
+                double d1 = this.rand.nextGaussian() * 0.02D;
+                double d2 = this.rand.nextGaussian() * 0.02D;
+                this.world.addParticle(ParticleTypes.CLOUD, this.getPosXRandom(1.0D), this.getPosYRandom() + 1.0D, this.getPosZRandom(1.0D), d0, d1, d2);
+            }
+        } else {
+            super.handleStatusUpdate(id);
+        }
     }
 
     @Override
