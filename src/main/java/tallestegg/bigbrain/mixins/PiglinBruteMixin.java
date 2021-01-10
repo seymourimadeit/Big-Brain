@@ -39,6 +39,7 @@ import net.minecraft.world.World;
 import tallestegg.bigbrain.BigBrainItems;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.ai.PiglinBruteLookController;
+import tallestegg.bigbrain.entity.ai.PiglinBruteMoveController;
 import tallestegg.bigbrain.items.BucklerItem;
 
 //This is where the magic happens, and by magic, I mean mechanically automated goring into commodities!
@@ -60,6 +61,7 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
     @Inject(method = "<init>(Lnet/minecraft/entity/EntityType;Lnet/minecraft/world/World;)V", at = @At("RETURN"))
     public void onConstructor(EntityType<? extends PiglinBruteEntity> p_i241917_1_, World p_i241917_2_, CallbackInfo info) {
         this.lookController = new PiglinBruteLookController(this);
+        this.moveController = new PiglinBruteMoveController(this);
     }
 
     @Override

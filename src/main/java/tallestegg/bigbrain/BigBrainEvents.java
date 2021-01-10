@@ -5,6 +5,7 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.monster.PillagerEntity;
+import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -19,6 +20,7 @@ import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -53,6 +55,15 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    public static void onJump(LivingJumpEvent event) {
+        if (event.getEntity() instanceof IBucklerUser) {
+            if (((IBucklerUser) event.getEntity()).isCharging()) {
+                event.getEntity().setMotion(event.getEntity().getMotion().getX(), 0, event.getEntity().getMotion().getZ());
+            }
+        }
+    }
+
+    @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public static void onMovementKeyPressed(InputUpdateEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
@@ -65,9 +76,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().toString().contains("minecraft:chests/bastion")) {
-            LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry
-                    (ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry
-                    (ItemLootEntry.builder(Items.AIR).weight(90)).build(); //This is hacky, but this will make do for now.
+            LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(ItemLootEntry.builder(Items.AIR).weight(90)).build(); // This is hacky, but this will make do for now.
             event.getTable().addPool(pool);
         }
     }

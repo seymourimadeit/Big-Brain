@@ -42,6 +42,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
         if (!((IBucklerUser) entityIn).isCharging())
             entityIn.faceEntity(this.getAttackTarget(entityIn), 30.0F, 30.0F);
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0) {
+            //entityIn.playSound(SoundEvents.ENTITY_PIGLIN_BRUTE_ANGRY, 1.0F, entityIn.isChild() ? (entityIn.getRNG().nextFloat() - entityIn.getRNG().nextFloat()) * 0.2F + 1.5F : (entityIn.getRNG().nextFloat() - entityIn.getRNG().nextFloat()) * 0.2F + 1.0F);
             entityIn.getMoveHelper().strafe(-2.0F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)

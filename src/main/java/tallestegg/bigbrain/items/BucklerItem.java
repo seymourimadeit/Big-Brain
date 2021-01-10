@@ -16,11 +16,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags.Items;
+import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
@@ -50,7 +50,7 @@ public class BucklerItem extends ShieldItem {
             }
             livingEntityIn.resetActiveHand();
             if (livingEntityIn instanceof AbstractPiglinEntity)
-                livingEntityIn.playSound(SoundEvents.ENTITY_PIGLIN_BRUTE_CONVRTED_TO_ZOMBIFIED, 1.0F,
+                livingEntityIn.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F,
                         livingEntityIn.isChild() ? (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.5F : (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.0F);
         }
 

@@ -27,6 +27,7 @@ public class BigBrain {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, BigBrainConfig.COMMON_SPEC);
         BigBrainItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        BigBrainSounds.SOUNDS.register(FMLJavaModLoadingContext.get().getModEventBus());
         MinecraftForge.EVENT_BUS.register(this);
         BigBrainPackets.registerPackets();
     }
