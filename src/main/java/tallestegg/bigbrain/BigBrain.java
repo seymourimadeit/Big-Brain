@@ -19,7 +19,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Mod(BigBrain.MODID)
 public class BigBrain {
     public static final String MODID = "bigbrain";
-
+    
     public BigBrain() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
@@ -28,6 +28,7 @@ public class BigBrain {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, BigBrainConfig.COMMON_SPEC);
         BigBrainItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BigBrainSounds.SOUNDS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        BigBrainEnchantments.ENCHANTMENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
         MinecraftForge.EVENT_BUS.register(this);
         BigBrainPackets.registerPackets();
     }

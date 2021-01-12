@@ -77,7 +77,7 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
-        return Items.INGOTS_GOLD.contains(repair.getItem()) || super.getIsRepairable(toRepair, repair);
+        return Items.INGOTS_GOLD.contains(repair.getItem());
     }
     
 

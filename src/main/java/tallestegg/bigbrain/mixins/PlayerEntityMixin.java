@@ -22,6 +22,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.items.BucklerItem;
@@ -44,16 +45,16 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
 
     @Override
     protected void collideWithEntity(Entity entityIn) {
-        if (this.isCharging()) {
+        if (this.isCharging() && BigBrainEnchantments.getTurningOnHands(this) == 0) {
             float f = 5.0F + this.getRNG().nextInt(1);
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
-                ((LivingEntity) entityIn).applyKnockback(f1 * 0.5F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
+                ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
                 this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
             }
+            this.world.setEntityState(this, (byte) 43);
             entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
             this.setLastAttackedEntity(entityIn);
-            this.world.setEntityState(this, (byte) 43);
             this.setCritical(true);
         }
         super.collideWithEntity(entityIn);

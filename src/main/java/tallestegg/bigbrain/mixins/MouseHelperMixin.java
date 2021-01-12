@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHelper;
 import net.minecraft.client.util.MouseSmoother;
 import net.minecraft.client.util.NativeUtil;
+import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
 @Mixin(MouseHelper.class)
@@ -36,21 +37,21 @@ public class MouseHelperMixin {
     @Shadow
     private double yVelocity;
 
-    //This is the worst implemetation of a feature I have ever done.
-    //Please, @ me on discord for a better implementation.
+    // This is the worst implemetation of a feature I have ever done.
+    // Please, @ me on discord for a better implementation.
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;player:Lnet/minecraft/client/entity/player/ClientPlayerEntity;", shift = At.Shift.AFTER), cancellable = true, method = "updatePlayerLook()V")
     public void updatePlayerLook(CallbackInfo info) {
         info.cancel();
     }
 
     @Inject(at = @At(value = "HEAD"), cancellable = true, method = "updatePlayerLook()V")
-    public void updatePlayrerLook(CallbackInfo info) {
+    public void updatePlayerLook2(CallbackInfo info) {
         if (minecraft.player == null) {
             return;
         }
         double d0 = NativeUtil.getTime();
         double d1 = d0 - this.lastLookTime;
-        double d4 = ((IBucklerUser)minecraft.player).isCharging() ? 0.2F : this.minecraft.gameSettings.mouseSensitivity * (double) 0.6F + (double) 0.2F;
+        double d4 = ((IBucklerUser) minecraft.player).isCharging() && BigBrainEnchantments.getTurningOnHands(minecraft.player) == 0 ? 0.2F : this.minecraft.gameSettings.mouseSensitivity * (double) 0.6F + (double) 0.2F;
         double d5 = d4 * d4 * d4 * 8.0D;
         double d2;
         double d3;

@@ -4,7 +4,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.PillagerEntity;
+import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -97,6 +102,16 @@ public class BigBrainEvents {
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
             if (BigBrainConfig.PillagerCover)
                 pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
+        }
+        
+        if (event.getEntity() instanceof IMob && BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(event.getEntity().getEntityString())) {
+            MobEntity mob = (MobEntity)event.getEntity();
+            mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillagerEntity.class, true));
+        }
+        
+        if (event.getEntity() instanceof AbstractPiglinEntity) {
+            AbstractPiglinEntity piglin = (AbstractPiglinEntity)event.getEntity();
+            piglin.func_242340_t(true);
         }
     }
 }

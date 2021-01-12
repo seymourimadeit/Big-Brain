@@ -1,5 +1,6 @@
 package tallestegg.bigbrain.mixins;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -37,6 +39,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
+import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.BigBrainItems;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.ai.PiglinBruteLookController;
@@ -67,16 +70,16 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
 
     @Override
     protected void collideWithEntity(Entity entityIn) {
-        if (this.isCharging()) {
+        if (this.isCharging() && !(EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), this.getHeldItemOffhand()) > 0)) {
             float f = 5.0F + this.getRNG().nextInt(1);
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
-                ((LivingEntity) entityIn).applyKnockback(f1 * 0.5F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
+                ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
                 this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
             }
+            this.world.setEntityState(this, (byte) 43);
             entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
             this.setLastAttackedEntity(entityIn);
-            this.world.setEntityState(this, (byte) 43);
         }
         super.collideWithEntity(entityIn);
     }
@@ -112,17 +115,35 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
         super.livingTick();
     }
 
-    @Inject(at = @At("HEAD"), method = "onInitialSpawn(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/entity/SpawnReason;Lnet/minecraft/entity/ILivingEntityData;Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/entity/ILivingEntityData;")
+    @Inject(at = @At("TAIL"), method = "onInitialSpawn(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/entity/SpawnReason;Lnet/minecraft/entity/ILivingEntityData;Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/entity/ILivingEntityData;")
     public ILivingEntityData onInitialSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag, CallbackInfoReturnable<ILivingEntityData> info) {
+        this.setEnchantmentBasedOnDifficulty(difficultyIn);
+        return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
+    }
+
+    @Inject(at = @At(value = "TAIL"), method = "setEquipmentBasedOnDifficulty")
+    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty, CallbackInfo info) {
         this.setItemStackToSlot(EquipmentSlotType.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
         this.cooldown = 240;
-        return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
+    }
+
+    @Override
+    protected void func_241844_w(float p_241844_1_) {
+        if (this.rand.nextInt(300) == 0) {
+            ItemStack itemstack = this.getHeldItemOffhand();
+            if (itemstack.getItem() instanceof BucklerItem) {
+                Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
+                map.putIfAbsent(BigBrainEnchantments.TURNING.get(), 1);
+                EnchantmentHelper.setEnchantments(map, itemstack);
+                this.setItemStackToSlot(EquipmentSlotType.OFFHAND, itemstack);
+            }
+        }
     }
 
     @Override
     public void handleStatusUpdate(byte id) {
         if (id == 43) {
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < 10; ++i) {
                 double d0 = this.rand.nextGaussian() * 0.02D;
                 double d1 = this.rand.nextGaussian() * 0.02D;
                 double d2 = this.rand.nextGaussian() * 0.02D;

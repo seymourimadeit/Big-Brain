@@ -2,6 +2,7 @@ package tallestegg.bigbrain.entity.ai.tasks;
 
 import com.google.common.collect.ImmutableMap;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleStatus;
@@ -10,6 +11,7 @@ import net.minecraft.entity.ai.brain.task.Task;
 import net.minecraft.entity.monster.piglin.PiglinBruteEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.server.ServerWorld;
+import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
@@ -25,7 +27,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
     @Override
     protected boolean shouldExecute(ServerWorld worldIn, T owner) {
         LivingEntity livingentity = this.getAttackTarget(owner);
-        return livingentity.getDistance(owner) > 4.0D && ((IBucklerUser) owner).getCooldown() == 240 && owner.getHeldItemOffhand().getItem() instanceof BucklerItem;
+        return livingentity.getDistance(owner) >= 4.0D && ((IBucklerUser) owner).getCooldown() == 240 && owner.getHeldItemOffhand().getItem() instanceof BucklerItem;
     }
 
     @Override
@@ -39,10 +41,10 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
 
     @Override
     protected void updateTask(ServerWorld worldIn, T entityIn, long gameTime) {
-        if (!((IBucklerUser) entityIn).isCharging())
+        if (((IBucklerUser) entityIn).isCharging() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), entityIn.getHeldItemOffhand()) > 0 || !((IBucklerUser) entityIn).isCharging()) {
             entityIn.faceEntity(this.getAttackTarget(entityIn), 30.0F, 30.0F);
+        }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0) {
-            //entityIn.playSound(SoundEvents.ENTITY_PIGLIN_BRUTE_ANGRY, 1.0F, entityIn.isChild() ? (entityIn.getRNG().nextFloat() - entityIn.getRNG().nextFloat()) * 0.2F + 1.5F : (entityIn.getRNG().nextFloat() - entityIn.getRNG().nextFloat()) * 0.2F + 1.0F);
             entityIn.getMoveHelper().strafe(-2.0F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)
