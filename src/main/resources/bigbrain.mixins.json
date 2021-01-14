@@ -6,7 +6,6 @@
   "mixins": [
      "MeleeAttackGoalMixin",
      "RangedCrossbowAttackGoalMixin",
-     "SquidEntityMixin",
      "PlayerEntityMixin",
      "BruteBrainMixin",
      "PiglinBruteMixin"

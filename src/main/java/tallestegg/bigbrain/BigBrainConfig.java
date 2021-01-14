@@ -25,6 +25,7 @@ public class BigBrainConfig {
     public static Boolean PillagerMultishot;
     public static Boolean PigBreeding;
     public static Boolean MobsAttackAllVillagers;
+    public static Boolean BruteSpawningWithBuckler;
     public static List<String> MobBlackList;
 
     public static void bakeCommonConfig() {
