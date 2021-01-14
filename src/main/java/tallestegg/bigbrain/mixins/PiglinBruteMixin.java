@@ -39,6 +39,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
+import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.BigBrainItems;
 import tallestegg.bigbrain.entity.IBucklerUser;
@@ -123,6 +124,8 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
 
     @Inject(at = @At(value = "TAIL"), method = "setEquipmentBasedOnDifficulty")
     protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty, CallbackInfo info) {
+        if (!BigBrainConfig.BruteSpawningWithBuckler)
+            return;
         this.setItemStackToSlot(EquipmentSlotType.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
         this.cooldown = 240;
     }

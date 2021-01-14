@@ -64,13 +64,14 @@ public class BucklerItem extends ShieldItem {
     public static void moveFowards(LivingEntity entity) {
         if (entity.isAlive()) {
             Vector3d d3 = entity.getLookVec();
+            Vector3d d4 = entity.getLook(1.0F);
             Vector3d motion = entity.getMotion();
             if (entity instanceof PlayerEntity) {
                 entity.setMotion(d3.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y, d3.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
             } else {
                 // This is the only way to make the piglin brute go faster without having it
                 // spazz out.
-                entity.setMotion(d3.x * 1.0D, motion.y, d3.z * 1.0D);
+                entity.setMotion(d4.x * 1.0D, motion.y, d4.z * 1.0D);
             }
         }
     }

@@ -34,6 +34,7 @@ public class BigBrainConfig {
         PillagerMultishot = COMMON.PillagerMultishot.get();
         MobsAttackAllVillagers = COMMON.MobsAttackAllVillagers.get();
         MobBlackList = COMMON.MobBlackList.get();
+        BruteSpawningWithBuckler = COMMON.BruteBuckler.get();
     }
 
     @SubscribeEvent
@@ -49,12 +50,14 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue PillagerMultishot;
         public final ForgeConfigSpec.BooleanValue PigBreeding;
         public final ForgeConfigSpec.BooleanValue MobsAttackAllVillagers;
+        public final ForgeConfigSpec.BooleanValue BruteBuckler;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             PigBreeding = builder.translation(BigBrain.MODID + ".config.pigBreeding").define("Have pigs give birth to multiple babies?", true);
             PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
             PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
+            BruteBuckler = builder.translation(BigBrain.MODID + ".config.bruteBuckler").define("Have brutes spawn with bucklers?", true);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
         }

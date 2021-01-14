@@ -5,12 +5,14 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.PillagerEntity;
-import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.loot.ConstantRange;
@@ -109,9 +111,16 @@ public class BigBrainEvents {
             mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillagerEntity.class, true));
         }
         
-        if (event.getEntity() instanceof AbstractPiglinEntity) {
+        if (event.getEntity() instanceof VillagerEntity && BigBrainConfig.MobsAttackAllVillagers) {
+            VillagerEntity villager = (VillagerEntity)event.getEntity();
+            villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, MobEntity.class, 8.0F, 1.0D, 0.5D, (p_213469_1_) -> {
+                return !BigBrainConfig.MobBlackList.contains(p_213469_1_.getEntityString());
+            }));
+        }
+        
+        /*if (event.getEntity() instanceof AbstractPiglinEntity) {
             AbstractPiglinEntity piglin = (AbstractPiglinEntity)event.getEntity();
             piglin.func_242340_t(true);
-        }
+        }*/
     }
 }
