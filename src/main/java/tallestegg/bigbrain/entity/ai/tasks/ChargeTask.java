@@ -27,7 +27,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
     @Override
     protected boolean shouldExecute(ServerWorld worldIn, T owner) {
         LivingEntity livingentity = this.getAttackTarget(owner);
-        return livingentity.getDistance(owner) >= 4.0D && ((IBucklerUser) owner).getCooldown() == 240 && owner.getHeldItemOffhand().getItem() instanceof BucklerItem;
+        return livingentity.getDistance(owner) >= 4.0D && livingentity.getDistance(owner) <= 15.0D && ((IBucklerUser) owner).getCooldown() == 240 && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubbleColumn();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
             entityIn.faceEntity(this.getAttackTarget(entityIn), 30.0F, 30.0F);
         }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0) {
-            entityIn.getMoveHelper().strafe(-2.0F, 0.0F);
+            entityIn.getMoveHelper().strafe(-0.9F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)
                 chargePhase = ChargePhases.CHARGE;

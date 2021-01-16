@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
@@ -12,6 +13,7 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.util.ActionResult;
@@ -27,6 +29,7 @@ import tallestegg.bigbrain.entity.IBucklerUser;
 public class BucklerItem extends ShieldItem {
     public BucklerItem(Properties p_i48470_1_) {
         super(p_i48470_1_.setISTER(BucklerItem::getISTER));
+        DispenserBlock.registerDispenseBehavior(this, ArmorItem.DISPENSER_BEHAVIOR);
     }
 
     private static Callable<ItemStackTileEntityRenderer> getISTER() {
@@ -40,20 +43,21 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public void onUse(World worldIn, LivingEntity livingEntityIn, ItemStack stack, int count) {
-        if (((IBucklerUser) livingEntityIn).getCooldown() > 0) {
-            ((IBucklerUser) livingEntityIn).setCharging(true);
-            stack.damageItem(1, livingEntityIn, (player1) -> {
-                player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
-            });
-            if (livingEntityIn instanceof PlayerEntity && !((PlayerEntity) livingEntityIn).abilities.isCreativeMode) {
-                ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
+        if (!livingEntityIn.isInWaterRainOrBubbleColumn()) {
+            if (((IBucklerUser) livingEntityIn).getCooldown() > 0) {
+                ((IBucklerUser) livingEntityIn).setCharging(true);
+                stack.damageItem(1, livingEntityIn, (player1) -> {
+                    player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
+                });
+                if (livingEntityIn instanceof PlayerEntity && !((PlayerEntity) livingEntityIn).abilities.isCreativeMode) {
+                    ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
+                }
+                livingEntityIn.resetActiveHand();
+                if (livingEntityIn instanceof AbstractPiglinEntity)
+                    livingEntityIn.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F,
+                            livingEntityIn.isChild() ? (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.5F : (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.0F);
             }
-            livingEntityIn.resetActiveHand();
-            if (livingEntityIn instanceof AbstractPiglinEntity)
-                livingEntityIn.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F,
-                        livingEntityIn.isChild() ? (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.5F : (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.0F);
         }
-
     }
 
     @Override
@@ -80,7 +84,6 @@ public class BucklerItem extends ShieldItem {
     public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
         return Items.INGOTS_GOLD.contains(repair.getItem());
     }
-    
 
     @Override
     public boolean isShield(ItemStack stack, @Nullable LivingEntity entity) {
