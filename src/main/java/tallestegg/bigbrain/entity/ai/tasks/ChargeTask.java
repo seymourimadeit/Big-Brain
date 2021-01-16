@@ -41,11 +41,12 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
 
     @Override
     protected void updateTask(ServerWorld worldIn, T entityIn, long gameTime) {
+        LivingEntity livingEntity = this.getAttackTarget(entityIn);
         if (((IBucklerUser) entityIn).isCharging() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), entityIn.getHeldItemOffhand()) > 0 || !((IBucklerUser) entityIn).isCharging()) {
-            entityIn.faceEntity(this.getAttackTarget(entityIn), 30.0F, 30.0F);
+            entityIn.faceEntity(livingEntity, 30.0F, 30.0F);
         }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0) {
-            entityIn.getMoveHelper().strafe(-0.9F, 0.0F);
+            entityIn.getMoveHelper().strafe(-0.5F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)
                 chargePhase = ChargePhases.CHARGE;

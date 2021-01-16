@@ -16,6 +16,7 @@ import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.loot.ConstantRange;
+import net.minecraft.loot.EmptyLootEntry;
 import net.minecraft.loot.ItemLootEntry;
 import net.minecraft.loot.LootPool;
 import net.minecraft.util.SoundEvents;
@@ -82,7 +83,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().toString().contains("minecraft:chests/bastion")) {
-            LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(ItemLootEntry.builder(Items.AIR).weight(90)).build(); // This is hacky, but this will make do for now.
+            LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(EmptyLootEntry.func_216167_a().weight(90)).build();
             event.getTable().addPool(pool);
         }
     }
