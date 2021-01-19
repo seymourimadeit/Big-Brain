@@ -2,6 +2,8 @@ package tallestegg.bigbrain.entity.ai.goals;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.ai.goal.RandomWalkingGoal;
@@ -20,7 +22,7 @@ public class RunWhileChargingGoal extends RandomWalkingGoal {
 
     @Override
     public boolean shouldExecute() {
-        return ((PillagerEntity) creature).isCharging() && creature.getAttackTarget() != null && this.findPosition() && !CrossbowItem.isCharged(creature.getActiveItemStack());
+        return ((PillagerEntity) creature).isCharging() && creature.getAttackTarget() != null && this.findPosition() && !CrossbowItem.isCharged(creature.getActiveItemStack()) && EnchantmentHelper.getEnchantmentLevel(Enchantments.MULTISHOT, this.creature.getHeldItemMainhand()) == 0;
     }
 
     public boolean findPosition() {

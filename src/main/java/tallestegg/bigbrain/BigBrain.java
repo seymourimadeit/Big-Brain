@@ -30,7 +30,6 @@ public class BigBrain {
         BigBrainSounds.SOUNDS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BigBrainEnchantments.ENCHANTMENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
         MinecraftForge.EVENT_BUS.register(this);
-        BigBrainPackets.registerPackets();
     }
 
     private void setup(final FMLCommonSetupEvent event) {

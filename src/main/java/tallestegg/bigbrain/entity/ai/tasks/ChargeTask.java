@@ -46,7 +46,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
             entityIn.faceEntity(livingEntity, 30.0F, 30.0F);
         }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0) {
-            entityIn.getMoveHelper().strafe(-0.5F, 0.0F);
+            entityIn.getMoveHelper().strafe(-1.5F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)
                 chargePhase = ChargePhases.CHARGE;

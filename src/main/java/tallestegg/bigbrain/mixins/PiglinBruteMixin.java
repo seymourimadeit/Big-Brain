@@ -46,6 +46,7 @@ import net.minecraft.world.server.ServerWorld;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.BigBrainItems;
+import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.ai.PiglinBruteLookController;
 import tallestegg.bigbrain.entity.ai.PiglinBruteMoveController;
@@ -55,7 +56,7 @@ import tallestegg.bigbrain.items.BucklerItem;
 @Mixin(PiglinBruteEntity.class)
 public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUser {
     private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
-    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback Reduction", 0.10D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 0.10D, AttributeModifier.Operation.ADDITION);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
     @Unique
     private int cooldown;
@@ -76,7 +77,7 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
     @Override
     protected void collideWithEntity(Entity entityIn) {
         if (this.isCharging() && !(EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), this.getHeldItemOffhand()) > 0)) {
-            float f = 5.0F + this.getRNG().nextInt(1);
+            float f = 5.0F + ((float) this.getRNG().nextInt(3));
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
                 for (int i = 0; i < 10; ++i) {
@@ -84,8 +85,13 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
                     double d1 = this.rand.nextGaussian() * 0.02D;
                     double d2 = this.rand.nextGaussian() * 0.02D;
                     BasicParticleType type = entityIn instanceof WitherEntity || entityIn instanceof WitherSkeletonEntity ? ParticleTypes.SMOKE : ParticleTypes.CLOUD;
-                    if (world instanceof ServerWorld)
+                    if (world instanceof ServerWorld) {
+                        // Collision is done on the server side, so a server side method must be used.
                         ((ServerWorld) world).spawnParticle(type, entityIn.getPosXRandom(1.0D), entityIn.getPosYRandom() + 1.0D, entityIn.getPosZRandom(1.0D), 1, d0, d1, d2, 1.0D);
+                        if (!this.isSilent())
+                            ((ServerWorld) world).playSound((PlayerEntity) null, (double) this.getPosition().getX() + 0.5D, (double) this.getPosition().getY() + 0.5D, (double) this.getPosition().getZ() + 0.5D, BigBrainSounds.SHIELD_BASH.get(), this.getSoundCategory(), 0.1F,
+                                    this.getSoundPitch() + this.rand.nextFloat() * 0.4F);
+                    }
                 }
                 ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
                 this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));

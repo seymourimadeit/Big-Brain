@@ -19,5 +19,22 @@
 			}
 		],
 		"subtitle": "subtitles.entity.piglin_brute.charge"
+	},
+	"item.buckler.bash": {
+		"sounds": [
+			{
+				"name": "bigbrain:buckler/bash1",
+				"volume": 0.9
+			},
+			{
+				"name": "bigbrain:buckler/bash2",
+				"volume": 0.9
+			},
+			{
+				"name": "bigbrain:buckler/bash3",
+				"volume": 0.9
+			}
+		],
+		"subtitle": "subtitles.item.buckler.bash"
 	}
 }
