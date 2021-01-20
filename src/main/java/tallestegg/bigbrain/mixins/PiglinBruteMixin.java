@@ -57,7 +57,7 @@ import tallestegg.bigbrain.items.BucklerItem;
 public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUser {
     private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
     private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 0.10D, AttributeModifier.Operation.ADDITION);
-    private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PiglinBruteEntity.class, DataSerializers.BOOLEAN);
     @Unique
     private int cooldown;
 
