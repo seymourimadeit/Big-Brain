@@ -49,7 +49,7 @@ public class BucklerItem extends ShieldItem {
                 stack.damageItem(1, livingEntityIn, (player1) -> {
                     player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
                 });
-                if (livingEntityIn instanceof PlayerEntity && !((PlayerEntity) livingEntityIn).abilities.isCreativeMode) {
+                if (livingEntityIn instanceof PlayerEntity) {
                     ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
                 }
                 livingEntityIn.resetActiveHand();
@@ -62,7 +62,7 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        return super.onItemRightClick(worldIn, playerIn, handIn);
+        return !playerIn.isInWaterRainOrBubbleColumn() ? super.onItemRightClick(worldIn, playerIn, handIn) : ActionResult.resultPass(playerIn.getHeldItem(handIn));
     }
 
     public static void moveFowards(LivingEntity entity) {
