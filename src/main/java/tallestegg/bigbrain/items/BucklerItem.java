@@ -16,6 +16,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
+import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
@@ -43,15 +44,12 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public void onUse(World worldIn, LivingEntity livingEntityIn, ItemStack stack, int count) {
-        if (!livingEntityIn.isInWaterRainOrBubbleColumn()) {
+        if (!livingEntityIn.isInWaterRainOrBubbleColumn() && !(livingEntityIn instanceof PlayerEntity)) {
             if (((IBucklerUser) livingEntityIn).getCooldown() > 0) {
                 ((IBucklerUser) livingEntityIn).setCharging(true);
                 stack.damageItem(1, livingEntityIn, (player1) -> {
                     player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
                 });
-                if (livingEntityIn instanceof PlayerEntity) {
-                    ((PlayerEntity) livingEntityIn).getCooldownTracker().setCooldown(this, 240);
-                }
                 livingEntityIn.resetActiveHand();
                 if (livingEntityIn instanceof AbstractPiglinEntity)
                     livingEntityIn.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F,
@@ -61,8 +59,34 @@ public class BucklerItem extends ShieldItem {
     }
 
     @Override
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
+        ItemStack itemstack = super.onItemUseFinish(stack, worldIn, entityLiving);
+        if (entityLiving instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) entityLiving;
+            if (((IBucklerUser) player).getCooldown() > 0) {
+                ((IBucklerUser) player).setCharging(true);
+                stack.damageItem(1, player, (player1) -> {
+                    player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
+                });
+                player.getCooldownTracker().setCooldown(this, 240);
+                player.resetActiveHand();
+            }
+        }
+        return itemstack;
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack) {
+        return 10;
+    }
+
+    @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        return !playerIn.isInWaterRainOrBubbleColumn() ? super.onItemRightClick(worldIn, playerIn, handIn) : ActionResult.resultPass(playerIn.getHeldItem(handIn));
+        return super.onItemRightClick(worldIn, playerIn, handIn);
+    }
+    
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.BLOCK;
     }
 
     public static void moveFowards(LivingEntity entity) {
