@@ -8,7 +8,8 @@
      "RangedCrossbowAttackGoalMixin",
      "PlayerEntityMixin",
      "BruteBrainMixin",
-     "PiglinBruteMixin"
+     "PiglinBruteMixin",
+     "LivingEntityMixin"
   ],
   "client": [
      "PlayerModelMixin",

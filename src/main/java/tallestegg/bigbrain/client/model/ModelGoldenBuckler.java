@@ -20,7 +20,7 @@ public class ModelGoldenBuckler extends Model {
         this.base = new ModelRenderer(this, 0, 0);
         this.base.setRotationPoint(0.0F, 0.0F, 0.0F);
         this.base.addBox(-5.0F, -5.0F, -1.0F, 10.0F, 10.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.base.setTextureOffset(0, 11).addBox(-1.0F, -3.0F, 0.0F, 2.0F, 6.0F, 6.0F, 0.0F, 0.0F, 0.0F);
+        this.base.setTextureOffset(0, 11).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 6.0F, 6.0F, 0.0F, 0.0F, 0.0F);
     }
 
     @Override
