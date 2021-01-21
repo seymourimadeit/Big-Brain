@@ -27,7 +27,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
     @Override
     protected boolean shouldExecute(ServerWorld worldIn, T owner) {
         LivingEntity livingentity = this.getAttackTarget(owner);
-        return livingentity.getDistance(owner) >= 4.0D && livingentity.getDistance(owner) <= 15.0D && ((IBucklerUser) owner).getCooldown() == 240 && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubbleColumn();
+        return livingentity.getDistance(owner) >= 4.0D && livingentity.getDistance(owner) <= 10.0D && ((IBucklerUser) owner).getCooldown() == 240 && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubbleColumn();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
         if (((IBucklerUser) entityIn).isCharging() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), entityIn.getHeldItemOffhand()) > 0 || !((IBucklerUser) entityIn).isCharging()) {
             entityIn.faceEntity(livingEntity, 30.0F, 30.0F);
         }
-        if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0) {
+        if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && entityIn.getDistance(livingEntity) >= 4.0D && entityIn.getDistance(livingEntity) <= 10.0D) {
             entityIn.getMoveHelper().strafe(-1.5F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)
