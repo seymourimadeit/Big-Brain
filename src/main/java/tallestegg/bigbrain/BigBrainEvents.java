@@ -3,9 +3,7 @@ package tallestegg.bigbrain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
@@ -15,14 +13,10 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.loot.ConstantRange;
-import net.minecraft.loot.EmptyLootEntry;
-import net.minecraft.loot.ItemLootEntry;
 import net.minecraft.loot.LootPool;
-import net.minecraft.util.DamageSource;
+import net.minecraft.loot.TableLootEntry;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputUpdateEvent;
@@ -37,7 +31,6 @@ import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
-import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
@@ -76,8 +69,9 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().toString().contains("minecraft:chests/bastion")) {
-            LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(EmptyLootEntry.func_216167_a().weight(90)).build();
-            event.getTable().addPool(pool);
+            ResourceLocation bucklerBastionLoot = new ResourceLocation(BigBrain.MODID, "chests/buckler_loot_table");
+            //LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(EmptyLootEntry.func_216167_a().weight(90)).build();
+            event.getTable().addPool(LootPool.builder().addEntry(TableLootEntry.builder(bucklerBastionLoot)).build());
         }
     }
 
@@ -88,31 +82,6 @@ public class BigBrainEvents {
             event.getPlayer().world.playSound((PlayerEntity) null, event.getPlayer().getPosX(), event.getPlayer().getPosY(), event.getPlayer().getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, event.getPlayer().getSoundCategory(), 1.0F, 1.0F);
             event.getPlayer().onCriticalHit(event.getTarget());
         }
-    }
-
-    public static boolean canBlockDamageSource(DamageSource damageSourceIn, LivingEntity mob) {
-        Entity entity = damageSourceIn.getImmediateSource();
-        boolean flag = false;
-        if (entity instanceof AbstractArrowEntity) {
-            AbstractArrowEntity abstractarrowentity = (AbstractArrowEntity) entity;
-            if (abstractarrowentity.getPierceLevel() > 0) {
-                flag = true;
-            }
-        }
-
-        if (!damageSourceIn.isUnblockable() && mob.isActiveItemStackBlocking() && mob.getActiveItemStack().getItem() instanceof BucklerItem && !flag) {
-            Vector3d vector3d2 = damageSourceIn.getDamageLocation();
-            if (vector3d2 != null) {
-                Vector3d vector3d = mob.getLook(1.0F);
-                Vector3d vector3d1 = vector3d2.subtractReverse(mob.getPositionVec()).normalize();
-                vector3d1 = new Vector3d(vector3d1.x, 0.0D, vector3d1.z);
-                if (vector3d1.dotProduct(vector3d) < 0.0D) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     @SubscribeEvent
@@ -137,10 +106,10 @@ public class BigBrainEvents {
             }));
         }
 
-        /*
-         * if (event.getEntity() instanceof AbstractPiglinEntity) { AbstractPiglinEntity
-         * piglin = (AbstractPiglinEntity)event.getEntity(); piglin.func_242340_t(true);
-         * }
-         */
+        // if (event.getEntity() instanceof AbstractPiglinEntity) {
+        // AbstractPiglinEntity piglin = (AbstractPiglinEntity) event.getEntity();
+        // piglin.func_242340_t(true);
+        // }
+
     }
 }

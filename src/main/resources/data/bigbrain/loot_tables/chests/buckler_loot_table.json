@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 10,
+          "name": "bigbrain:buckler"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 90
+        }
+      ]
+    }
+  ]
+}
