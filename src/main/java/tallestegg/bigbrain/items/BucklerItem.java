@@ -23,6 +23,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags.Items;
+import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
@@ -55,8 +56,8 @@ public class BucklerItem extends ShieldItem {
                     entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
                 });
                 if (entityLiving instanceof PlayerEntity)
-                     ((PlayerEntity) entityLiving).getCooldownTracker().setCooldown(this, 240);
-                    entityLiving.resetActiveHand();
+                    ((PlayerEntity) entityLiving).getCooldownTracker().setCooldown(this, BigBrainConfig.BucklerCooldown);
+                entityLiving.resetActiveHand();
                 if (entityLiving instanceof AbstractPiglinEntity)
                     entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isChild() ? (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.5F : (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.0F);
             }

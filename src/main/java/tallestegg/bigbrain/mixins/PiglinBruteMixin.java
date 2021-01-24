@@ -110,11 +110,11 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
     public void livingTick() {
         if (!this.isCharging()) {
             ++this.bucklerUseTimer;
-            if (this.bucklerUseTimer > 15)
-                this.bucklerUseTimer = 15;
+            if (this.bucklerUseTimer > BigBrainConfig.BucklerRunTime)
+                this.bucklerUseTimer = BigBrainConfig.BucklerRunTime;
             ++this.cooldown;
-            if (this.cooldown > 240)
-                this.cooldown = 240;
+            if (this.cooldown > BigBrainConfig.BucklerCooldown)
+                this.cooldown = BigBrainConfig.BucklerCooldown;
         }
 
         if (this.isCharging()) {

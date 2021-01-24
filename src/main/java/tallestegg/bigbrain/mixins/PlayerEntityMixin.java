@@ -28,6 +28,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.entity.IBucklerUser;
@@ -86,8 +87,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
     public void livingTick(CallbackInfo info) {
         if (!this.isCharging()) {
             ++this.cooldown;
-            if (this.cooldown > 15)
-                this.cooldown = 15;
+            if (this.cooldown > BigBrainConfig.BucklerRunTime)
+                this.cooldown = BigBrainConfig.BucklerRunTime;
         }
 
         if (this.isCharging()) {

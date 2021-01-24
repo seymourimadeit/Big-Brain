@@ -26,6 +26,8 @@ public class BigBrainConfig {
     public static Boolean PigBreeding;
     public static Boolean MobsAttackAllVillagers;
     public static Boolean BruteSpawningWithBuckler;
+    public static Integer BucklerCooldown;
+    public static Integer BucklerRunTime;
     public static List<String> MobBlackList;
 
     public static void bakeCommonConfig() {
@@ -35,6 +37,8 @@ public class BigBrainConfig {
         MobsAttackAllVillagers = COMMON.MobsAttackAllVillagers.get();
         MobBlackList = COMMON.MobBlackList.get();
         BruteSpawningWithBuckler = COMMON.BruteBuckler.get();
+        BucklerCooldown = COMMON.BucklerCooldown.get();
+        BucklerRunTime = COMMON.BucklerRunTime.get();
     }
 
     @SubscribeEvent
@@ -51,6 +55,8 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue PigBreeding;
         public final ForgeConfigSpec.BooleanValue MobsAttackAllVillagers;
         public final ForgeConfigSpec.BooleanValue BruteBuckler;
+        public final ForgeConfigSpec.IntValue BucklerCooldown;
+        public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
@@ -60,6 +66,8 @@ public class BigBrainConfig {
             BruteBuckler = builder.translation(BigBrain.MODID + ".config.bruteBuckler").define("Have brutes spawn with bucklers?", true);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
+            BucklerCooldown = builder.translation(BigBrain.MODID + ".config.bucklerCoolDown").defineInRange("How long should the buckler's cooldown be in ticks?", 240, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
     }
 }

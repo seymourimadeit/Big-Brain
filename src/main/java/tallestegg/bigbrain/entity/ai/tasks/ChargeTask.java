@@ -11,6 +11,7 @@ import net.minecraft.entity.ai.brain.task.Task;
 import net.minecraft.entity.monster.piglin.PiglinBruteEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.server.ServerWorld;
+import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
@@ -27,7 +28,7 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
     @Override
     protected boolean shouldExecute(ServerWorld worldIn, T owner) {
         LivingEntity livingentity = this.getAttackTarget(owner);
-        return livingentity.getDistance(owner) >= 4.0D && ((IBucklerUser) owner).getCooldown() == 240 && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubbleColumn();
+        return livingentity.getDistance(owner) >= 4.0D && ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubbleColumn();
     }
 
     @Override
