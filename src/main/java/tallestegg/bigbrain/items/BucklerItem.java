@@ -16,7 +16,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
-import net.minecraft.item.UseAction;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
@@ -43,33 +43,22 @@ public class BucklerItem extends ShieldItem {
     }
 
     @Override
-    public void onUse(World worldIn, LivingEntity livingEntityIn, ItemStack stack, int count) {
-        if (!livingEntityIn.isInWaterRainOrBubbleColumn() && !(livingEntityIn instanceof PlayerEntity)) {
-            if (((IBucklerUser) livingEntityIn).getCooldown() > 0) {
-                ((IBucklerUser) livingEntityIn).setCharging(true);
-                stack.damageItem(1, livingEntityIn, (player1) -> {
-                    player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
-                });
-                livingEntityIn.resetActiveHand();
-                if (livingEntityIn instanceof AbstractPiglinEntity)
-                    livingEntityIn.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F,
-                            livingEntityIn.isChild() ? (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.5F : (livingEntityIn.getRNG().nextFloat() - livingEntityIn.getRNG().nextFloat()) * 0.2F + 1.0F);
-            }
-        }
-    }
-
-    @Override
     public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
         ItemStack itemstack = super.onItemUseFinish(stack, worldIn, entityLiving);
-        if (entityLiving instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) entityLiving;
-            if (((IBucklerUser) player).getCooldown() > 0) {
-                ((IBucklerUser) player).setCharging(true);
-                stack.damageItem(1, player, (player1) -> {
-                    player1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
+        if (isReady(stack))
+            setReady(stack, false);
+        if (entityLiving instanceof IBucklerUser) {
+            if (((IBucklerUser) entityLiving).getCooldown() > 0) {
+                ((IBucklerUser) entityLiving).setCharging(true);
+                BucklerItem.setReady(stack, true);
+                stack.damageItem(1, entityLiving, (entityLiving1) -> {
+                    entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
                 });
-                player.getCooldownTracker().setCooldown(this, 240);
-                player.resetActiveHand();
+                if (entityLiving instanceof PlayerEntity)
+                     ((PlayerEntity) entityLiving).getCooldownTracker().setCooldown(this, 240);
+                    entityLiving.resetActiveHand();
+                if (entityLiving instanceof AbstractPiglinEntity)
+                    entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isChild() ? (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.5F : (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.0F);
             }
         }
         return itemstack;
@@ -82,11 +71,7 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        return super.onItemRightClick(worldIn, playerIn, handIn);
-    }
-    
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.BLOCK;
+        return !playerIn.isInWaterRainOrBubbleColumn() ? super.onItemRightClick(worldIn, playerIn, handIn) : ActionResult.resultPass(playerIn.getHeldItem(handIn));
     }
 
     public static void moveFowards(LivingEntity entity) {
@@ -102,6 +87,16 @@ public class BucklerItem extends ShieldItem {
                 entity.setMotion(d4.x * 1.0D, motion.y, d4.z * 1.0D);
             }
         }
+    }
+
+    public static boolean isReady(ItemStack stack) {
+        CompoundNBT compoundnbt = stack.getTag();
+        return compoundnbt != null && compoundnbt.getBoolean("Ready");
+    }
+
+    public static void setReady(ItemStack stack, boolean ready) {
+        CompoundNBT compoundnbt = stack.getOrCreateTag();
+        compoundnbt.putBoolean("Ready", ready);
     }
 
     @Override

@@ -46,15 +46,16 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
             entityIn.faceEntity(livingEntity, 30.0F, 30.0F);
         }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && entityIn.getDistance(livingEntity) >= 4.0D && entityIn.getDistance(livingEntity) <= 10.0D) {
-            entityIn.getMoveHelper().strafe(-1.5F, 0.0F);
+            entityIn.getMoveHelper().strafe(-2.0F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)
                 chargePhase = ChargePhases.CHARGE;
         } else if (chargePhase == ChargePhases.CHARGE) {
             if (!entityIn.isHandActive()) {
                 entityIn.setActiveHand(Hand.OFF_HAND);
-                chargePhase = ChargePhases.FINISH;
             }
+            if (entityIn.getItemInUseMaxCount() >= entityIn.getActiveItemStack().getUseDuration())
+                chargePhase = ChargePhases.FINISH;
         }
     }
 
