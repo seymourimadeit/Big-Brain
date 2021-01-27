@@ -71,6 +71,11 @@ public class BucklerItem extends ShieldItem {
     }
 
     @Override
+    public int getItemEnchantability() {
+        return 1;
+    }
+
+    @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
         return !playerIn.isInWaterRainOrBubbleColumn() ? super.onItemRightClick(worldIn, playerIn, handIn) : ActionResult.resultPass(playerIn.getHeldItem(handIn));
     }

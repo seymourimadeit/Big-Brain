@@ -8,7 +8,7 @@ modId="bigbrain" #mandatory
 version="1.1.0" #mandatory
  # A display name for the mod
 displayName="Big Brain" #mandatory
-updateJSONURL="http://myurl.me/" #optional
+updateJSONURL="https://raw.githubusercontent.com/seymourimadeit/Big-Brain/main/update.json" #optional
 displayURL="https://www.curseforge.com/minecraft/mc-mods/big-brain/" #optional
 logoFile="bigbrain.png" #optional
 credits="TallestEgg, and MCVinnyQ for the buckler texture!" #optional

@@ -40,6 +40,8 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.ExplosionContext;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -56,7 +58,7 @@ import tallestegg.bigbrain.items.BucklerItem;
 @Mixin(PiglinBruteEntity.class)
 public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUser {
     private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
-    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 0.10D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 1.0D, AttributeModifier.Operation.ADDITION);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(PiglinBruteEntity.class, DataSerializers.BOOLEAN);
     @Unique
     private int cooldown;
@@ -77,7 +79,7 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
     @Override
     protected void collideWithEntity(Entity entityIn) {
         if (this.isCharging() && !(EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), this.getHeldItemOffhand()) > 0)) {
-            float f = 5.0F + ((float) this.getRNG().nextInt(3));
+            float f = 6.0F + ((float) this.getRNG().nextInt(3));
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
                 for (int i = 0; i < 10; ++i) {
@@ -89,15 +91,20 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
                         // Collision is done on the server side, so a server side method must be used.
                         ((ServerWorld) world).spawnParticle(type, entityIn.getPosXRandom(1.0D), entityIn.getPosYRandom() + 1.0D, entityIn.getPosZRandom(1.0D), 1, d0, d1, d2, 1.0D);
                         if (!this.isSilent())
-                            ((ServerWorld) world).playSound((PlayerEntity) null, (double) this.getPosition().getX() + 0.5D, (double) this.getPosition().getY() + 0.5D, (double) this.getPosition().getZ() + 0.5D, BigBrainSounds.SHIELD_BASH.get(), this.getSoundCategory(), 0.1F,
+                            ((ServerWorld) world).playSound((PlayerEntity) null, (double) this.getPosition().getX(), (double) this.getPosition().getY(), (double) this.getPosition().getZ(), BigBrainSounds.SHIELD_BASH.get(), this.getSoundCategory(), 0.1F,
                                     this.getSoundPitch() + this.rand.nextFloat() * 0.4F);
                     }
                 }
-                ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
+                if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), this) == 0)
+                    ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
                 this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
             }
-            this.world.setEntityState(this, (byte) 43);
-            entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+            if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), this) == 0) {
+                entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+            } else {
+                this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), 1.5F, false, Explosion.Mode.NONE);
+                this.setCharging(false);
+            }
             this.setLastAttackedEntity(entityIn);
         }
         super.collideWithEntity(entityIn);
@@ -155,6 +162,15 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
             if (itemstack.getItem() instanceof BucklerItem) {
                 Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
                 map.putIfAbsent(BigBrainEnchantments.TURNING.get(), 1);
+                EnchantmentHelper.setEnchantments(map, itemstack);
+                this.setItemStackToSlot(EquipmentSlotType.OFFHAND, itemstack);
+            }
+        }
+        if (this.rand.nextInt(500) == 0) {
+            ItemStack itemstack = this.getHeldItemOffhand();
+            if (itemstack.getItem() instanceof BucklerItem) {
+                Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
+                map.putIfAbsent(BigBrainEnchantments.BANG.get(), 1);
                 EnchantmentHelper.setEnchantments(map, itemstack);
                 this.setItemStackToSlot(EquipmentSlotType.OFFHAND, itemstack);
             }

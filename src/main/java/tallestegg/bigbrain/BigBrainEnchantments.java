@@ -11,6 +11,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import tallestegg.bigbrain.enchantments.BangEnchantment;
 import tallestegg.bigbrain.enchantments.TurningEnchantment;
 import tallestegg.bigbrain.items.BucklerItem;
 
@@ -18,6 +19,7 @@ import tallestegg.bigbrain.items.BucklerItem;
 public class BigBrainEnchantments {
     public static final DeferredRegister<Enchantment> ENCHANTMENTS = DeferredRegister.create(ForgeRegistries.ENCHANTMENTS, BigBrain.MODID);
     public static final RegistryObject<Enchantment> TURNING = ENCHANTMENTS.register("turning", () -> new TurningEnchantment(Enchantment.Rarity.RARE, EquipmentSlotType.MAINHAND));
+    public static final RegistryObject<Enchantment> BANG = ENCHANTMENTS.register("bang", () -> new BangEnchantment(Enchantment.Rarity.RARE, EquipmentSlotType.MAINHAND));
 
     public static final EnchantmentType BUCKLER = EnchantmentType.create("buckler", (item) -> (item instanceof BucklerItem));
 
@@ -25,9 +27,9 @@ public class BigBrainEnchantments {
         return EnchantmentHelper.getMaxEnchantmentLevel(TURNING.get(), player);
     }
 
-    public static int getTurningOnHands(LivingEntity player) {
+    public static int getBucklerEnchantsOnHands(Enchantment enchantment, LivingEntity player) {
         Hand hand = player.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
         ItemStack stack = player.getHeldItem(hand);
-        return EnchantmentHelper.getEnchantmentLevel(TURNING.get(), stack);
+        return EnchantmentHelper.getEnchantmentLevel(enchantment, stack);
     }
 }

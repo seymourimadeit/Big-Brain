@@ -7,29 +7,28 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.entity.model.IHasArm;
+import net.minecraft.client.renderer.entity.model.IHasHead;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
-@Mixin(PlayerModel.class)
-public class PlayerModelMixin<T extends LivingEntity> extends BipedModel<T> {
-    public PlayerModelMixin(float p_i1148_1_) {
-        super(p_i1148_1_);
-    }
+@Mixin(BipedModel.class)
+public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableModel<T> implements IHasArm, IHasHead {
+    @Shadow
+    @Final
+    public ModelRenderer bipedLeftArm;
 
     @Shadow
     @Final
-    public ModelRenderer bipedLeftArmwear;
-
-    @Shadow
-    @Final
-    public ModelRenderer bipedRightArmwear;
+    public ModelRenderer bipedRightArm;
 
     @Inject(at = @At("TAIL"), method = "setRotationAngles(Lnet/minecraft/entity/LivingEntity;FFFFF)V")
     public void setRotationAngles(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo info) {
@@ -53,10 +52,13 @@ public class PlayerModelMixin<T extends LivingEntity> extends BipedModel<T> {
             bipedLeftArm.rotateAngleX = MathHelper.lerp(result, bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleX * 0.1F - 1.5F);
         }
         if (((IBucklerUser) entityIn).isCharging() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
-            this.bipedRightArm.rotateAngleX = 0.5F - (float) Math.PI;
-            this.bipedRightArm.rotateAngleY = 0.0F;
-            this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.5F - 0.9424779F;
-            this.bipedRightArm.rotateAngleY = ((float) Math.PI / 6F);
+            ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
+            if (!handItems.isEmpty()) {
+                this.bipedRightArm.rotateAngleX = 0.5F - (float) Math.PI;
+                this.bipedRightArm.rotateAngleY = 0.0F;
+                this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.5F - 0.9424779F;
+                this.bipedRightArm.rotateAngleY = ((float) Math.PI / 6F);
+            }
             this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.1F - 1.5F;
             this.bipedLeftArm.rotateAngleY = ((float) Math.PI / 3F);
         }
@@ -71,10 +73,13 @@ public class PlayerModelMixin<T extends LivingEntity> extends BipedModel<T> {
             bipedRightArm.rotateAngleX = MathHelper.lerp(result, bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleX * 0.1F - 1.5F);
         }
         if (((IBucklerUser) entityIn).isCharging() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
-            this.bipedLeftArm.rotateAngleX = 0.5F - (float) Math.PI;
-            this.bipedLeftArm.rotateAngleY = 0.0F;
-            this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5F - 0.9424779F;
-            this.bipedLeftArm.rotateAngleY = -(float) Math.PI / 6F;
+            ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
+            if (!handItems.isEmpty()) {
+                this.bipedLeftArm.rotateAngleX = 0.5F - (float) Math.PI;
+                this.bipedLeftArm.rotateAngleY = 0.0F;
+                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5F - 0.9424779F;
+                this.bipedLeftArm.rotateAngleY = -(float) Math.PI / 6F;
+            }
             this.bipedRightArm.rotateAngleX = 0.0F * 0.1F - 1.5F;
             this.bipedRightArm.rotateAngleY = -(float) Math.PI / 3F;
         }

@@ -61,7 +61,7 @@ public class BigBrainEvents {
     public static void onMovementKeyPressed(InputUpdateEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (((IBucklerUser) player).isCharging()) {
-            // event.getMovementInput().jump = false;
+            event.getMovementInput().jump = false;
             event.getMovementInput().moveStrafe = 0;
         }
     }
