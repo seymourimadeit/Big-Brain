@@ -80,6 +80,7 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
     @Override
     protected void collideWithEntity(Entity entityIn) {
         if (this.isCharging() && !(EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), this.getHeldItemOffhand()) > 0)) {
+            int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), this);
             float f = 6.0F + ((float) this.getRNG().nextInt(3));
             float f1 = 2.0F;
             if (f1 > 0.0F && entityIn instanceof LivingEntity) {
@@ -96,19 +97,19 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
                                     this.getSoundPitch() + this.rand.nextFloat() * 0.4F);
                     }
                 }
-                if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), this) == 0)
+                if (bangLevel == 0)
                     ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
                 this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
             }
-            if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), this) == 0) {
+            if (bangLevel == 0) {
                 entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
             } else {
                 Hand hand = this.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                 ItemStack stack = this.getHeldItem(hand);
-                stack.damageItem(15, this, (player1) -> {
+                stack.damageItem(10 * bangLevel, this, (player1) -> {
                     player1.sendBreakAnimation(hand);
                 });
-                this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), 1.5F, false, Explosion.Mode.NONE);
+                this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, Explosion.Mode.NONE);
                 this.setCharging(false);
             }
             this.setLastAttackedEntity(entityIn);

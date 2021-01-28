@@ -82,7 +82,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IBuckler
             } else {
                 Hand hand = this.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                 ItemStack stack = this.getHeldItem(hand);
-                stack.damageItem(15, this, (player1) -> {
+                stack.damageItem(10 * bangLevel, this, (player1) -> { // We will need feedback on this.
                     player1.sendBreakAnimation(hand);
                 });
                 this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, Explosion.Mode.NONE);
