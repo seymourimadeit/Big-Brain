@@ -1,7 +1,6 @@
 package tallestegg.bigbrain.enchantments;
 
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.MendingEnchantment;
 import net.minecraft.inventory.EquipmentSlotType;
 import tallestegg.bigbrain.BigBrainEnchantments;
 
@@ -12,12 +11,12 @@ public class BangEnchantment extends Enchantment {
 
     @Override
     public int getMinEnchantability(int enchantmentLevel) {
-        return 5 + (enchantmentLevel - 1) * 9;
+        return 1 + (enchantmentLevel - 1) * 10;
     }
 
     @Override
     public int getMaxEnchantability(int enchantmentLevel) {
-        return this.getMinEnchantability(enchantmentLevel) + 15;
+        return 50;
     }
 
     @Override

@@ -38,6 +38,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.Explosion;
@@ -102,6 +103,11 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
             if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), this) == 0) {
                 entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
             } else {
+                Hand hand = this.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                ItemStack stack = this.getHeldItem(hand);
+                stack.damageItem(15, this, (player1) -> {
+                    player1.sendBreakAnimation(hand);
+                });
                 this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), 1.5F, false, Explosion.Mode.NONE);
                 this.setCharging(false);
             }

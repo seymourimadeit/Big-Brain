@@ -18,8 +18,8 @@ import tallestegg.bigbrain.items.BucklerItem;
 @Mod.EventBusSubscriber(modid = BigBrain.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BigBrainEnchantments {
     public static final DeferredRegister<Enchantment> ENCHANTMENTS = DeferredRegister.create(ForgeRegistries.ENCHANTMENTS, BigBrain.MODID);
-    public static final RegistryObject<Enchantment> TURNING = ENCHANTMENTS.register("turning", () -> new TurningEnchantment(Enchantment.Rarity.RARE, EquipmentSlotType.MAINHAND));
-    public static final RegistryObject<Enchantment> BANG = ENCHANTMENTS.register("bang", () -> new BangEnchantment(Enchantment.Rarity.RARE, EquipmentSlotType.MAINHAND));
+    public static final RegistryObject<Enchantment> TURNING = ENCHANTMENTS.register("turning", () -> new TurningEnchantment(Enchantment.Rarity.COMMON, EquipmentSlotType.MAINHAND));
+    public static final RegistryObject<Enchantment> BANG = ENCHANTMENTS.register("bang", () -> new BangEnchantment(Enchantment.Rarity.COMMON, EquipmentSlotType.MAINHAND));
 
     public static final EnchantmentType BUCKLER = EnchantmentType.create("buckler", (item) -> (item instanceof BucklerItem));
 
