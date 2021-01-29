@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.brain.BrainUtil;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleStatus;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
 import net.minecraft.entity.ai.brain.task.Task;
@@ -33,7 +34,9 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
 
     @Override
     protected boolean shouldContinueExecuting(ServerWorld worldIn, T entityIn, long gameTimeIn) {
-        return entityIn.getBrain().hasMemory(MemoryModuleType.ATTACK_TARGET) && this.shouldExecute(worldIn, entityIn) && chargePhase != ChargePhases.FINISH;
+        LivingEntity livingentity = this.getAttackTarget(entityIn);
+        return entityIn.getBrain().hasMemory(MemoryModuleType.ATTACK_TARGET) && BrainUtil.isMobVisible(entityIn, livingentity) && ((IBucklerUser) entityIn).getCooldown() == BigBrainConfig.BucklerCooldown && entityIn.getHeldItemOffhand().getItem() instanceof BucklerItem
+                && !entityIn.isInWaterRainOrBubbleColumn() && chargePhase != ChargePhases.FINISH;
     }
 
     private LivingEntity getAttackTarget(MobEntity mob) {

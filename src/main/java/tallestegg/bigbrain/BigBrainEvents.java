@@ -106,10 +106,10 @@ public class BigBrainEvents {
             }));
         }
 
-        // if (event.getEntity() instanceof AbstractPiglinEntity) {
-        // AbstractPiglinEntity piglin = (AbstractPiglinEntity) event.getEntity();
-        // piglin.func_242340_t(true);
-        // }
+        /*if (event.getEntity() instanceof AbstractPiglinEntity) {
+        AbstractPiglinEntity piglin = (AbstractPiglinEntity) event.getEntity();
+         piglin.func_242340_t(true);
+         }*/
 
     }
 }

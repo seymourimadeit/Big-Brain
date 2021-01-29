@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
@@ -21,9 +22,12 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags.Items;
 import tallestegg.bigbrain.BigBrainConfig;
+import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
@@ -40,7 +44,22 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-
+        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.charge")).mergeStyle(TextFormatting.BLUE));
+        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.while")).mergeStyle(TextFormatting.GRAY));
+        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.forward")).mergeStyle(TextFormatting.BLUE));
+        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.speed")).mergeStyle(TextFormatting.BLUE));
+        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0 && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0)
+            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.bash")).mergeStyle(TextFormatting.BLUE));
+        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) > 0)
+            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.explosion")).mergeStyle(TextFormatting.BLUE));
+        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.knockback")).mergeStyle(TextFormatting.BLUE));
+        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0 && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0) {
+            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.critical")).mergeStyle(TextFormatting.BLUE));
+            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.critSwing")).mergeStyle(TextFormatting.RED));
+            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.turnSpeed")).mergeStyle(TextFormatting.RED));
+        }
+        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.noJumping")).mergeStyle(TextFormatting.RED));
+        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.water")).mergeStyle(TextFormatting.RED));
     }
 
     @Override
