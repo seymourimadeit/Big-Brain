@@ -8,7 +8,7 @@
 "item.bigbrain.buckler.desc.speed": "  +9 Speed",
 "item.bigbrain.buckler.desc.bash": "  +Colliding with an entity will deal 6 - 8 attack damage",
 "item.bigbrain.buckler.desc.explosion": "  +Colliding with an entity will cause the user to explode",
-"item.bigbrain.buckler.desc.knockback": "  +9 Knockback Resistance",
+"item.bigbrain.buckler.desc.knockback": "  +1 Knockback Resistance",
 "item.bigbrain.buckler.desc.critical": "  +1 Critical Hit after colliding with an entity",
 "item.bigbrain.buckler.desc.critSwing": "  -Critical Hit is lost after one swing",
 "item.bigbrain.buckler.desc.turnSpeed": "  -Reduced turn speed while charging",
