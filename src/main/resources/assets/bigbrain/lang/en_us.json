@@ -14,8 +14,8 @@
 "item.bigbrain.buckler.desc.turnSpeed": "  -Reduced turn speed while charging",
 "item.bigbrain.buckler.desc.noJumping": "  -User cannot jump",
 "item.bigbrain.buckler.desc.water": "-Cannot be used while in water",
-"enchantment.bigbrain.turning.desc": "Allows full turn control while charging, at the cost of the buckler losing it's shield bash ability."
-"enchantment.bigbrain.bang.desc": "When the user shield bashes a large explosion is created. This explosion deals damage to the user and surrounding mobs. "
 "enchantment.bigbrain.turning": "Turning",
-"enchantment.bigbrain.bang": "Bang!"
+"enchantment.bigbrain.bang": "Bang!",
+"enchantment.bigbrain.turning.desc": "Allows full turn control while charging, at the cost of the buckler losing it's shield bash ability.",
+"enchantment.bigbrain.bang.desc": "When the user shield bashes a large explosion is created. This explosion deals damage to the user and surrounding mobs. "
 }
