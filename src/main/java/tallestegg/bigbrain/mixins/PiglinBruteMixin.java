@@ -193,7 +193,7 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
             boolean flag = f > 1.0F;
             if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack) && (recentlyHitIn || flag) && Math.max(this.rand.nextFloat() - (float) looting * 0.01F, 0.0F) < f) {
                 if (!flag && itemstack.isDamageable()) {
-                    itemstack.setDamage(itemstack.getMaxDamage() - this.rand.nextInt(1 + this.rand.nextInt(Math.max(itemstack.getMaxDamage() - 3, 1))));
+                    itemstack.setDamage(this.rand.nextInt(this.rand.nextInt(itemstack.getMaxDamage() / 2)));
                 }
 
                 this.entityDropItem(itemstack);

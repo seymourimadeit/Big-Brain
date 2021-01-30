@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.brain.BrainUtil;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleStatus;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
@@ -29,18 +28,18 @@ public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
     @Override
     protected boolean shouldExecute(ServerWorld worldIn, T owner) {
         LivingEntity livingentity = this.getAttackTarget(owner);
-        return livingentity.getDistance(owner) >= 4.0D && ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubbleColumn();
+        return livingentity != null && livingentity.getDistance(owner) >= 4.0D && BrainUtil.isMobVisible(owner, livingentity) && ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubbleColumn();
     }
 
     @Override
     protected boolean shouldContinueExecuting(ServerWorld worldIn, T entityIn, long gameTimeIn) {
         LivingEntity livingentity = this.getAttackTarget(entityIn);
-        return entityIn.getBrain().hasMemory(MemoryModuleType.ATTACK_TARGET) && BrainUtil.isMobVisible(entityIn, livingentity) && ((IBucklerUser) entityIn).getCooldown() == BigBrainConfig.BucklerCooldown && entityIn.getHeldItemOffhand().getItem() instanceof BucklerItem
+        return livingentity != null && entityIn.getBrain().hasMemory(MemoryModuleType.ATTACK_TARGET) && ((IBucklerUser) entityIn).getCooldown() == BigBrainConfig.BucklerCooldown && entityIn.getHeldItemOffhand().getItem() instanceof BucklerItem
                 && !entityIn.isInWaterRainOrBubbleColumn() && chargePhase != ChargePhases.FINISH;
     }
 
-    private LivingEntity getAttackTarget(MobEntity mob) {
-        return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
+    private LivingEntity getAttackTarget(T mob) {
+        return mob.getAttackTarget();
     }
 
     @Override

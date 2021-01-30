@@ -80,6 +80,11 @@ public class BucklerItem extends ShieldItem {
                 if (entityLiving instanceof AbstractPiglinEntity)
                     entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isChild() ? (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.5F : (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.0F);
             }
+        } else {
+            BucklerItem.setReady(stack, true);
+            stack.damageItem(1, entityLiving, (entityLiving1) -> {
+                entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
+            });
         }
         return itemstack;
     }

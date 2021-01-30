@@ -17,5 +17,7 @@
 "enchantment.bigbrain.turning": "Turning",
 "enchantment.bigbrain.bang": "Bang!",
 "enchantment.bigbrain.turning.desc": "Allows full turn control while charging, at the cost of the buckler losing it's shield bash ability.",
-"enchantment.bigbrain.bang.desc": "When the user shield bashes a large explosion is created. This explosion deals damage to the user and surrounding mobs. "
+"enchantment.bigbrain.bang.desc": "When the user shield bashes a large explosion is created. This explosion deals damage to the user and surrounding mobs.",
+"bigbrain.advancements.nether.obtain_buckler.title": "Chargin' Targe",
+"bigbrain.advancements.nether.obtain_buckler.description": "Have a buckler in your inventory."
 }
