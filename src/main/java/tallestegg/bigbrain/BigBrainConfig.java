@@ -26,6 +26,7 @@ public class BigBrainConfig {
     public static Boolean PigBreeding;
     public static Boolean MobsAttackAllVillagers;
     public static Boolean BruteSpawningWithBuckler;
+    public static Boolean BangBlockDestruction;
     public static Integer BucklerCooldown;
     public static Integer BucklerRunTime;
     public static List<String> MobBlackList;
@@ -39,6 +40,7 @@ public class BigBrainConfig {
         BruteSpawningWithBuckler = COMMON.BruteBuckler.get();
         BucklerCooldown = COMMON.BucklerCooldown.get();
         BucklerRunTime = COMMON.BucklerRunTime.get();
+        BangBlockDestruction = COMMON.BangBlockDestruction.get();
     }
 
     @SubscribeEvent
@@ -55,6 +57,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue PigBreeding;
         public final ForgeConfigSpec.BooleanValue MobsAttackAllVillagers;
         public final ForgeConfigSpec.BooleanValue BruteBuckler;
+        public final ForgeConfigSpec.BooleanValue BangBlockDestruction;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
@@ -63,6 +66,7 @@ public class BigBrainConfig {
             PigBreeding = builder.translation(BigBrain.MODID + ".config.pigBreeding").define("Have pigs give birth to multiple babies?", true);
             PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
             PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
+            BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
             BruteBuckler = builder.translation(BigBrain.MODID + ".config.bruteBuckler").define("Have brutes spawn with bucklers?", true);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());

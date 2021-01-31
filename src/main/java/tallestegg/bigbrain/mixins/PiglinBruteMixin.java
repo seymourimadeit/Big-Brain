@@ -109,7 +109,8 @@ public class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUs
                 stack.damageItem(10 * bangLevel, this, (player1) -> {
                     player1.sendBreakAnimation(hand);
                 });
-                this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, Explosion.Mode.NONE);
+                Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
+                this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, mode);
                 this.setCharging(false);
             }
             this.setLastAttackedEntity(entityIn);
