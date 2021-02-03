@@ -80,11 +80,6 @@ public class BucklerItem extends ShieldItem {
                 if (entityLiving instanceof AbstractPiglinEntity)
                     entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isChild() ? (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.5F : (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.0F);
             }
-        } else {
-            BucklerItem.setReady(stack, true);
-            stack.damageItem(1, entityLiving, (entityLiving1) -> {
-                entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
-            });
         }
         return itemstack;
     }
@@ -106,15 +101,14 @@ public class BucklerItem extends ShieldItem {
 
     public static void moveFowards(LivingEntity entity) {
         if (entity.isAlive()) {
-            Vector3d d3 = entity.getLookVec();
-            Vector3d d4 = entity.getLook(1.0F);
+            Vector3d look = entity.getLook(1.0F);
             Vector3d motion = entity.getMotion();
             if (entity instanceof PlayerEntity) {
-                entity.setMotion(d3.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y, d3.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
+                entity.setMotion(look.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y, look.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
             } else {
                 // This is the only way to make the piglin brute go faster without having it
                 // spazz out.
-                entity.setMotion(d4.x * 1.0D, motion.y, d4.z * 1.0D);
+                entity.setMotion(look.x * 1.0D, motion.y, look.z * 1.0D);
             }
         }
     }

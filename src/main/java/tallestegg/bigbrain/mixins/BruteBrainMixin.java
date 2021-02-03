@@ -1,8 +1,10 @@
 package tallestegg.bigbrain.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.collect.ImmutableList;
 
@@ -22,15 +24,13 @@ import tallestegg.bigbrain.entity.ai.tasks.ChargeTask;
 //I'm probably using way too many mixins.
 @Mixin(PiglinBruteBrain.class)
 public class BruteBrainMixin {
-    /**
-     * The reason why this is an overwrite is because the original method was a static method with an immutable list.
-     * @author tallestred
-     */
-    @Overwrite
-    private static void func_242364_d(PiglinBruteEntity brute, Brain<PiglinBruteEntity> brain) {
+
+    @Inject(at = @At(value = "TAIL"), cancellable = true, method = "func_242364_d")
+    private static void func_242364_d(PiglinBruteEntity brute, Brain<PiglinBruteEntity> brain, CallbackInfo info) {
         brain.registerActivity(Activity.FIGHT, 10, ImmutableList.of(new FindNewAttackTargetTask<>((p_242361_1_) -> {
             return !func_242350_a(brute, p_242361_1_);
         }), new MoveToTargetTask(1.0F), new AttackTargetTask(20), new ChargeTask<>()), MemoryModuleType.ATTACK_TARGET);
+        info.cancel();
     }
 
     @Shadow
