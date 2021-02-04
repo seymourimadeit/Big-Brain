@@ -89,7 +89,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
             if (bangLevel == 0) {
                 entityIn.attackEntityFrom(DamageSource.causeMobDamage((LivingEntity) (Object) this), f);
                 ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
-                if (entityIn instanceof PlayerEntity)
+                if (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getActiveItemStack().isShield(((PlayerEntity) entityIn)))
                     ((PlayerEntity) entityIn).disableShield(true);
             } else {
                 Hand hand = this.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
@@ -114,33 +114,6 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     public void getVisibilityMultiplier(@Nullable Entity lookingEntity, CallbackInfoReturnable<Double> info) {
         if (lookingEntity != null && ((LivingEntity) lookingEntity).isPotionActive(Effects.BLINDNESS))
             info.setReturnValue(info.getReturnValueD() * 0.3D);
-    }
-
-    @Inject(at = @At(value = "TAIL"), cancellable = true, method = "livingTick")
-    public void livingTick(CallbackInfo info) {
-        if (!this.isCharging()) {
-            ++this.bucklerUseTimer;
-            if (this.bucklerUseTimer > BigBrainConfig.BucklerRunTime)
-                this.bucklerUseTimer = BigBrainConfig.BucklerRunTime;
-            ++this.cooldown;
-            if (this.cooldown > BigBrainConfig.BucklerCooldown)
-                this.cooldown = BigBrainConfig.BucklerCooldown;
-        }
-
-        if (this.isCharging()) {
-            BucklerItem.moveFowards(((LivingEntity) (Object) this));
-            this.cooldown--;
-            this.bucklerUseTimer--;
-        }
-        if (bucklerUseTimer <= 0) {
-            this.setCharging(false);
-            this.cooldown = 0;
-            this.bucklerUseTimer = 0;
-            this.resetActiveHand();
-        }
-        if (cooldown <= 0) {
-            this.cooldown = 0;
-        }
     }
 
     @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canBlockDamageSource")
@@ -184,7 +157,8 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
                 return;
             }
             knockback.removeModifier(KNOCKBACK_RESISTANCE);
-            speed.removeModifier(CHARGE_SPEED_BOOST);
+            if ((LivingEntity) (Object) this instanceof PlayerEntity)
+                speed.removeModifier(CHARGE_SPEED_BOOST);
         }
         if (charging) {
             ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
@@ -194,8 +168,10 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
             }
             knockback.removeModifier(KNOCKBACK_RESISTANCE);
             knockback.applyNonPersistentModifier(KNOCKBACK_RESISTANCE);
-            speed.removeModifier(CHARGE_SPEED_BOOST);
-            speed.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
+            if ((LivingEntity) (Object) this instanceof PlayerEntity) {
+                speed.removeModifier(CHARGE_SPEED_BOOST);
+                speed.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
+            }
         }
         this.dataManager.set(CHARGING, charging);
     }

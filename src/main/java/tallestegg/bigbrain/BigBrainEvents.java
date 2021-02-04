@@ -4,7 +4,9 @@ import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.AgeableEntity;
+import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -29,13 +31,17 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
+import tallestegg.bigbrain.entity.ai.goals.UseBucklerGoal;
+import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
@@ -56,7 +62,7 @@ public class BigBrainEvents {
     public static void onJump(LivingJumpEvent event) {
         if (event.getEntity() instanceof IBucklerUser) {
             if (((IBucklerUser) event.getEntity()).isCharging()) {
-                event.getEntity().setMotion(event.getEntity().getMotion().getX(), 0, event.getEntity().getMotion().getZ());
+                event.getEntity().setMotion(event.getEntity().getMotion().getX(), 0.0D, event.getEntity().getMotion().getZ());
             }
         }
     }
@@ -72,10 +78,48 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    public static void onLivingTick(LivingUpdateEvent event) {
+        //event.setCanceled(true); //Only uncomment this if you're going to take a screenshot of something.
+        if (event.getEntity() instanceof IBucklerUser) {
+            LivingEntity entity = (LivingEntity) event.getEntity();
+            int coolDown = ((IBucklerUser) entity).getCooldown();
+            int bucklerUseTimer = ((IBucklerUser) entity).getBucklerUseTimer();
+            if (!((IBucklerUser) entity).isCharging()) {
+                ++bucklerUseTimer;
+                if (bucklerUseTimer > BigBrainConfig.BucklerRunTime)
+                    bucklerUseTimer = BigBrainConfig.BucklerRunTime;
+                ++coolDown;
+                if (coolDown > BigBrainConfig.BucklerCooldown)
+                    coolDown = BigBrainConfig.BucklerCooldown;
+                ((IBucklerUser) entity).setBucklerUseTimer(bucklerUseTimer);
+                ((IBucklerUser) entity).setCooldown(coolDown);
+            }
+
+            if (((IBucklerUser) entity).isCharging()) {
+                BucklerItem.moveFowards(entity);
+                coolDown--;
+                bucklerUseTimer--;
+                ((IBucklerUser) entity).setBucklerUseTimer(bucklerUseTimer);
+                ((IBucklerUser) entity).setCooldown(coolDown);
+            }
+            if (bucklerUseTimer <= 0) {
+                ((IBucklerUser) entity).setCharging(false);
+                ((IBucklerUser) entity).setCooldown(0);
+                bucklerUseTimer = 0;
+                entity.resetActiveHand();
+            }
+            if (coolDown <= 0) {
+                ((IBucklerUser) entity).setCooldown(0);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().toString().contains("minecraft:chests/bastion")) {
             ResourceLocation bucklerBastionLoot = new ResourceLocation(BigBrain.MODID, "chests/buckler_loot_table");
-            //LootPool pool = LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(EmptyLootEntry.func_216167_a().weight(90)).build();
+            // LootPool pool =
+            // LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(EmptyLootEntry.func_216167_a().weight(90)).build();
             event.getTable().addPool(LootPool.builder().addEntry(TableLootEntry.builder(bucklerBastionLoot)).build());
         }
     }
@@ -111,16 +155,20 @@ public class BigBrainEvents {
             }));
         }
 
-        /*if (event.getEntity() instanceof AbstractPiglinEntity) {
-        AbstractPiglinEntity piglin = (AbstractPiglinEntity) event.getEntity();
-         piglin.func_242340_t(true);
-         }*/
-        
-        if (event.getEntity() instanceof PolarBearEntity) {
-            PolarBearEntity polar = (PolarBearEntity)event.getEntity();
-            polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>)null));
+        if (event.getEntity().getType().equals(ForgeRegistries.ENTITIES.getValue(new ResourceLocation("guardvillagers:guard")))) {
+            CreatureEntity creature = (CreatureEntity) event.getEntity();
+            creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
         }
-            
 
+        /*
+         * if (event.getEntity() instanceof AbstractPiglinEntity) { AbstractPiglinEntity
+         * piglin = (AbstractPiglinEntity) event.getEntity();
+         * piglin.func_242340_t(true); }
+         */
+
+        if (event.getEntity() instanceof PolarBearEntity) {
+            PolarBearEntity polar = (PolarBearEntity) event.getEntity();
+            polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
+        }
     }
 }
