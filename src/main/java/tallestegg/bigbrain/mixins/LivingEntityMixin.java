@@ -96,6 +96,8 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
                 ItemStack stack = this.getHeldItem(hand);
                 stack.damageItem(10 * bangLevel, ((LivingEntity) (Object) this), (player1) -> { // We will need feedback on this.
                     player1.sendBreakAnimation(hand);
+                    if ((LivingEntity) (Object) this instanceof PlayerEntity)
+                        net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) (Object) this, this.activeItemStack, hand);
                 });
                 Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
                 this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage((LivingEntity) (Object) this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, mode);
