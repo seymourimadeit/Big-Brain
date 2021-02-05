@@ -144,7 +144,7 @@ public class BigBrainEvents {
             ResourceLocation bucklerBastionLoot = new ResourceLocation(BigBrain.MODID, "chests/buckler_loot_table");
             // LootPool pool =
             // LootPool.builder().rolls(ConstantRange.of(1)).addEntry(ItemLootEntry.builder(BigBrainItems.BUCKLER.get()).weight(10)).addEntry(EmptyLootEntry.func_216167_a().weight(90)).build();
-            event.getTable().addPool(LootPool.builder().addEntry(TableLootEntry.builder(bucklerBastionLoot)).build());
+            event.getTable().addPool(LootPool.builder().name("buckler_bastion_chests").addEntry(TableLootEntry.builder(bucklerBastionLoot)).build());
         }
     }
 
