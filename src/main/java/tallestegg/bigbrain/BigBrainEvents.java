@@ -6,7 +6,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingRenderer;
@@ -33,9 +32,6 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
@@ -75,30 +71,6 @@ public class BigBrainEvents {
             }
         }
     }
-
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public static void onMovementKeyPressed(InputUpdateEvent event) {
-        ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (((IBucklerUser) player).isBucklerDashing()) {
-            event.getMovementInput().jump = false;
-            event.getMovementInput().moveStrafe = 0;
-        }
-    }
-
-    /*
-     * @SubscribeEvent public static void
-     * onEntityRender(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>>
-     * event) { if (event.getEntity() instanceof IBucklerUser) { LivingEntity entity
-     * = (LivingEntity) event.getEntity(); if (((IBucklerUser) entity).isCharging())
-     * { for (int i = 0; i < 5; ++i) { event.getMatrixStack().push();
-     * event.getMatrixStack().translate(0.0D, (double)-1.101F, 1.5D * i);
-     * BigBrainEvents.render(entity, event.getRenderer(),
-     * event.getRenderer().getEntityModel(),
-     * event.getEntity().getYaw(event.getPartialRenderTick()),
-     * event.getPartialRenderTick(), event.getMatrixStack(), event.getBuffers(),
-     * event.getLight(), 1.0F / i); event.getMatrixStack().pop(); } } } }
-     */
 
     @SubscribeEvent
     public static void onLivingTick(LivingUpdateEvent event) {
@@ -197,7 +169,7 @@ public class BigBrainEvents {
         }
     }
 
-    public static void render(LivingEntity entityIn, LivingRenderer<LivingEntity, ?> renderer, EntityModel<LivingEntity> entityModel, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, float opacity) {
+   /* public static void render(LivingEntity entityIn, LivingRenderer<LivingEntity, ?> renderer, EntityModel<LivingEntity> entityModel, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, float opacity) {
         matrixStackIn.push();
         entityModel.swingProgress = entityIn.getSwingProgress(partialTicks);
 
@@ -268,5 +240,5 @@ public class BigBrainEvents {
         }
 
         matrixStackIn.pop();
-    }
+    }*/
 }
