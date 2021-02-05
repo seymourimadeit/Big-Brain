@@ -36,7 +36,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputUpdateEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
@@ -71,7 +70,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onJump(LivingJumpEvent event) {
         if (event.getEntity() instanceof IBucklerUser) {
-            if (((IBucklerUser) event.getEntity()).isCharging()) {
+            if (((IBucklerUser) event.getEntity()).isBucklerDashing()) {
                 event.getEntity().setMotion(event.getEntity().getMotion().getX(), 0.0D, event.getEntity().getMotion().getZ());
             }
         }
@@ -81,7 +80,7 @@ public class BigBrainEvents {
     @OnlyIn(Dist.CLIENT)
     public static void onMovementKeyPressed(InputUpdateEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (((IBucklerUser) player).isCharging()) {
+        if (((IBucklerUser) player).isBucklerDashing()) {
             event.getMovementInput().jump = false;
             event.getMovementInput().moveStrafe = 0;
         }
@@ -109,7 +108,7 @@ public class BigBrainEvents {
             LivingEntity entity = (LivingEntity) event.getEntity();
             int coolDown = ((IBucklerUser) entity).getCooldown();
             int bucklerUseTimer = ((IBucklerUser) entity).getBucklerUseTimer();
-            if (!((IBucklerUser) entity).isCharging()) {
+            if (!((IBucklerUser) entity).isBucklerDashing()) {
                 ++bucklerUseTimer;
                 if (bucklerUseTimer > BigBrainConfig.BucklerRunTime)
                     bucklerUseTimer = BigBrainConfig.BucklerRunTime;
@@ -120,7 +119,7 @@ public class BigBrainEvents {
                 ((IBucklerUser) entity).setCooldown(coolDown);
             }
 
-            if (((IBucklerUser) entity).isCharging()) {
+            if (((IBucklerUser) entity).isBucklerDashing()) {
                 BucklerItem.moveFowards(entity);
                 coolDown--;
                 bucklerUseTimer--;
@@ -128,7 +127,7 @@ public class BigBrainEvents {
                 ((IBucklerUser) entity).setCooldown(coolDown);
             }
             if (bucklerUseTimer <= 0) {
-                ((IBucklerUser) entity).setCharging(false);
+                ((IBucklerUser) entity).setBucklerDashing(false);
                 ((IBucklerUser) entity).setCooldown(0);
                 bucklerUseTimer = 0;
                 entity.resetActiveHand();

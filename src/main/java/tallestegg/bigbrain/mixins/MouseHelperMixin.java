@@ -51,7 +51,7 @@ public class MouseHelperMixin {
         }
         double d0 = NativeUtil.getTime();
         double d1 = d0 - this.lastLookTime;
-        double d4 = ((IBucklerUser) minecraft.player).isCharging() && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), minecraft.player) == 0 ? 0.2F : this.minecraft.gameSettings.mouseSensitivity * (double) 0.6F + (double) 0.2F;
+        double d4 = ((IBucklerUser) minecraft.player).isBucklerDashing() && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), minecraft.player) == 0 ? 0.2F : this.minecraft.gameSettings.mouseSensitivity * (double) 0.6F + (double) 0.2F;
         double d5 = d4 * d4 * d4 * 8.0D;
         double d2;
         double d3;

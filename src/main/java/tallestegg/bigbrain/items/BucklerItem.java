@@ -69,7 +69,7 @@ public class BucklerItem extends ShieldItem {
             setReady(stack, false);
         if (entityLiving instanceof IBucklerUser) {
             if (((IBucklerUser) entityLiving).getCooldown() > 0) {
-                ((IBucklerUser) entityLiving).setCharging(true);
+                ((IBucklerUser) entityLiving).setBucklerDashing(true);
                 BucklerItem.setReady(stack, true);
                 stack.damageItem(1, entityLiving, (entityLiving1) -> {
                     entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);

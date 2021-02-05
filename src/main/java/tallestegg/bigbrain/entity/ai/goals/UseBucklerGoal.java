@@ -39,7 +39,7 @@ public class UseBucklerGoal<T extends CreatureEntity> extends Goal {
         LivingEntity livingEntity = owner.getAttackTarget();
         if (livingEntity == null)
             return;
-        if (((IBucklerUser) owner).isCharging() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getHeldItemOffhand()) > 0 || !((IBucklerUser) owner).isCharging()) {
+        if (((IBucklerUser) owner).isBucklerDashing() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getHeldItemOffhand()) > 0 || !((IBucklerUser) owner).isBucklerDashing()) {
             owner.faceEntity(livingEntity, 30.0F, 30.0F);
         }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && owner.getDistance(livingEntity) >= 4.0D && owner.getDistance(livingEntity) <= 10.0D) {

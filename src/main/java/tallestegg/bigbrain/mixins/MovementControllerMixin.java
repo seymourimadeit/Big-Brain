@@ -53,7 +53,7 @@ public abstract class MovementControllerMixin {
      */
     @Overwrite
     public void tick() {
-        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), mob.getHeldItemOffhand()) > 0 && ((IBucklerUser) mob).isCharging() || !((IBucklerUser) mob).isCharging()) {
+        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), mob.getHeldItemOffhand()) > 0 && ((IBucklerUser) mob).isBucklerDashing() || !((IBucklerUser) mob).isBucklerDashing()) {
             if (this.action == MovementController.Action.STRAFE) {
                 float f = (float) this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
                 float f1 = (float) this.speed * f;

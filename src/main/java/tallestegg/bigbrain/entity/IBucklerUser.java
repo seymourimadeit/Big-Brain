@@ -5,9 +5,9 @@ public interface IBucklerUser {
     
     void setCooldown(int cooldown);
     
-    void setCharging(boolean charging);
+    void setBucklerDashing(boolean charging);
     
-    boolean isCharging();
+    boolean isBucklerDashing();
     
     int getBucklerUseTimer();
     

@@ -51,7 +51,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
     private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 1.0D, AttributeModifier.Operation.ADDITION);
-    private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(LivingEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> DASHING = EntityDataManager.createKey(LivingEntity.class, DataSerializers.BOOLEAN);
 
     @Unique
     private int cooldown;
@@ -68,7 +68,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
 
     @Inject(at = @At(value = "TAIL"), cancellable = true, method = "collideWithEntity")
     protected void collideWithEntity(Entity entityIn, CallbackInfo info) {
-        if (this.isCharging() && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), (LivingEntity) (Object) this) == 0) {
+        if (this.isBucklerDashing() && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), (LivingEntity) (Object) this) == 0) {
             int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), (LivingEntity) (Object) this);
             float f = 6.0F + ((float) this.getRNG().nextInt(3));
             float f1 = 2.0F;
@@ -101,7 +101,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
                 });
                 Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
                 this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage((LivingEntity) (Object) this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, mode);
-                this.setCharging(false);
+                this.setBucklerDashing(false);
             }
             this.setLastAttackedEntity(entityIn);
             if (this instanceof IOneCriticalAfterCharge)
@@ -128,19 +128,19 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
 
     @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
     public void writeAdditional(CompoundNBT compound, CallbackInfo info) {
-        compound.putBoolean("Charging", this.isCharging());
+        compound.putBoolean("BucklerDashing", this.isBucklerDashing());
         compound.putInt("ChargeCooldown", this.getCooldown());
     }
 
     @Inject(at = @At(value = "TAIL"), method = "readAdditional")
     public void readAdditional(CompoundNBT compound, CallbackInfo info) {
-        this.setCharging(compound.getBoolean("Charging"));
+        this.setBucklerDashing(compound.getBoolean("BucklerDashing"));
         this.setCooldown(compound.getInt("ChargeCooldown"));
     }
 
     @Inject(at = @At(value = "TAIL"), method = "registerData")
     protected void registerData(CallbackInfo info) {
-        this.dataManager.register(CHARGING, false);
+        this.dataManager.register(DASHING, false);
     }
 
     public int getCooldown() {
@@ -151,8 +151,8 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
         this.cooldown = cooldown;
     }
 
-    public void setCharging(boolean charging) {
-        if (!charging) {
+    public void setBucklerDashing(boolean dashing) {
+        if (!dashing) {
             ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
             ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
             if (speed == null || knockback == null) {
@@ -162,7 +162,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
             if ((LivingEntity) (Object) this instanceof PlayerEntity)
                 speed.removeModifier(CHARGE_SPEED_BOOST);
         }
-        if (charging) {
+        if (dashing) {
             ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
             ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
             if (speed == null || knockback == null) {
@@ -175,11 +175,11 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
                 speed.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
             }
         }
-        this.dataManager.set(CHARGING, charging);
+        this.dataManager.set(DASHING, dashing);
     }
 
-    public boolean isCharging() {
-        return this.dataManager.get(CHARGING);
+    public boolean isBucklerDashing() {
+        return this.dataManager.get(DASHING);
     }
 
     @Override

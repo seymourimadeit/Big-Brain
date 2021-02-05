@@ -39,7 +39,7 @@ public class LookControllerMixin {
     // TODO PR a event to forge that allows us to cancel look control ticking, and also pray that they don't ignore it.
     @Overwrite
     public void tick() {
-        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), mob.getHeldItemOffhand()) > 0 && ((IBucklerUser) mob).isCharging() || !((IBucklerUser) mob).isCharging()) {
+        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), mob.getHeldItemOffhand()) > 0 && ((IBucklerUser) mob).isBucklerDashing() || !((IBucklerUser) mob).isBucklerDashing()) {
             if (this.shouldResetPitch()) {
                 this.mob.rotationPitch = 0.0F;
             }
@@ -70,7 +70,7 @@ public class LookControllerMixin {
 
     @Overwrite
     public void setLookPosition(double x, double y, double z, float deltaYaw, float deltaPitch) {
-        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), mob.getHeldItemOffhand()) > 0 && ((IBucklerUser) mob).isCharging() || !((IBucklerUser) mob).isCharging()) {
+        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), mob.getHeldItemOffhand()) > 0 && ((IBucklerUser) mob).isBucklerDashing() || !((IBucklerUser) mob).isBucklerDashing()) {
             this.posX = x;
             this.posY = y;
             this.posZ = z;

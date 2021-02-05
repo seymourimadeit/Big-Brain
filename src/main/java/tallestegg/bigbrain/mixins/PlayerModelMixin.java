@@ -48,7 +48,7 @@ public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableMo
             bipedLeftArm.rotateAngleX = MathHelper.lerp(result, bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleX * 0.1F - 1.5F);
         }
         if (entityIn instanceof IBucklerUser) {
-            if (((IBucklerUser) entityIn).isCharging() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
+            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
                 ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
                 if (!handItems.isEmpty()) {
                     this.bipedRightArm.rotateAngleX = 0.5F - (float) Math.PI;
@@ -83,7 +83,7 @@ public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableMo
             bipedRightArm.rotateAngleX = MathHelper.lerp(result, bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleX * 0.1F - 1.5F);
         }
         if (entityIn instanceof IBucklerUser) {
-            if (((IBucklerUser) entityIn).isCharging() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
+            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
                 ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
                 if (!handItems.isEmpty()) {
                     this.bipedLeftArm.rotateAngleX = 0.5F - (float) Math.PI;
