@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD, modid = BigBrain.MODID)
+@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
 public class BigBrainClientEvents {
     @SubscribeEvent
     public static void onMovementKeyPressed(InputUpdateEvent event) {
