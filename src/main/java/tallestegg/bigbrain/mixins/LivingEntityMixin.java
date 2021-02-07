@@ -85,27 +85,27 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
                             ((ServerWorld) world).playSound((PlayerEntity) null, (double) this.getPosition().getX(), (double) this.getPosition().getY(), (double) this.getPosition().getZ(), BigBrainSounds.SHIELD_BASH.get(), this.getSoundCategory(), 0.1F, 0.8F + this.rand.nextFloat() * 0.4F);
                     }
                 }
+                if (bangLevel == 0) {
+                    entityIn.attackEntityFrom(DamageSource.causeMobDamage((LivingEntity) (Object) this), f);
+                    ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
+                    if (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getActiveItemStack().isShield(((PlayerEntity) entityIn)))
+                        ((PlayerEntity) entityIn).disableShield(true);
+                } else {
+                    Hand hand = this.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                    ItemStack stack = this.getHeldItem(hand);
+                    stack.damageItem(10 * bangLevel, ((LivingEntity) (Object) this), (player1) -> { // We will need feedback on this.
+                        player1.sendBreakAnimation(hand);
+                        if ((LivingEntity) (Object) this instanceof PlayerEntity)
+                            net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) (Object) this, this.activeItemStack, hand);
+                    });
+                    Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
+                    this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage((LivingEntity) (Object) this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, mode);
+                    this.setBucklerDashing(false);
+                }
+                this.setLastAttackedEntity(entityIn);
+                if (this instanceof IOneCriticalAfterCharge)
+                    ((IOneCriticalAfterCharge) this).setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), (LivingEntity) (Object) this) == 0);
             }
-            if (bangLevel == 0) {
-                entityIn.attackEntityFrom(DamageSource.causeMobDamage((LivingEntity) (Object) this), f);
-                ((LivingEntity) entityIn).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F))));
-                if (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getActiveItemStack().isShield(((PlayerEntity) entityIn)))
-                    ((PlayerEntity) entityIn).disableShield(true);
-            } else {
-                Hand hand = this.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
-                ItemStack stack = this.getHeldItem(hand);
-                stack.damageItem(10 * bangLevel, ((LivingEntity) (Object) this), (player1) -> { // We will need feedback on this.
-                    player1.sendBreakAnimation(hand);
-                    if ((LivingEntity) (Object) this instanceof PlayerEntity)
-                        net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) (Object) this, this.activeItemStack, hand);
-                });
-                Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
-                this.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage((LivingEntity) (Object) this), (ExplosionContext) null, this.getPosX(), this.getPosY(), this.getPosZ(), (float) bangLevel * 1.0F, false, mode);
-                this.setBucklerDashing(false);
-            }
-            this.setLastAttackedEntity(entityIn);
-            if (this instanceof IOneCriticalAfterCharge)
-                ((IOneCriticalAfterCharge) this).setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), (LivingEntity) (Object) this) == 0);
         }
     }
 
@@ -130,12 +130,14 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     public void writeAdditional(CompoundNBT compound, CallbackInfo info) {
         compound.putBoolean("BucklerDashing", this.isBucklerDashing());
         compound.putInt("ChargeCooldown", this.getCooldown());
+        compound.putInt("BucklerUseTimer", this.getBucklerUseTimer());
     }
 
     @Inject(at = @At(value = "TAIL"), method = "readAdditional")
     public void readAdditional(CompoundNBT compound, CallbackInfo info) {
         this.setBucklerDashing(compound.getBoolean("BucklerDashing"));
         this.setCooldown(compound.getInt("ChargeCooldown"));
+        this.setBucklerUseTimer(compound.getInt("BucklerUseTimer"));
     }
 
     @Inject(at = @At(value = "TAIL"), method = "registerData")

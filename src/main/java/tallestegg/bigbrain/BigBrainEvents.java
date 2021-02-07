@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -26,12 +27,17 @@ import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraft.entity.passive.fish.AbstractFishEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.TableLootEntry;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.ExplosionContext;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
@@ -95,6 +101,22 @@ public class BigBrainEvents {
                 BucklerItem.moveFowards(entity);
                 coolDown--;
                 bucklerUseTimer--;
+                if (entity.collidedHorizontally) {
+                    bucklerUseTimer = 0;
+                    int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
+                    entity.playSound(BigBrainSounds.SHIELD_BASH.get(), 1.0F, 1.0F);
+                    ((IBucklerUser) entity).setBucklerDashing(false);
+                    Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                    ItemStack stack = entity.getHeldItem(hand);
+                    stack.damageItem(10 * bangLevel, entity, (player1) -> { // We will need feedback on this.
+                        player1.sendBreakAnimation(hand);
+                        if (entity instanceof PlayerEntity)
+                            net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) entity, entity.getActiveItemStack(), hand);
+                    });
+                    Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
+                    if (bangLevel > 0)
+                        entity.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(entity), (ExplosionContext) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), (float) bangLevel * 1.0F, false, mode);
+                }
                 ((IBucklerUser) entity).setBucklerUseTimer(bucklerUseTimer);
                 ((IBucklerUser) entity).setCooldown(coolDown);
             }
@@ -169,76 +191,61 @@ public class BigBrainEvents {
         }
     }
 
-   /* public static void render(LivingEntity entityIn, LivingRenderer<LivingEntity, ?> renderer, EntityModel<LivingEntity> entityModel, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, float opacity) {
-        matrixStackIn.push();
-        entityModel.swingProgress = entityIn.getSwingProgress(partialTicks);
-
-        boolean shouldSit = entityIn.isPassenger() && (entityIn.getRidingEntity() != null && entityIn.getRidingEntity().shouldRiderSit());
-        entityModel.isSitting = shouldSit;
-        entityModel.isChild = entityIn.isChild();
-        float f = MathHelper.interpolateAngle(partialTicks, entityIn.prevRenderYawOffset, entityIn.renderYawOffset);
-        float f1 = MathHelper.interpolateAngle(partialTicks, entityIn.prevRotationYawHead, entityIn.rotationYawHead);
-        float f2 = f1 - f;
-        if (shouldSit && entityIn.getRidingEntity() instanceof LivingEntity) {
-            LivingEntity livingentity = (LivingEntity) entityIn.getRidingEntity();
-            f = MathHelper.interpolateAngle(partialTicks, livingentity.prevRenderYawOffset, livingentity.renderYawOffset);
-            f2 = f1 - f;
-            float f3 = MathHelper.wrapDegrees(f2);
-            if (f3 < -85.0F) {
-                f3 = -85.0F;
-            }
-
-            if (f3 >= 85.0F) {
-                f3 = 85.0F;
-            }
-
-            f = f1 - f3;
-            if (f3 * f3 > 2500.0F) {
-                f += f3 * 0.2F;
-            }
-
-            f2 = f1 - f;
-        }
-
-        float f6 = MathHelper.lerp(partialTicks, entityIn.prevRotationPitch, entityIn.rotationPitch);
-        if (entityIn.getPose() == Pose.SLEEPING) {
-            Direction direction = entityIn.getBedDirection();
-            if (direction != null) {
-                float f4 = entityIn.getEyeHeight(Pose.STANDING) - 0.1F;
-                matrixStackIn.translate((double) ((float) (-direction.getXOffset()) * f4), 0.0D, (double) ((float) (-direction.getZOffset()) * f4));
-            }
-        }
-
-        float f7 = (float) entityIn.ticksExisted + partialTicks;
-        matrixStackIn.scale(-1.0F, -1.0F, 1.0F);
-        matrixStackIn.translate(0.0D, (double) -1.501F, 0.0D);
-        float f8 = 0.0F;
-        float f5 = 0.0F;
-        if (!shouldSit && entityIn.isAlive()) {
-            f8 = MathHelper.lerp(partialTicks, entityIn.prevLimbSwingAmount, entityIn.limbSwingAmount);
-            f5 = entityIn.limbSwing - entityIn.limbSwingAmount * (1.0F - partialTicks);
-            if (entityIn.isChild()) {
-                f5 *= 3.0F;
-            }
-
-            if (f8 > 1.0F) {
-                f8 = 1.0F;
-            }
-        }
-
-        entityModel.setLivingAnimations(entityIn, f5, f8, partialTicks);
-        entityModel.setRotationAngles(entityIn, f5, f8, f7, f2, f6);
-        Minecraft minecraft = Minecraft.getInstance();
-        boolean flag = !entityIn.isInvisible();
-        boolean flag1 = !flag && !entityIn.isInvisibleToPlayer(minecraft.player);
-        boolean flag2 = minecraft.isEntityGlowing(entityIn);
-        RenderType rendertype = RenderType.getItemEntityTranslucentCull(renderer.getEntityTexture(entityIn));
-        if (rendertype != null) {
-            IVertexBuilder ivertexbuilder = bufferIn.getBuffer(rendertype);
-            int i = LivingRenderer.getPackedOverlay(entityIn, 0.0F);
-            entityModel.render(matrixStackIn, ivertexbuilder, packedLightIn, i, 1.0F, 1.0F, 1.0F, opacity);
-        }
-
-        matrixStackIn.pop();
-    }*/
+    /*
+     * public static void render(LivingEntity entityIn, LivingRenderer<LivingEntity,
+     * ?> renderer, EntityModel<LivingEntity> entityModel, float entityYaw, float
+     * partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int
+     * packedLightIn, float opacity) { matrixStackIn.push();
+     * entityModel.swingProgress = entityIn.getSwingProgress(partialTicks);
+     * 
+     * boolean shouldSit = entityIn.isPassenger() && (entityIn.getRidingEntity() !=
+     * null && entityIn.getRidingEntity().shouldRiderSit()); entityModel.isSitting =
+     * shouldSit; entityModel.isChild = entityIn.isChild(); float f =
+     * MathHelper.interpolateAngle(partialTicks, entityIn.prevRenderYawOffset,
+     * entityIn.renderYawOffset); float f1 =
+     * MathHelper.interpolateAngle(partialTicks, entityIn.prevRotationYawHead,
+     * entityIn.rotationYawHead); float f2 = f1 - f; if (shouldSit &&
+     * entityIn.getRidingEntity() instanceof LivingEntity) { LivingEntity
+     * livingentity = (LivingEntity) entityIn.getRidingEntity(); f =
+     * MathHelper.interpolateAngle(partialTicks, livingentity.prevRenderYawOffset,
+     * livingentity.renderYawOffset); f2 = f1 - f; float f3 =
+     * MathHelper.wrapDegrees(f2); if (f3 < -85.0F) { f3 = -85.0F; }
+     * 
+     * if (f3 >= 85.0F) { f3 = 85.0F; }
+     * 
+     * f = f1 - f3; if (f3 * f3 > 2500.0F) { f += f3 * 0.2F; }
+     * 
+     * f2 = f1 - f; }
+     * 
+     * float f6 = MathHelper.lerp(partialTicks, entityIn.prevRotationPitch,
+     * entityIn.rotationPitch); if (entityIn.getPose() == Pose.SLEEPING) { Direction
+     * direction = entityIn.getBedDirection(); if (direction != null) { float f4 =
+     * entityIn.getEyeHeight(Pose.STANDING) - 0.1F; matrixStackIn.translate((double)
+     * ((float) (-direction.getXOffset()) * f4), 0.0D, (double) ((float)
+     * (-direction.getZOffset()) * f4)); } }
+     * 
+     * float f7 = (float) entityIn.ticksExisted + partialTicks;
+     * matrixStackIn.scale(-1.0F, -1.0F, 1.0F); matrixStackIn.translate(0.0D,
+     * (double) -1.501F, 0.0D); float f8 = 0.0F; float f5 = 0.0F; if (!shouldSit &&
+     * entityIn.isAlive()) { f8 = MathHelper.lerp(partialTicks,
+     * entityIn.prevLimbSwingAmount, entityIn.limbSwingAmount); f5 =
+     * entityIn.limbSwing - entityIn.limbSwingAmount * (1.0F - partialTicks); if
+     * (entityIn.isChild()) { f5 *= 3.0F; }
+     * 
+     * if (f8 > 1.0F) { f8 = 1.0F; } }
+     * 
+     * entityModel.setLivingAnimations(entityIn, f5, f8, partialTicks);
+     * entityModel.setRotationAngles(entityIn, f5, f8, f7, f2, f6); Minecraft
+     * minecraft = Minecraft.getInstance(); boolean flag = !entityIn.isInvisible();
+     * boolean flag1 = !flag && !entityIn.isInvisibleToPlayer(minecraft.player);
+     * boolean flag2 = minecraft.isEntityGlowing(entityIn); RenderType rendertype =
+     * RenderType.getItemEntityTranslucentCull(renderer.getEntityTexture(entityIn));
+     * if (rendertype != null) { IVertexBuilder ivertexbuilder =
+     * bufferIn.getBuffer(rendertype); int i =
+     * LivingRenderer.getPackedOverlay(entityIn, 0.0F);
+     * entityModel.render(matrixStackIn, ivertexbuilder, packedLightIn, i, 1.0F,
+     * 1.0F, 1.0F, opacity); }
+     * 
+     * matrixStackIn.pop(); }
+     */
 }

@@ -67,7 +67,7 @@ public class RunWhileChargingGoal extends RandomWalkingGoal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return !CrossbowItem.isCharged(creature.getActiveItemStack()) && ((PillagerEntity) creature).isCharging() && super.shouldContinueExecuting();
+        return !CrossbowItem.isCharged(creature.getActiveItemStack()) && ((PillagerEntity) creature).isHandActive() && creature.getActiveItemStack().getItem() instanceof CrossbowItem && super.shouldContinueExecuting();
     }
 
     @Override
