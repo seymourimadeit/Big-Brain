@@ -82,7 +82,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
                         // Collision is done on the server side, so a server side method must be used.
                         ((ServerWorld) world).spawnParticle(type, entityIn.getPosXRandom(1.0D), entityIn.getPosYRandom() + 1.0D, entityIn.getPosZRandom(1.0D), 1, d0, d1, d2, 1.0D);
                         if (!this.isSilent())
-                            ((ServerWorld) world).playSound((PlayerEntity) null, (double) this.getPosition().getX(), (double) this.getPosition().getY(), (double) this.getPosition().getZ(), BigBrainSounds.SHIELD_BASH.get(), this.getSoundCategory(), 0.1F, 0.8F + this.rand.nextFloat() * 0.4F);
+                            ((ServerWorld) world).playSound((PlayerEntity) null, (double) this.getPosition().getX(), (double) this.getPosition().getY(), (double) this.getPosition().getZ(), BigBrainSounds.SHIELD_BASH.get(), this.getSoundCategory(), 0.12F, 0.8F + this.rand.nextFloat() * 0.4F);
                     }
                 }
                 if (bangLevel == 0) {

@@ -102,9 +102,9 @@ public class BigBrainEvents {
                 coolDown--;
                 bucklerUseTimer--;
                 if (entity.collidedHorizontally) {
+                    entity.playSound(BigBrainSounds.SHIELD_BASH.get(), 1.0F, 1.0F);
                     bucklerUseTimer = 0;
                     int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
-                    entity.playSound(BigBrainSounds.SHIELD_BASH.get(), 1.0F, 1.0F);
                     ((IBucklerUser) entity).setBucklerDashing(false);
                     Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                     ItemStack stack = entity.getHeldItem(hand);
