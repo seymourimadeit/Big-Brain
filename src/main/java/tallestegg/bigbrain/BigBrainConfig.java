@@ -29,6 +29,7 @@ public class BigBrainConfig {
     public static Boolean BangBlockDestruction;
     public static Boolean PolarBearFish;
     public static Integer BucklerCooldown;
+    public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
     public static List<String> MobBlackList;
 
@@ -43,6 +44,7 @@ public class BigBrainConfig {
         BucklerRunTime = COMMON.BucklerRunTime.get();
         BangBlockDestruction = COMMON.BangBlockDestruction.get();
         PolarBearFish = COMMON.PolarBearFish.get();
+        BucklerTurningRunTime = COMMON.BucklerTurningRunTime.get();
     }
 
     @SubscribeEvent
@@ -63,6 +65,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue PolarBearFish;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
+        public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
@@ -76,6 +79,7 @@ public class BigBrainConfig {
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
             BucklerCooldown = builder.translation(BigBrain.MODID + ".config.bucklerCoolDown").defineInRange("How long should the buckler's cooldown be in ticks?", 240, Integer.MIN_VALUE, Integer.MAX_VALUE);
             BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            BucklerTurningRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move if you have the turning enchant be in ticks?", 30, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
     }
 }

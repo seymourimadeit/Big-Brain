@@ -2,21 +2,12 @@ package tallestegg.bigbrain;
 
 import java.util.function.Predicate;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.LivingRenderer;
-import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.Pose;
 import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
@@ -31,11 +22,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.TableLootEntry;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ExplosionContext;
 import net.minecraftforge.event.LootTableLoadEvent;
@@ -84,12 +73,15 @@ public class BigBrainEvents {
         // screenshot of something.
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
+            int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
+            int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
             int coolDown = ((IBucklerUser) entity).getCooldown();
             int bucklerUseTimer = ((IBucklerUser) entity).getBucklerUseTimer();
             if (!((IBucklerUser) entity).isBucklerDashing()) {
                 ++bucklerUseTimer;
-                if (bucklerUseTimer > BigBrainConfig.BucklerRunTime)
-                    bucklerUseTimer = BigBrainConfig.BucklerRunTime;
+                int configValue = turningLevel == 0 ? BigBrainConfig.BucklerRunTime : BigBrainConfig.BucklerTurningRunTime;
+                if (bucklerUseTimer > configValue)
+                    bucklerUseTimer = configValue;
                 ++coolDown;
                 if (coolDown > BigBrainConfig.BucklerCooldown)
                     coolDown = BigBrainConfig.BucklerCooldown;
@@ -104,7 +96,6 @@ public class BigBrainEvents {
                 if (entity.collidedHorizontally) {
                     entity.playSound(BigBrainSounds.SHIELD_BASH.get(), 1.0F, 1.0F);
                     bucklerUseTimer = 0;
-                    int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
                     ((IBucklerUser) entity).setBucklerDashing(false);
                     Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                     ItemStack stack = entity.getHeldItem(hand);
