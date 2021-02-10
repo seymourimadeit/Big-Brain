@@ -24,6 +24,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.BigBrain;
+import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
@@ -42,6 +43,8 @@ public class BigBrainClientEvents {
     @SubscribeEvent
     public static void onEntityRenderPre(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = (LivingEntity) event.getEntity();
+        if (!BigBrainConfig.RenderAfterImage)
+            return;
         if (((IBucklerUser) entityIn).isBucklerDashing()) {
             for (int i = 0; i < 5; i++) {
                 if (i != 0) {
@@ -116,6 +119,13 @@ public class BigBrainClientEvents {
                         IVertexBuilder ivertexbuilder = event.getBuffers().getBuffer(rendertype);
                         int overlay = LivingRenderer.getPackedOverlay(entityIn, 0.0F);
                         event.getRenderer().getEntityModel().render(event.getMatrixStack(), ivertexbuilder, event.getLight(), overlay, 1.0F, 1.0F, 1.0F, 0.3F / i + 1.0F);
+                    }
+                    if (!entityIn.isSpectator()) {
+                        if (BigBrainConfig.RenderEntityLayersDuringAfterImage) {
+                            for (LayerRenderer<LivingEntity, EntityModel<LivingEntity>> layerrenderer : event.getRenderer().layerRenderers) {
+                                layerrenderer.render(event.getMatrixStack(), event.getBuffers(), event.getLight(), entityIn, f5, f8, event.getPartialRenderTick(), f7, f2, f6);
+                            }
+                        }
                     }
                     event.getMatrixStack().pop();
                 }

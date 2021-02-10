@@ -14,11 +14,18 @@ import net.minecraftforge.fml.config.ModConfig;
 public class BigBrainConfig {
     public static final ForgeConfigSpec COMMON_SPEC;
     public static final CommonConfig COMMON;
+    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ClientConfig CLIENT;
     static {
         {
             final Pair<CommonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(CommonConfig::new);
             COMMON = specPair.getLeft();
             COMMON_SPEC = specPair.getRight();
+        }
+        {
+            final Pair<ClientConfig, ForgeConfigSpec> specPair1 = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+            CLIENT = specPair1.getLeft();
+            CLIENT_SPEC = specPair1.getRight();
         }
     }
     public static Boolean PillagerCover;
@@ -28,6 +35,8 @@ public class BigBrainConfig {
     public static Boolean BruteSpawningWithBuckler;
     public static Boolean BangBlockDestruction;
     public static Boolean PolarBearFish;
+    public static Boolean RenderAfterImage;
+    public static Boolean RenderEntityLayersDuringAfterImage;
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
@@ -47,10 +56,18 @@ public class BigBrainConfig {
         BucklerTurningRunTime = COMMON.BucklerTurningRunTime.get();
     }
 
+    public static void bakeClientConfig() {
+        RenderAfterImage = CLIENT.RenderAfterImage.get();
+        RenderEntityLayersDuringAfterImage = CLIENT.RenderEntityLayersDuringAfterImage.get();
+    }
+
     @SubscribeEvent
     public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
         if (configEvent.getConfig().getSpec() == BigBrainConfig.COMMON_SPEC) {
             bakeCommonConfig();
+        }
+        if (configEvent.getConfig().getSpec() == BigBrainConfig.CLIENT_SPEC) {
+            bakeClientConfig();
         }
     }
 
@@ -80,6 +97,16 @@ public class BigBrainConfig {
             BucklerCooldown = builder.translation(BigBrain.MODID + ".config.bucklerCoolDown").defineInRange("How long should the buckler's cooldown be in ticks?", 240, Integer.MIN_VALUE, Integer.MAX_VALUE);
             BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE);
             BucklerTurningRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move if you have the turning enchant be in ticks?", 30, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        }
+    }
+
+    public static class ClientConfig {
+        public final ForgeConfigSpec.BooleanValue RenderAfterImage;
+        public final ForgeConfigSpec.BooleanValue RenderEntityLayersDuringAfterImage;
+
+        public ClientConfig(ForgeConfigSpec.Builder builder) {
+            RenderAfterImage = builder.translation(BigBrain.MODID + ".config.afterImage").define("Render an after image while an entity is charging with a buckler?", true);
+            RenderEntityLayersDuringAfterImage = builder.translation(BigBrain.MODID + ".config.entityLayers").comment("Keep in mind this won't affect their opacity due to technical reasons.").define("Render entity layers while rendering the after image?", false);
         }
     }
 }

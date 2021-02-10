@@ -26,6 +26,7 @@ public class BigBrain {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, BigBrainConfig.COMMON_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, BigBrainConfig.CLIENT_SPEC);
         BigBrainItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BigBrainSounds.SOUNDS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BigBrainEnchantments.ENCHANTMENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
