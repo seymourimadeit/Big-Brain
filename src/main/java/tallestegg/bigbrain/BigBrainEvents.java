@@ -73,7 +73,6 @@ public class BigBrainEvents {
         // screenshot of something.
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
-            int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
             int coolDown = ((IBucklerUser) entity).getCooldown();
             int bucklerUseTimer = ((IBucklerUser) entity).getBucklerUseTimer();
@@ -93,21 +92,6 @@ public class BigBrainEvents {
                 BucklerItem.moveFowards(entity);
                 coolDown--;
                 bucklerUseTimer--;
-                if (entity.collidedHorizontally) {
-                    entity.playSound(BigBrainSounds.SHIELD_BASH.get(), 1.0F, 1.0F);
-                    bucklerUseTimer = 0;
-                    ((IBucklerUser) entity).setBucklerDashing(false);
-                    Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
-                    ItemStack stack = entity.getHeldItem(hand);
-                    stack.damageItem(10 * bangLevel, entity, (player1) -> { // We will need feedback on this.
-                        player1.sendBreakAnimation(hand);
-                        if (entity instanceof PlayerEntity)
-                            net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) entity, entity.getActiveItemStack(), hand);
-                    });
-                    Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
-                    if (bangLevel > 0)
-                        entity.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(entity), (ExplosionContext) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), (float) bangLevel * 1.0F, false, mode);
-                }
                 ((IBucklerUser) entity).setBucklerUseTimer(bucklerUseTimer);
                 ((IBucklerUser) entity).setCooldown(coolDown);
             }
