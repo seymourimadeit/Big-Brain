@@ -1,29 +1,45 @@
 package tallestegg.bigbrain;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.PillagerEntity;
+import net.minecraft.entity.monster.WitherSkeletonEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraft.entity.passive.fish.AbstractFishEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.TableLootEntry;
+import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.ExplosionContext;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -60,6 +76,13 @@ public class BigBrainEvents {
             }
         }
     }
+    
+    @SubscribeEvent
+    public static void onEntityAttacked(LivingDamageEvent event) {
+        if (event.getEntity() instanceof IBucklerUser && ((IBucklerUser)event.getEntity()).isBucklerDashing()) {
+            event.setAmount(event.getAmount() / 2.0F);
+        }
+    }
 
     @SubscribeEvent
     public static void onLivingTick(LivingUpdateEvent event) {
@@ -88,15 +111,77 @@ public class BigBrainEvents {
                 bucklerUseTimer--;
                 ((IBucklerUser) entity).setBucklerUseTimer(bucklerUseTimer);
                 ((IBucklerUser) entity).setCooldown(coolDown);
-            }
-            if (bucklerUseTimer <= 0) {
-                ((IBucklerUser) entity).setBucklerDashing(false);
-                ((IBucklerUser) entity).setCooldown(0);
-                bucklerUseTimer = 0;
-                entity.resetActiveHand();
-            }
-            if (coolDown <= 0) {
-                ((IBucklerUser) entity).setCooldown(0);
+                List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(0.5D, 0.0D, 0.5D), EntityPredicates.pushableBy(entity));
+                if (!list.isEmpty()) {
+                    int i = entity.world.getGameRules().getInt(GameRules.MAX_ENTITY_CRAMMING);
+                    if (i > 0 && list.size() > i - 1 && entity.getRNG().nextInt(4) == 0) {
+                        int j = 0;
+
+                        for (int k = 0; k < list.size(); ++k) {
+                            if (!list.get(k).isPassenger()) {
+                                ++j;
+                            }
+                        }
+
+                        if (j > i - 1) {
+                            entity.attackEntityFrom(DamageSource.CRAMMING, 6.0F);
+                        }
+                    }
+
+                    for (int l = 0; l < list.size(); ++l) {
+                        Entity entity2 = list.get(l);
+                        entity2.applyEntityCollision(entity);
+                        if (turningLevel == 0) {
+                            int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
+                            float f = 6.0F + ((float) entity.getRNG().nextInt(3));
+                            float f1 = 2.0F;
+                            if (f1 > 0.0F && entity instanceof LivingEntity) {
+                                for (int duration = 0; duration < 10; ++duration) {
+                                    double d0 = entity.getRNG().nextGaussian() * 0.02D;
+                                    double d1 = entity.getRNG().nextGaussian() * 0.02D;
+                                    double d2 = entity.getRNG().nextGaussian() * 0.02D;
+                                    BasicParticleType type = entity2 instanceof WitherEntity || entity2 instanceof WitherSkeletonEntity ? ParticleTypes.SMOKE : ParticleTypes.CLOUD;
+                                    if (entity.world instanceof ServerWorld) {
+                                        // Collision is done on the server side, so a server side method must be used.
+                                        ((ServerWorld) entity.world).spawnParticle(type, entity.getPosXRandom(1.0D), entity.getPosYRandom() + 1.0D, entity.getPosZRandom(1.0D), 1, d0, d1, d2, 1.0D);
+                                        if (!entity.isSilent())
+                                            ((ServerWorld) entity.world).playSound((PlayerEntity) null, (double) entity.getPosition().getX(), (double) entity.getPosition().getY(), (double) entity.getPosition().getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.12F,
+                                                    0.8F + entity.getRNG().nextFloat() * 0.4F);
+                                    }
+                                }
+                                if (bangLevel == 0) {
+                                    entity2.attackEntityFrom(DamageSource.causeMobDamage(entity), f);
+                                    ((LivingEntity) entity2).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
+                                    if (entity2 instanceof PlayerEntity && ((PlayerEntity) entity2).getActiveItemStack().isShield(((PlayerEntity) entity2)))
+                                        ((PlayerEntity) entity2).disableShield(true);
+                                } else {
+                                    Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                                    ItemStack stack = entity.getHeldItem(hand);
+                                    stack.damageItem(10 * bangLevel, entity, (player1) -> { // We will need feedback on this.
+                                        player1.sendBreakAnimation(hand);
+                                        if (entity instanceof PlayerEntity)
+                                            net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) (Object) entity, entity.getActiveItemStack(), hand);
+                                    });
+                                    Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
+                                    entity.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(entity), (ExplosionContext) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), (float) bangLevel * 1.0F, false, mode);
+                                    ((IBucklerUser) entity).setBucklerDashing(false);
+                                }
+                                entity.setLastAttackedEntity(entity2);
+                                if (entity instanceof IOneCriticalAfterCharge)
+                                    ((IOneCriticalAfterCharge) entity).setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), (LivingEntity) (Object) entity) == 0);
+                            }
+                        }
+                    }
+                }
+                if (bucklerUseTimer <= 0) {
+                    ((IBucklerUser) entity).setBucklerDashing(false);
+                    ((IBucklerUser) entity).setCooldown(0);
+                    bucklerUseTimer = 0;
+                    entity.resetActiveHand();
+                }
+                if (coolDown <= 0) {
+                    ((IBucklerUser) entity).setCooldown(0);
+                }
             }
         }
     }
@@ -159,62 +244,4 @@ public class BigBrainEvents {
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
         }
     }
-
-    /*
-     * public static void render(LivingEntity entityIn, LivingRenderer<LivingEntity,
-     * ?> renderer, EntityModel<LivingEntity> entityModel, float entityYaw, float
-     * partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int
-     * packedLightIn, float opacity) { matrixStackIn.push();
-     * entityModel.swingProgress = entityIn.getSwingProgress(partialTicks);
-     * 
-     * boolean shouldSit = entityIn.isPassenger() && (entityIn.getRidingEntity() !=
-     * null && entityIn.getRidingEntity().shouldRiderSit()); entityModel.isSitting =
-     * shouldSit; entityModel.isChild = entityIn.isChild(); float f =
-     * MathHelper.interpolateAngle(partialTicks, entityIn.prevRenderYawOffset,
-     * entityIn.renderYawOffset); float f1 =
-     * MathHelper.interpolateAngle(partialTicks, entityIn.prevRotationYawHead,
-     * entityIn.rotationYawHead); float f2 = f1 - f; if (shouldSit &&
-     * entityIn.getRidingEntity() instanceof LivingEntity) { LivingEntity
-     * livingentity = (LivingEntity) entityIn.getRidingEntity(); f =
-     * MathHelper.interpolateAngle(partialTicks, livingentity.prevRenderYawOffset,
-     * livingentity.renderYawOffset); f2 = f1 - f; float f3 =
-     * MathHelper.wrapDegrees(f2); if (f3 < -85.0F) { f3 = -85.0F; }
-     * 
-     * if (f3 >= 85.0F) { f3 = 85.0F; }
-     * 
-     * f = f1 - f3; if (f3 * f3 > 2500.0F) { f += f3 * 0.2F; }
-     * 
-     * f2 = f1 - f; }
-     * 
-     * float f6 = MathHelper.lerp(partialTicks, entityIn.prevRotationPitch,
-     * entityIn.rotationPitch); if (entityIn.getPose() == Pose.SLEEPING) { Direction
-     * direction = entityIn.getBedDirection(); if (direction != null) { float f4 =
-     * entityIn.getEyeHeight(Pose.STANDING) - 0.1F; matrixStackIn.translate((double)
-     * ((float) (-direction.getXOffset()) * f4), 0.0D, (double) ((float)
-     * (-direction.getZOffset()) * f4)); } }
-     * 
-     * float f7 = (float) entityIn.ticksExisted + partialTicks;
-     * matrixStackIn.scale(-1.0F, -1.0F, 1.0F); matrixStackIn.translate(0.0D,
-     * (double) -1.501F, 0.0D); float f8 = 0.0F; float f5 = 0.0F; if (!shouldSit &&
-     * entityIn.isAlive()) { f8 = MathHelper.lerp(partialTicks,
-     * entityIn.prevLimbSwingAmount, entityIn.limbSwingAmount); f5 =
-     * entityIn.limbSwing - entityIn.limbSwingAmount * (1.0F - partialTicks); if
-     * (entityIn.isChild()) { f5 *= 3.0F; }
-     * 
-     * if (f8 > 1.0F) { f8 = 1.0F; } }
-     * 
-     * entityModel.setLivingAnimations(entityIn, f5, f8, partialTicks);
-     * entityModel.setRotationAngles(entityIn, f5, f8, f7, f2, f6); Minecraft
-     * minecraft = Minecraft.getInstance(); boolean flag = !entityIn.isInvisible();
-     * boolean flag1 = !flag && !entityIn.isInvisibleToPlayer(minecraft.player);
-     * boolean flag2 = minecraft.isEntityGlowing(entityIn); RenderType rendertype =
-     * RenderType.getItemEntityTranslucentCull(renderer.getEntityTexture(entityIn));
-     * if (rendertype != null) { IVertexBuilder ivertexbuilder =
-     * bufferIn.getBuffer(rendertype); int i =
-     * LivingRenderer.getPackedOverlay(entityIn, 0.0F);
-     * entityModel.render(matrixStackIn, ivertexbuilder, packedLightIn, i, 1.0F,
-     * 1.0F, 1.0F, opacity); }
-     * 
-     * matrixStackIn.pop(); }
-     */
 }
