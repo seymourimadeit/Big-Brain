@@ -89,11 +89,11 @@ public class BigBrainClientEvents {
                     event.getMatrixStack().rotate(Vector3f.YP.rotationDegrees(180.0F - f));
                     event.getMatrixStack().scale(-1.0F, -1.0F, 1.0F);
                     double motionZ = Math.abs(entityIn.getMotion().getZ());
-                    event.getMatrixStack().translate(0.0D, -1.50D, i * motionZ * 2 / ((IBucklerUser)entityIn).getBucklerUseTimer());
+                    event.getMatrixStack().translate(0.0D, -1.50D, i * motionZ * 2 / ((IBucklerUser) entityIn).getBucklerUseTimer());
                     try {
                         preRenderCallback.invoke(event.getRenderer(), entityIn, event.getMatrixStack(), event.getPartialRenderTick());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        new RuntimeException("Big Brain has failed to invoke preRenderCallback via reflection.");
                     }
                     float f8 = 0.0F;
                     float f5 = 0.0F;
