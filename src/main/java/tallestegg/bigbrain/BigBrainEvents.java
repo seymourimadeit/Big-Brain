@@ -43,6 +43,8 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -78,16 +80,7 @@ public class BigBrainEvents {
     }
     
     @SubscribeEvent
-    public static void onEntityAttacked(LivingDamageEvent event) {
-        if (event.getEntity() instanceof IBucklerUser && ((IBucklerUser)event.getEntity()).isBucklerDashing()) {
-            event.setAmount(event.getAmount() / 2.0F);
-        }
-    }
-
-    @SubscribeEvent
     public static void onLivingTick(LivingUpdateEvent event) {
-        // event.setCanceled(true); //Only uncomment this if you're going to take a
-        // screenshot of something.
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
@@ -197,11 +190,11 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerAttack(AttackEntityEvent event) {
+    public static void onPlayerAttack(CriticalHitEvent event) {
         if (((IOneCriticalAfterCharge) event.getPlayer()).isCritical()) {
+            event.setResult(Result.ALLOW);
+            event.setDamageModifier(1.5F); 
             ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
-            event.getPlayer().world.playSound((PlayerEntity) null, event.getPlayer().getPosX(), event.getPlayer().getPosY(), event.getPlayer().getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, event.getPlayer().getSoundCategory(), 1.0F, 1.0F);
-            event.getPlayer().onCriticalHit(event.getTarget());
         }
     }
 
