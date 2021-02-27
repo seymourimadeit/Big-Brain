@@ -37,8 +37,6 @@ public class MouseHelperMixin {
     @Shadow
     private double yVelocity;
 
-    // This is the worst implemetation of a feature I have ever done.
-    // Please, @ me on discord for a better implementation.
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;player:Lnet/minecraft/client/entity/player/ClientPlayerEntity;", shift = At.Shift.AFTER), cancellable = true, method = "updatePlayerLook()V")
     public void updatePlayerLook(CallbackInfo info) {
         info.cancel();

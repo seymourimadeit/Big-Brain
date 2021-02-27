@@ -26,11 +26,11 @@ import net.minecraft.loot.LootPool;
 import net.minecraft.loot.TableLootEntry;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ExplosionContext;
@@ -39,10 +39,9 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -79,6 +78,16 @@ public class BigBrainEvents {
         }
     }
     
+    @SubscribeEvent
+    public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
+        if (event.getEntity() instanceof LivingEntity) {
+            LivingEntity entity = (LivingEntity)event.getEntity();
+            if (entity.isPotionActive(Effects.BLINDNESS)) {
+               event.modifyVisibility(0.3D);
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void onLivingTick(LivingUpdateEvent event) {
         if (event.getEntity() instanceof IBucklerUser) {
@@ -193,15 +202,16 @@ public class BigBrainEvents {
     public static void onPlayerAttack(CriticalHitEvent event) {
         if (((IOneCriticalAfterCharge) event.getPlayer()).isCritical()) {
             event.setResult(Result.ALLOW);
-            event.setDamageModifier(1.5F); 
+            event.setDamageModifier(1.5F);
             ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
         }
     }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinWorldEvent event) {
+        Entity entity = event.getEntity();
         if (event.getEntity() instanceof PillagerEntity) {
-            PillagerEntity pillager = (PillagerEntity) event.getEntity();
+            PillagerEntity pillager = (PillagerEntity) entity;
             if (BigBrainConfig.PillagerMultishot)
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
             if (BigBrainConfig.PillagerCover)
@@ -209,19 +219,19 @@ public class BigBrainEvents {
         }
 
         if (event.getEntity() instanceof IMob && BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(event.getEntity().getEntityString())) {
-            MobEntity mob = (MobEntity) event.getEntity();
+            MobEntity mob = (MobEntity) entity;
             mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillagerEntity.class, true));
         }
 
         if (event.getEntity() instanceof VillagerEntity && BigBrainConfig.MobsAttackAllVillagers) {
-            VillagerEntity villager = (VillagerEntity) event.getEntity();
+            VillagerEntity villager = (VillagerEntity) entity;
             villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, MobEntity.class, 8.0F, 1.0D, 0.5D, (p_213469_1_) -> {
                 return !BigBrainConfig.MobBlackList.contains(p_213469_1_.getEntityString());
             }));
         }
 
         if (event.getEntity().getType().equals(ForgeRegistries.ENTITIES.getValue(new ResourceLocation("guardvillagers:guard")))) {
-            CreatureEntity creature = (CreatureEntity) event.getEntity();
+            CreatureEntity creature = (CreatureEntity) entity;
             creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
         }
 
@@ -232,9 +242,15 @@ public class BigBrainEvents {
          */
 
         if (event.getEntity() instanceof PolarBearEntity) {
-            PolarBearEntity polar = (PolarBearEntity) event.getEntity();
+            PolarBearEntity polar = (PolarBearEntity) entity;
             if (BigBrainConfig.PolarBearFish)
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
         }
+
+        /*if (event.getEntity() instanceof SquidEntity) {
+            SquidEntity squid = (SquidEntity) entity;
+            squid.goalSelector.addGoal(2, new MeleeAttackGoal(squid, 1.0D, true));
+            squid.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(squid, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
+        }*/
     }
 }

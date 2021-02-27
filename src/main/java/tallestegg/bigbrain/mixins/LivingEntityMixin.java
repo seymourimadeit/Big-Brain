@@ -1,9 +1,6 @@
 package tallestegg.bigbrain.mixins;
 
-import java.util.Random;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,29 +17,16 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.monster.WitherSkeletonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.ExplosionContext;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.BigBrainEnchantments;
-import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.entity.IBucklerUser;
-import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.items.BucklerItem;
 
 @Mixin(LivingEntity.class)
@@ -64,16 +48,6 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
 
     public LivingEntityMixin(EntityType<?> entityTypeIn, World worldIn) {
         super(entityTypeIn, worldIn);
-    }
-
-
-    @Shadow
-    protected abstract Random getRNG();
-
-    @Inject(at = @At(value = "RETURN"), cancellable = true, method = "getVisibilityMultiplier")
-    public void getVisibilityMultiplier(@Nullable Entity lookingEntity, CallbackInfoReturnable<Double> info) {
-        if (lookingEntity != null && ((LivingEntity) lookingEntity).isPotionActive(Effects.BLINDNESS))
-            info.setReturnValue(info.getReturnValueD() * 0.3D);
     }
 
     @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canBlockDamageSource")

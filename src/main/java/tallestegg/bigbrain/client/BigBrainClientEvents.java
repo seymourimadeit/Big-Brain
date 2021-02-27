@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
@@ -115,7 +116,7 @@ public class BigBrainClientEvents {
                     boolean flag = !entityIn.isInvisible();
                     boolean flag1 = !flag && !entityIn.isInvisibleToPlayer(minecraft.player);
                     boolean flag2 = minecraft.isEntityGlowing(entityIn);
-                    RenderType rendertype = event.getRenderer().getEntityModel().getRenderType(event.getRenderer().getEntityTexture(entityIn));
+                    RenderType rendertype = BigBrainClientEvents.getRenderType(entityIn, event.getRenderer(), event.getRenderer().getEntityModel(), flag, flag1, flag2);
                     if (rendertype != null) {
                         IVertexBuilder ivertexbuilder = event.getBuffers().getBuffer(rendertype);
                         int overlay = LivingRenderer.getPackedOverlay(entityIn, 0.0F);
@@ -131,6 +132,17 @@ public class BigBrainClientEvents {
                     event.getMatrixStack().pop();
                 }
             }
+        }
+    }
+
+    public static RenderType getRenderType(LivingEntity p_230496_1_, LivingRenderer<LivingEntity, ?> renderer, EntityModel<?> model, boolean p_230496_2_, boolean p_230496_3_, boolean p_230496_4_) {
+        ResourceLocation resourcelocation = renderer.getEntityTexture(p_230496_1_);
+        if (p_230496_3_) {
+            return RenderType.getItemEntityTranslucentCull(resourcelocation);
+        } else if (p_230496_2_) {
+            return model.getRenderType(resourcelocation);
+        } else {
+            return p_230496_4_ ? RenderType.getOutline(resourcelocation) : null;
         }
     }
 }
