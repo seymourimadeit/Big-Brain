@@ -77,13 +77,13 @@ public class BigBrainEvents {
             }
         }
     }
-    
+
     @SubscribeEvent
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getEntity() instanceof LivingEntity) {
-            LivingEntity entity = (LivingEntity)event.getEntity();
+            LivingEntity entity = (LivingEntity) event.getEntity();
             if (entity.isPotionActive(Effects.BLINDNESS)) {
-               event.modifyVisibility(0.3D);
+                event.modifyVisibility(0.3D);
             }
         }
     }
@@ -115,21 +115,6 @@ public class BigBrainEvents {
                 ((IBucklerUser) entity).setCooldown(coolDown);
                 List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(0.5D, 0.0D, 0.5D), EntityPredicates.pushableBy(entity));
                 if (!list.isEmpty()) {
-                    int i = entity.world.getGameRules().getInt(GameRules.MAX_ENTITY_CRAMMING);
-                    if (i > 0 && list.size() > i - 1 && entity.getRNG().nextInt(4) == 0) {
-                        int j = 0;
-
-                        for (int k = 0; k < list.size(); ++k) {
-                            if (!list.get(k).isPassenger()) {
-                                ++j;
-                            }
-                        }
-
-                        if (j > i - 1) {
-                            entity.attackEntityFrom(DamageSource.CRAMMING, 6.0F);
-                        }
-                    }
-
                     for (int l = 0; l < list.size(); ++l) {
                         Entity entity2 = list.get(l);
                         entity2.applyEntityCollision(entity);
@@ -153,13 +138,14 @@ public class BigBrainEvents {
                                 }
                                 if (bangLevel == 0) {
                                     entity2.attackEntityFrom(DamageSource.causeMobDamage(entity), f);
-                                    ((LivingEntity) entity2).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
+                                    if (entity2 instanceof LivingEntity)
+                                        ((LivingEntity) entity2).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
                                     if (entity2 instanceof PlayerEntity && ((PlayerEntity) entity2).getActiveItemStack().isShield(((PlayerEntity) entity2)))
                                         ((PlayerEntity) entity2).disableShield(true);
                                 } else {
                                     Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                                     ItemStack stack = entity.getHeldItem(hand);
-                                    stack.damageItem(10 * bangLevel, entity, (player1) -> { // We will need feedback on this.
+                                    stack.damageItem(5 * bangLevel, entity, (player1) -> {
                                         player1.sendBreakAnimation(hand);
                                         if (entity instanceof PlayerEntity)
                                             net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) (Object) entity, entity.getActiveItemStack(), hand);
@@ -247,10 +233,12 @@ public class BigBrainEvents {
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
         }
 
-        /*if (event.getEntity() instanceof SquidEntity) {
-            SquidEntity squid = (SquidEntity) entity;
-            squid.goalSelector.addGoal(2, new MeleeAttackGoal(squid, 1.0D, true));
-            squid.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(squid, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
-        }*/
+        /*
+         * if (event.getEntity() instanceof SquidEntity) { SquidEntity squid =
+         * (SquidEntity) entity; squid.goalSelector.addGoal(2, new
+         * MeleeAttackGoal(squid, 1.0D, true)); squid.targetSelector.addGoal(3, new
+         * NearestAttackableTargetGoal<>(squid, AbstractFishEntity.class, 10, true,
+         * true, (Predicate<LivingEntity>) null)); }
+         */
     }
 }
