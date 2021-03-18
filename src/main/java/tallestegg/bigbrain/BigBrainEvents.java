@@ -3,6 +3,8 @@ package tallestegg.bigbrain;
 import java.util.List;
 import java.util.function.Predicate;
 
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
@@ -25,16 +27,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.TableLootEntry;
 import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.BlockParticleData;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ExplosionContext;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -64,7 +68,7 @@ public class BigBrainEvents {
                 AgeableEntity baby = EntityType.PIG.create(event.getChild().world);
                 baby.copyLocationAndAnglesFrom(pig);
                 baby.setChild(true);
-                pig.world.addEntity(baby);
+                pig.getEntityWorld().addEntity(baby);
             }
         }
     }
@@ -93,26 +97,22 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
-            int coolDown = ((IBucklerUser) entity).getCooldown();
-            int bucklerUseTimer = ((IBucklerUser) entity).getBucklerUseTimer();
+            ((IBucklerUser) entity).getBucklerUseTimer();
             if (!((IBucklerUser) entity).isBucklerDashing()) {
-                ++bucklerUseTimer;
+                ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() + 1);
                 int configValue = turningLevel == 0 ? BigBrainConfig.BucklerRunTime : BigBrainConfig.BucklerTurningRunTime;
-                if (bucklerUseTimer > configValue)
-                    bucklerUseTimer = configValue;
-                ++coolDown;
-                if (coolDown > BigBrainConfig.BucklerCooldown)
-                    coolDown = BigBrainConfig.BucklerCooldown;
-                ((IBucklerUser) entity).setBucklerUseTimer(bucklerUseTimer);
-                ((IBucklerUser) entity).setCooldown(coolDown);
+                if (((IBucklerUser) entity).getBucklerUseTimer() > configValue)
+                    ((IBucklerUser) entity).setBucklerUseTimer(configValue);
+                ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
+                if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
+                    ((IBucklerUser) entity).setCooldown(BigBrainConfig.BucklerCooldown);
             }
 
             if (((IBucklerUser) entity).isBucklerDashing()) {
                 BucklerItem.moveFowards(entity);
-                coolDown--;
-                bucklerUseTimer--;
-                ((IBucklerUser) entity).setBucklerUseTimer(bucklerUseTimer);
-                ((IBucklerUser) entity).setCooldown(coolDown);
+                ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
+                ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
+                BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
                 List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(0.5D, 0.0D, 0.5D), EntityPredicates.pushableBy(entity));
                 if (!list.isEmpty()) {
                     for (int l = 0; l < list.size(); ++l) {
@@ -161,13 +161,16 @@ public class BigBrainEvents {
                         }
                     }
                 }
-                if (bucklerUseTimer <= 0) {
+                if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
+                    Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                    ItemStack stack = entity.getHeldItem(hand);
                     ((IBucklerUser) entity).setBucklerDashing(false);
+                    ((IBucklerUser) entity).setBucklerUseTimer(0);
                     ((IBucklerUser) entity).setCooldown(0);
-                    bucklerUseTimer = 0;
+                    BucklerItem.setReady(stack, false);
                     entity.resetActiveHand();
                 }
-                if (coolDown <= 0) {
+                if (((IBucklerUser) entity).getCooldown() <= 0) {
                     ((IBucklerUser) entity).setCooldown(0);
                 }
             }
@@ -221,24 +224,24 @@ public class BigBrainEvents {
             creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
         }
 
-        /*
-         * if (event.getEntity() instanceof AbstractPiglinEntity) { AbstractPiglinEntity
-         * piglin = (AbstractPiglinEntity) event.getEntity();
-         * piglin.func_242340_t(true); }
-         */
-
         if (event.getEntity() instanceof PolarBearEntity) {
             PolarBearEntity polar = (PolarBearEntity) entity;
             if (BigBrainConfig.PolarBearFish)
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
         }
+    }
 
-        /*
-         * if (event.getEntity() instanceof SquidEntity) { SquidEntity squid =
-         * (SquidEntity) entity; squid.goalSelector.addGoal(2, new
-         * MeleeAttackGoal(squid, 1.0D, true)); squid.targetSelector.addGoal(3, new
-         * NearestAttackableTargetGoal<>(squid, AbstractFishEntity.class, 10, true,
-         * true, (Predicate<LivingEntity>) null)); }
-         */
+    public static void spawnRunningEffectsWhileCharging(LivingEntity entity) {
+        int i = MathHelper.floor(entity.getPosX());
+        int j = MathHelper.floor(entity.getPosY() - (double) 0.2F);
+        int k = MathHelper.floor(entity.getPosZ());
+        BlockPos blockpos = new BlockPos(i, j, k);
+        BlockState blockstate = entity.world.getBlockState(blockpos);
+        if (!blockstate.addRunningEffects(entity.world, blockpos, entity))
+            if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
+                Vector3d vector3d = entity.getMotion();
+                entity.world.addParticle(new BlockParticleData(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getPosX() + (entity.getRNG().nextDouble() - 1.0D) * (double) entity.getSize(entity.getPose()).width, entity.getPosY() + 0.1D,
+                        entity.getPosZ() + (entity.getRNG().nextDouble() - 1.0D) * (double) entity.getSize(entity.getPose()).width, vector3d.x * -4.0D, 1.5D, vector3d.z * -4.0D);
+            }
     }
 }

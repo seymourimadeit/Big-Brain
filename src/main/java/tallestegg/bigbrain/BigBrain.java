@@ -15,11 +15,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import tallestegg.bigbrain.entity.IBucklerUser;
 
 @Mod(BigBrain.MODID)
 public class BigBrain {
     public static final String MODID = "bigbrain";
-    
+
     public BigBrain() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
@@ -60,7 +61,8 @@ public class BigBrain {
     public static class ItemModelHandler {
         public ItemModelHandler() {
             ItemModelsProperties.registerProperty(BigBrainItems.BUCKLER.get(), new ResourceLocation("blocking"), (stack, clientWorld, livingEntity) -> {
-                return livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack ? 1.0F : 0.0F;
+                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && ((IBucklerUser)livingEntity).isBucklerDashing();
+                return livingEntity != null && active ? 1.0F : 0.0F;
             });
         }
     }

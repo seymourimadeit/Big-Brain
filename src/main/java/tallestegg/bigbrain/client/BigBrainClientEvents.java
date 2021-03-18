@@ -42,7 +42,7 @@ public class BigBrainClientEvents {
     public static final Method preRenderCallback = ObfuscationReflectionHelper.findMethod(LivingRenderer.class, "func_225620_a_", LivingEntity.class, MatrixStack.class, float.class);
 
     @SubscribeEvent
-    public static void onEntityRenderPre(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
+    public static void onEntityRenderPre(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = (LivingEntity) event.getEntity();
         if (!BigBrainConfig.RenderAfterImage)
             return;
@@ -90,7 +90,7 @@ public class BigBrainClientEvents {
                     event.getMatrixStack().rotate(Vector3f.YP.rotationDegrees(180.0F - f));
                     event.getMatrixStack().scale(-1.0F, -1.0F, 1.0F);
                     double motionZ = Math.abs(entityIn.getMotion().getZ());
-                    event.getMatrixStack().translate(0.0D, -1.50D, i * motionZ * 2 / ((IBucklerUser) entityIn).getBucklerUseTimer());
+                    event.getMatrixStack().translate(0.0D, (double)-1.40F, i * motionZ * 4 / ((IBucklerUser) entityIn).getBucklerUseTimer());
                     try {
                         preRenderCallback.invoke(event.getRenderer(), entityIn, event.getMatrixStack(), event.getPartialRenderTick());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
