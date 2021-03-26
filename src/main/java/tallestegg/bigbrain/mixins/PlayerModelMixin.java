@@ -44,20 +44,18 @@ public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableMo
             float useDuration = (float) entityIn.getHeldItem(entityIn.getActiveHand()).getUseDuration();
             float useDurationClamped = MathHelper.clamp((float) entityIn.getItemInUseMaxCount(), 0.0F, useDuration);
             float result = useDurationClamped / useDuration;
-            this.bipedLeftArm.rotateAngleY = MathHelper.lerp(result, bipedLeftArm.rotateAngleY, (float) Math.PI / 2.8F);
+            this.bipedLeftArm.rotateAngleY = MathHelper.lerp(result, bipedLeftArm.rotateAngleY, 1.1466812652970528F);
             this.bipedLeftArm.rotateAngleX = MathHelper.lerp(result, bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleX * 0.1F - 1.5F);
         }
         if (entityIn instanceof IBucklerUser)
             if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
                 ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
                 if (!handItems.isEmpty()) {
-                    this.bipedRightArm.rotateAngleX = 0.5F - (float) Math.PI;
-                    this.bipedRightArm.rotateAngleY = 0.0F;
-                    this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.5F - 0.9424779F;
+                    this.bipedRightArm.rotateAngleX = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;
                     this.bipedRightArm.rotateAngleY = ((float) Math.PI / 6F);
                 }
                 this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.1F - 1.5F;
-                this.bipedLeftArm.rotateAngleY = ((float) Math.PI / 2.8F);
+                this.bipedLeftArm.rotateAngleY = 1.1466812652970528F;
             }
     }
 
@@ -66,20 +64,18 @@ public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableMo
             float useDuration = (float) entityIn.getHeldItem(entityIn.getActiveHand()).getUseDuration();
             float useDurationClamped = MathHelper.clamp((float) entityIn.getItemInUseMaxCount(), 0.0F, useDuration);
             float result = useDurationClamped / useDuration;
+            this.bipedRightArm.rotateAngleY = MathHelper.lerp(result, bipedRightArm.rotateAngleY, -1.1466812652970528F);
             this.bipedRightArm.rotateAngleX = MathHelper.lerp(result, bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleX * 0.1F - 1.5F);
-            this.bipedRightArm.rotateAngleY = MathHelper.lerp(result, bipedRightArm.rotateAngleY, -(float) Math.PI / 2.8F);
         }
         if (entityIn instanceof IBucklerUser) {
             if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
                 ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
                 if (!handItems.isEmpty()) {
-                    this.bipedLeftArm.rotateAngleX = 0.5F - (float) Math.PI;
-                    this.bipedLeftArm.rotateAngleY = 0.0F;
-                    this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5F - 0.9424779F;
-                    this.bipedLeftArm.rotateAngleY = -(float) Math.PI / 6F;
+                    this.bipedLeftArm.rotateAngleX = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;
+                    this.bipedLeftArm.rotateAngleY = (-(float) Math.PI / 6F);
                 }
                 this.bipedRightArm.rotateAngleX = 0.0F * 0.1F - 1.5F;
-                this.bipedRightArm.rotateAngleY = -(float) Math.PI / 2.8F;
+                this.bipedRightArm.rotateAngleY = -1.1466812652970528F;
             }
         }
     }

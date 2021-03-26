@@ -15,7 +15,6 @@ import tallestegg.bigbrain.BucklerTexture;
 import tallestegg.bigbrain.client.model.ModelGoldenBuckler;
 
 public class BucklerRenderer extends ItemStackTileEntityRenderer {
-
     public final ModelGoldenBuckler bucklerModel = new ModelGoldenBuckler();
 
     @Override

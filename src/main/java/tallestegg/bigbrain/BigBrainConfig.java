@@ -30,7 +30,6 @@ public class BigBrainConfig {
     }
     public static Boolean PillagerCover;
     public static Boolean PillagerMultishot;
-    public static Boolean PigBreeding;
     public static Boolean MobsAttackAllVillagers;
     public static Boolean BruteSpawningWithBuckler;
     public static Boolean BangBlockDestruction;
@@ -40,11 +39,12 @@ public class BigBrainConfig {
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
+    public static Integer minPigBabiesBred;
+    public static Integer maxPigBabiesBred;;
     public static List<String> MobBlackList;
 
     public static void bakeCommonConfig() {
         PillagerCover = COMMON.PillagerCover.get();
-        PigBreeding = COMMON.PigBreeding.get();
         PillagerMultishot = COMMON.PillagerMultishot.get();
         MobsAttackAllVillagers = COMMON.MobsAttackAllVillagers.get();
         MobBlackList = COMMON.MobBlackList.get();
@@ -54,6 +54,8 @@ public class BigBrainConfig {
         BangBlockDestruction = COMMON.BangBlockDestruction.get();
         PolarBearFish = COMMON.PolarBearFish.get();
         BucklerTurningRunTime = COMMON.BucklerTurningRunTime.get();
+        minPigBabiesBred = COMMON.minPigBabiesBred.get();
+        maxPigBabiesBred = COMMON.maxPigBabiesBred.get();
     }
 
     public static void bakeClientConfig() {
@@ -72,10 +74,8 @@ public class BigBrainConfig {
     }
 
     public static class CommonConfig {
-
         public final ForgeConfigSpec.BooleanValue PillagerCover;
         public final ForgeConfigSpec.BooleanValue PillagerMultishot;
-        public final ForgeConfigSpec.BooleanValue PigBreeding;
         public final ForgeConfigSpec.BooleanValue MobsAttackAllVillagers;
         public final ForgeConfigSpec.BooleanValue BruteBuckler;
         public final ForgeConfigSpec.BooleanValue BangBlockDestruction;
@@ -83,10 +83,11 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
+        public final ForgeConfigSpec.IntValue minPigBabiesBred;
+        public final ForgeConfigSpec.IntValue maxPigBabiesBred;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
-            PigBreeding = builder.translation(BigBrain.MODID + ".config.pigBreeding").define("Have pigs give birth to multiple babies?", true);
             PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
             PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
             PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
@@ -97,6 +98,8 @@ public class BigBrainConfig {
             BucklerCooldown = builder.translation(BigBrain.MODID + ".config.bucklerCoolDown").defineInRange("How long should the buckler's cooldown be in ticks?", 240, Integer.MIN_VALUE, Integer.MAX_VALUE);
             BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE);
             BucklerTurningRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move if you have the turning enchant be in ticks?", 30, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
     }
 

@@ -44,16 +44,18 @@ public class BigBrainClientEvents {
     @SubscribeEvent
     public static void onEntityRenderPre(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = (LivingEntity) event.getEntity();
+        LivingRenderer<LivingEntity, EntityModel<LivingEntity>> renderer = event.getRenderer();
+        MatrixStack stack = event.getMatrixStack();
         if (!BigBrainConfig.RenderAfterImage)
             return;
         if (((IBucklerUser) entityIn).isBucklerDashing()) {
             for (int i = 0; i < 5; i++) {
                 if (i != 0) {
-                    event.getMatrixStack().push();
-                    event.getRenderer().getEntityModel().swingProgress = entityIn.getSwingProgress(event.getPartialRenderTick());
+                    stack.push();
+                    renderer.getEntityModel().swingProgress = entityIn.getSwingProgress(event.getPartialRenderTick());
                     boolean shouldSit = entityIn.isPassenger() && (entityIn.getRidingEntity() != null && entityIn.getRidingEntity().shouldRiderSit());
-                    event.getRenderer().getEntityModel().isSitting = shouldSit;
-                    event.getRenderer().getEntityModel().isChild = entityIn.isChild();
+                    renderer.getEntityModel().isSitting = shouldSit;
+                    renderer.getEntityModel().isChild = entityIn.isChild();
                     float f = MathHelper.interpolateAngle(event.getPartialRenderTick(), entityIn.prevRenderYawOffset, entityIn.renderYawOffset);
                     float f1 = MathHelper.interpolateAngle(event.getPartialRenderTick(), entityIn.prevRotationYawHead, entityIn.rotationYawHead);
                     float f2 = f1 - f;
@@ -83,16 +85,16 @@ public class BigBrainClientEvents {
                         Direction direction = entityIn.getBedDirection();
                         if (direction != null) {
                             float f4 = entityIn.getEyeHeight(Pose.STANDING) - 0.1F;
-                            event.getMatrixStack().translate((double) ((float) (-direction.getXOffset()) * f4), 0.0D, (double) ((float) (-direction.getZOffset()) * f4));
+                            stack.translate((double) ((float) (-direction.getXOffset()) * f4), 0.0D, (double) ((float) (-direction.getZOffset()) * f4));
                         }
                     }
                     float f7 = (float) entityIn.ticksExisted + event.getPartialRenderTick();
-                    event.getMatrixStack().rotate(Vector3f.YP.rotationDegrees(180.0F - f));
-                    event.getMatrixStack().scale(-1.0F, -1.0F, 1.0F);
+                    stack.rotate(Vector3f.YP.rotationDegrees(180.0F - f));
+                    stack.scale(-1.0F, -1.0F, 1.0F);
                     double motionZ = Math.abs(entityIn.getMotion().getZ());
-                    event.getMatrixStack().translate(0.0D, (double)-1.40F, i * motionZ * 4 / ((IBucklerUser) entityIn).getBucklerUseTimer());
+                    stack.translate(0.0D, (double) -1.40F, i * motionZ * 4 / ((IBucklerUser) entityIn).getBucklerUseTimer());
                     try {
-                        preRenderCallback.invoke(event.getRenderer(), entityIn, event.getMatrixStack(), event.getPartialRenderTick());
+                        preRenderCallback.invoke(renderer, entityIn, stack, event.getPartialRenderTick());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         new RuntimeException("Big Brain has failed to invoke preRenderCallback via reflection.");
                     }
@@ -110,26 +112,26 @@ public class BigBrainClientEvents {
                         }
                     }
 
-                    event.getRenderer().getEntityModel().setLivingAnimations(entityIn, f5, f8, event.getPartialRenderTick());
-                    event.getRenderer().getEntityModel().setRotationAngles(entityIn, f5, f8, f7, f2, f6);
+                    renderer.getEntityModel().setLivingAnimations(entityIn, f5, f8, event.getPartialRenderTick());
+                    renderer.getEntityModel().setRotationAngles(entityIn, f5, f8, f7, f2, f6);
                     Minecraft minecraft = Minecraft.getInstance();
                     boolean flag = !entityIn.isInvisible();
                     boolean flag1 = !flag && !entityIn.isInvisibleToPlayer(minecraft.player);
                     boolean flag2 = minecraft.isEntityGlowing(entityIn);
-                    RenderType rendertype = BigBrainClientEvents.getRenderType(entityIn, event.getRenderer(), event.getRenderer().getEntityModel(), flag, flag1, flag2);
+                    RenderType rendertype = BigBrainClientEvents.getRenderType(entityIn, renderer, renderer.getEntityModel(), flag, flag1, flag2);
                     if (rendertype != null) {
                         IVertexBuilder ivertexbuilder = event.getBuffers().getBuffer(rendertype);
                         int overlay = LivingRenderer.getPackedOverlay(entityIn, 0.0F);
-                        event.getRenderer().getEntityModel().render(event.getMatrixStack(), ivertexbuilder, event.getLight(), overlay, 1.0F, 1.0F, 1.0F, 0.3F / i + 1.0F);
+                        renderer.getEntityModel().render(stack, ivertexbuilder, event.getLight(), overlay, 1.0F, 1.0F, 1.0F, 0.3F / i + 1.0F);
                     }
                     if (!entityIn.isSpectator()) {
                         if (BigBrainConfig.RenderEntityLayersDuringAfterImage) {
-                            for (LayerRenderer<LivingEntity, EntityModel<LivingEntity>> layerrenderer : event.getRenderer().layerRenderers) {
-                                layerrenderer.render(event.getMatrixStack(), event.getBuffers(), event.getLight(), entityIn, f5, f8, event.getPartialRenderTick(), f7, f2, f6);
+                            for (LayerRenderer<LivingEntity, EntityModel<LivingEntity>> layerrenderer : renderer.layerRenderers) {
+                                layerrenderer.render(stack, event.getBuffers(), event.getLight(), entityIn, f5, f8, event.getPartialRenderTick(), f7, f2, f6);
                             }
                         }
                     }
-                    event.getMatrixStack().pop();
+                    stack.pop();
                 }
             }
         }
