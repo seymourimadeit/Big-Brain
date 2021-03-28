@@ -90,14 +90,14 @@ public class BigBrainClientEvents {
                     }
                     float f7 = (float) entityIn.ticksExisted + event.getPartialRenderTick();
                     stack.rotate(Vector3f.YP.rotationDegrees(180.0F - f));
-                    stack.scale(-1.0F, -1.0F, 1.0F);
-                    double motionZ = Math.abs(entityIn.getMotion().getZ());
-                    stack.translate(0.0D, (double) -1.40F, i * motionZ * 4 / ((IBucklerUser) entityIn).getBucklerUseTimer());
                     try {
                         preRenderCallback.invoke(renderer, entityIn, stack, event.getPartialRenderTick());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         new RuntimeException("Big Brain has failed to invoke preRenderCallback via reflection.");
                     }
+                    stack.scale(-1.0F, -1.0F, 1.0F);
+                    double motionZ = Math.abs(entityIn.getMotion().getZ());
+                    stack.translate(0.0D, (double) -1.501F, i * motionZ * 4 / ((IBucklerUser) entityIn).getBucklerUseTimer());
                     float f8 = 0.0F;
                     float f5 = 0.0F;
                     if (!shouldSit && entityIn.isAlive()) {
