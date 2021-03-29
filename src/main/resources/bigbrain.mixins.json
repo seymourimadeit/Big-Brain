@@ -11,7 +11,8 @@
      "PiglinBruteMixin",
      "LivingEntityMixin",
      "MovementControllerMixin",
-     "LookControllerMixin"
+     "LookControllerMixin",
+     "PiglinBrainMixin"
   ],
   "client": [
      "PlayerModelMixin",

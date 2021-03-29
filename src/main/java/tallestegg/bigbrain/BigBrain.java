@@ -6,6 +6,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -15,6 +16,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import tallestegg.bigbrain.capablities.ILoaf;
+import tallestegg.bigbrain.capablities.Loaf;
+import tallestegg.bigbrain.capablities.LoafStorage;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
 @Mod(BigBrain.MODID)
@@ -35,6 +39,9 @@ public class BigBrain {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            CapabilityManager.INSTANCE.register(ILoaf.class, new LoafStorage(), Loaf::new);
+        });
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -61,7 +68,7 @@ public class BigBrain {
     public static class ItemModelHandler {
         public ItemModelHandler() {
             ItemModelsProperties.registerProperty(BigBrainItems.BUCKLER.get(), new ResourceLocation("blocking"), (stack, clientWorld, livingEntity) -> {
-                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && ((IBucklerUser)livingEntity).isBucklerDashing();
+                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && ((IBucklerUser) livingEntity).isBucklerDashing();
                 return livingEntity != null && active ? 1.0F : 0.0F;
             });
         }

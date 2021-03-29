@@ -30,6 +30,8 @@ import tallestegg.bigbrain.entity.IBucklerUser;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
 public class BigBrainClientEvents {
+    public static final Method preRenderCallback = ObfuscationReflectionHelper.findMethod(LivingRenderer.class, "func_225620_a_", LivingEntity.class, MatrixStack.class, float.class);
+
     @SubscribeEvent
     public static void onMovementKeyPressed(InputUpdateEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
@@ -38,8 +40,6 @@ public class BigBrainClientEvents {
             event.getMovementInput().moveStrafe = 0;
         }
     }
-
-    public static final Method preRenderCallback = ObfuscationReflectionHelper.findMethod(LivingRenderer.class, "func_225620_a_", LivingEntity.class, MatrixStack.class, float.class);
 
     @SubscribeEvent
     public static void onEntityRenderPre(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
@@ -142,7 +142,7 @@ public class BigBrainClientEvents {
         if (p_230496_3_) {
             return RenderType.getItemEntityTranslucentCull(resourcelocation);
         } else if (p_230496_2_) {
-            return model.getRenderType(resourcelocation);
+            return RenderType.getEntityTranslucent(resourcelocation);
         } else {
             return p_230496_4_ ? RenderType.getOutline(resourcelocation) : null;
         }

@@ -24,7 +24,6 @@ import tallestegg.bigbrain.entity.ai.tasks.ChargeTask;
 //I'm probably using way too many mixins.
 @Mixin(PiglinBruteBrain.class)
 public class BruteBrainMixin {
-
     @Inject(at = @At(value = "TAIL"), cancellable = true, method = "func_242364_d")
     private static void func_242364_d(PiglinBruteEntity brute, Brain<PiglinBruteEntity> brain, CallbackInfo info) {
         brain.registerActivity(Activity.FIGHT, 10, ImmutableList.of(new FindNewAttackTargetTask<>((p_242361_1_) -> {

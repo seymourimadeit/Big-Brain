@@ -1,15 +1,21 @@
 package tallestegg.bigbrain;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.brain.Brain;
+import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
 import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.boss.WitherEntity;
@@ -18,6 +24,8 @@ import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.monster.WitherSkeletonEntity;
+import net.minecraft.entity.monster.piglin.PiglinEntity;
+import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraft.entity.passive.SnowGolemEntity;
@@ -44,11 +52,13 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ExplosionContext;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -56,7 +66,9 @@ import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
+import tallestegg.bigbrain.capablities.LoafProvider;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
@@ -66,6 +78,13 @@ import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
+    @SubscribeEvent
+    public static void onAttachEntityCapabilities(AttachCapabilitiesEvent<Entity> event) {
+        if (event.getObject() instanceof CatEntity) {
+            event.addCapability(new ResourceLocation(BigBrain.MODID, "loaf"), new LoafProvider());
+        }
+    }
+
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
         if (event.getParentA() instanceof PigEntity && event.getParentB() instanceof PigEntity) {
@@ -86,6 +105,10 @@ public class BigBrainEvents {
                 event.getEntity().setMotion(event.getEntity().getMotion().getX(), 0.0D, event.getEntity().getMotion().getZ());
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onLivingAttacked(LivingAttackEvent event) {
     }
 
     @SubscribeEvent
@@ -132,9 +155,7 @@ public class BigBrainEvents {
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
                 ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
                 BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
-                entity.world.getProfiler().startSection("bash");
                 BigBrainEvents.shieldBash(entity, turningLevel);
-                entity.world.getProfiler().endSection();
                 if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
                     Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                     ItemStack stack = entity.getHeldItem(hand);
