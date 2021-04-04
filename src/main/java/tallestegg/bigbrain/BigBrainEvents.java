@@ -1,31 +1,29 @@
 package tallestegg.bigbrain;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.brain.Brain;
-import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
 import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.monster.WitherSkeletonEntity;
-import net.minecraft.entity.monster.piglin.PiglinEntity;
+import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
+import net.minecraft.entity.monster.piglin.PiglinTasks;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.CatEntity;
+import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraft.entity.passive.SnowGolemEntity;
@@ -58,10 +56,10 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -71,6 +69,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import tallestegg.bigbrain.capablities.LoafProvider;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.entity.ai.goals.FindShelterGoal;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
 import tallestegg.bigbrain.entity.ai.goals.UseBucklerGoal;
@@ -78,12 +77,7 @@ import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
-    @SubscribeEvent
-    public static void onAttachEntityCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof CatEntity) {
-            event.addCapability(new ResourceLocation(BigBrain.MODID, "loaf"), new LoafProvider());
-        }
-    }
+    private static final Method setTargetPiglin = ObfuscationReflectionHelper.findMethod(PiglinTasks.class, "func_234509_e_", AbstractPiglinEntity.class, LivingEntity.class);
 
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
@@ -108,10 +102,6 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void onLivingAttacked(LivingAttackEvent event) {
-    }
-
-    @SubscribeEvent
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getEntity() instanceof LivingEntity) {
             LivingEntity entity = (LivingEntity) event.getEntity();
@@ -123,10 +113,10 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onProjectileImpact(ProjectileImpactEvent.Throwable event) {
-        if (event.getThrowable() instanceof SnowballEntity && event.getThrowable().func_234616_v_() instanceof SnowGolemEntity) {
+        if (event.getThrowable() instanceof SnowballEntity && BigBrainConfig.snowGolemSlow) {
             if (event.getRayTraceResult().getType() == RayTraceResult.Type.ENTITY) {
                 Entity entity = ((EntityRayTraceResult) event.getRayTraceResult()).getEntity();
-                if (entity instanceof LivingEntity) {
+                if (entity instanceof LivingEntity && event.getThrowable().func_234616_v_() instanceof SnowGolemEntity) {
                     LivingEntity living = (LivingEntity) entity;
                     living.addPotionEffect(new EffectInstance(Effects.SLOWNESS, 20, 3));
                 }
@@ -190,9 +180,20 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    public static void onSetAttackTarget(LivingSetAttackTargetEvent event) {
+        if (event.getEntity() instanceof AbstractPiglinEntity) {
+            try {
+                setTargetPiglin.invoke(PiglinTasks.class, event.getEntity(), event.getTarget());
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                new RuntimeException("Big Brain has failed to invoke func_234509_e_");
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
-        if (event.getEntity() instanceof PillagerEntity) {
+        if (entity instanceof PillagerEntity) {
             PillagerEntity pillager = (PillagerEntity) entity;
             if (BigBrainConfig.PillagerMultishot)
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
@@ -200,27 +201,39 @@ public class BigBrainEvents {
                 pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
         }
 
-        if (event.getEntity() instanceof IMob && BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(event.getEntity().getEntityString())) {
+        if (entity instanceof IMob && BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(entity.getEntityString())) {
             MobEntity mob = (MobEntity) entity;
             mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillagerEntity.class, true));
         }
 
-        if (event.getEntity() instanceof VillagerEntity && BigBrainConfig.MobsAttackAllVillagers) {
-            VillagerEntity villager = (VillagerEntity) entity;
+        if (entity instanceof AbstractVillagerEntity && BigBrainConfig.MobsAttackAllVillagers) {
+            AbstractVillagerEntity villager = (AbstractVillagerEntity) entity;
             villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, MobEntity.class, 8.0F, 1.0D, 0.5D, (p_213469_1_) -> {
                 return !BigBrainConfig.MobBlackList.contains(p_213469_1_.getEntityString());
             }));
         }
 
-        if (event.getEntity().getType().equals(ForgeRegistries.ENTITIES.getValue(new ResourceLocation("guardvillagers:guard")))) {
+        if (entity.getType().equals(ForgeRegistries.ENTITIES.getValue(new ResourceLocation("guardvillagers:guard")))) {
             CreatureEntity creature = (CreatureEntity) entity;
             creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
         }
 
-        if (event.getEntity() instanceof PolarBearEntity) {
+        if (entity instanceof PolarBearEntity) {
             PolarBearEntity polar = (PolarBearEntity) entity;
             if (BigBrainConfig.PolarBearFish)
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
+        }
+
+        if (entity instanceof AnimalEntity && !BigBrainConfig.AnimalBlackList.contains(entity.getEntityString())) {
+            AnimalEntity animal = (AnimalEntity) entity;
+            animal.goalSelector.addGoal(1, new FindShelterGoal(animal));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onAttachEntityCapabilities(AttachCapabilitiesEvent<Entity> event) {
+        if (event.getObject() instanceof CatEntity) {
+            event.addCapability(new ResourceLocation(BigBrain.MODID, "loaf"), new LoafProvider());
         }
     }
 
@@ -246,7 +259,7 @@ public class BigBrainEvents {
                 entity2.applyEntityCollision(entity);
                 int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
                 float f = 6.0F + ((float) entity.getRNG().nextInt(3));
-                float f1 = 2.0F;
+                float f1 = 3.0F;
                 if (f1 > 0.0F && entity instanceof LivingEntity) {
                     for (int duration = 0; duration < 10; ++duration) {
                         double d0 = entity.getRNG().nextGaussian() * 0.02D;
@@ -264,7 +277,7 @@ public class BigBrainEvents {
                     if (bangLevel == 0) {
                         entity2.attackEntityFrom(DamageSource.causeMobDamage(entity), f);
                         if (entity2 instanceof LivingEntity)
-                            ((LivingEntity) entity2).applyKnockback(f1 * 0.8F, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
+                            ((LivingEntity) entity2).applyKnockback(f1, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
                         if (entity2 instanceof PlayerEntity && ((PlayerEntity) entity2).getActiveItemStack().isShield(((PlayerEntity) entity2)))
                             ((PlayerEntity) entity2).disableShield(true);
                     } else {

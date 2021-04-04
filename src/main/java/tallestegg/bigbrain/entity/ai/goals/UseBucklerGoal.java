@@ -20,7 +20,7 @@ public class UseBucklerGoal<T extends CreatureEntity> extends Goal {
 
     public UseBucklerGoal(T owner) {
         this.owner = owner;
-        this.setMutexFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        this.setMutexFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK, Goal.Flag.TARGET));
     }
 
     @Override
@@ -39,9 +39,9 @@ public class UseBucklerGoal<T extends CreatureEntity> extends Goal {
         LivingEntity livingEntity = owner.getAttackTarget();
         if (livingEntity == null)
             return;
-        if (((IBucklerUser) owner).isBucklerDashing() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getHeldItemOffhand()) > 0 || !((IBucklerUser) owner).isBucklerDashing()) {
+        if (((IBucklerUser) owner).isBucklerDashing() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getHeldItemOffhand()) > 0 || !((IBucklerUser) owner).isBucklerDashing())
             owner.faceEntity(livingEntity, 30.0F, 30.0F);
-        }
+
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && owner.getDistance(livingEntity) >= 4.0D && owner.getDistance(livingEntity) <= 10.0D) {
             owner.getMoveHelper().strafe(-2.0F, 0.0F);
             strafeTicks--;
@@ -66,6 +66,8 @@ public class UseBucklerGoal<T extends CreatureEntity> extends Goal {
     public void resetTask() {
         owner.resetActiveHand();
         owner.setAggroed(false);
+        if (!owner.getAttackTarget().isAlive() || owner.getAttackTarget() == null)
+            owner.setAttackTarget(null);
     }
 
     public enum ChargePhases {

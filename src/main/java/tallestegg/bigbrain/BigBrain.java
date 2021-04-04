@@ -7,6 +7,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -19,7 +20,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import tallestegg.bigbrain.capablities.ILoaf;
 import tallestegg.bigbrain.capablities.Loaf;
 import tallestegg.bigbrain.capablities.LoafStorage;
-import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod(BigBrain.MODID)
 public class BigBrain {
@@ -30,6 +31,7 @@ public class BigBrain {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::attributeChange);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, BigBrainConfig.COMMON_SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, BigBrainConfig.CLIENT_SPEC);
         BigBrainItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -54,6 +56,9 @@ public class BigBrain {
     private void processIMC(final InterModProcessEvent event) {
     }
 
+    private void attributeChange(final EntityAttributeModificationEvent event) {
+    }
+
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class TextureHandler {
         @SuppressWarnings("deprecation")
@@ -68,7 +73,7 @@ public class BigBrain {
     public static class ItemModelHandler {
         public ItemModelHandler() {
             ItemModelsProperties.registerProperty(BigBrainItems.BUCKLER.get(), new ResourceLocation("blocking"), (stack, clientWorld, livingEntity) -> {
-                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && ((IBucklerUser) livingEntity).isBucklerDashing();
+                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && BucklerItem.isReady(stack);
                 return livingEntity != null && active ? 1.0F : 0.0F;
             });
         }

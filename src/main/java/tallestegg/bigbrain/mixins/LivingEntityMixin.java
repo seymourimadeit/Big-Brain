@@ -24,7 +24,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
@@ -53,9 +52,9 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canBlockDamageSource")
     public void canBlockDamageSource(DamageSource damageSourceIn, CallbackInfoReturnable<Boolean> info) {
         boolean flag = false;
-        if (!damageSourceIn.isUnblockable() && this.isActiveItemStackBlocking() && !flag && this.activeItemStack.getItem() instanceof BucklerItem) {
+        if (!damageSourceIn.isUnblockable() && this.isActiveItemStackBlocking() && !flag && this.activeItemStack.getItem() instanceof BucklerItem) 
             info.setReturnValue(false);
-        }
+        
     }
 
     @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
@@ -127,19 +126,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     }
 
     @Shadow
-    protected abstract void setLastAttackedEntity(Entity entityIn);
-
-    @Shadow
-    protected abstract void resetActiveHand();
-
-    @Shadow
     protected abstract ModifiableAttributeInstance getAttribute(Attribute knockbackResistance);
-
-    @Shadow
-    protected abstract ItemStack getHeldItem(Hand hand);
-
-    @Shadow
-    protected abstract ItemStack getHeldItemMainhand();
 
     @Shadow
     protected abstract boolean isActiveItemStackBlocking();

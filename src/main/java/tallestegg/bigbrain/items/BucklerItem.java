@@ -65,8 +65,6 @@ public class BucklerItem extends ShieldItem {
     @Override
     public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
         ItemStack itemstack = super.onItemUseFinish(stack, worldIn, entityLiving);
-        if (isReady(stack))
-            setReady(stack, false);
         if (entityLiving instanceof IBucklerUser) {
             if (((IBucklerUser) entityLiving).getCooldown() > 0) {
                 ((IBucklerUser) entityLiving).setBucklerDashing(true);

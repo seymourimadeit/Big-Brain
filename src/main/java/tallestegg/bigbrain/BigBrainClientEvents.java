@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.client;
+package tallestegg.bigbrain;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,8 +24,6 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import tallestegg.bigbrain.BigBrain;
-import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
@@ -45,6 +43,7 @@ public class BigBrainClientEvents {
     public static void onEntityRenderPre(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = (LivingEntity) event.getEntity();
         LivingRenderer<LivingEntity, EntityModel<LivingEntity>> renderer = event.getRenderer();
+        EntityModel<LivingEntity> model = renderer.getEntityModel();
         MatrixStack stack = event.getMatrixStack();
         if (!BigBrainConfig.RenderAfterImage)
             return;
@@ -52,10 +51,10 @@ public class BigBrainClientEvents {
             for (int i = 0; i < 5; i++) {
                 if (i != 0) {
                     stack.push();
-                    renderer.getEntityModel().swingProgress = entityIn.getSwingProgress(event.getPartialRenderTick());
+                    model.swingProgress = entityIn.getSwingProgress(event.getPartialRenderTick());
                     boolean shouldSit = entityIn.isPassenger() && (entityIn.getRidingEntity() != null && entityIn.getRidingEntity().shouldRiderSit());
-                    renderer.getEntityModel().isSitting = shouldSit;
-                    renderer.getEntityModel().isChild = entityIn.isChild();
+                    model.isSitting = shouldSit;
+                    model.isChild = entityIn.isChild();
                     float f = MathHelper.interpolateAngle(event.getPartialRenderTick(), entityIn.prevRenderYawOffset, entityIn.renderYawOffset);
                     float f1 = MathHelper.interpolateAngle(event.getPartialRenderTick(), entityIn.prevRotationYawHead, entityIn.rotationYawHead);
                     float f2 = f1 - f;
@@ -112,17 +111,17 @@ public class BigBrainClientEvents {
                         }
                     }
 
-                    renderer.getEntityModel().setLivingAnimations(entityIn, f5, f8, event.getPartialRenderTick());
-                    renderer.getEntityModel().setRotationAngles(entityIn, f5, f8, f7, f2, f6);
+                    model.setLivingAnimations(entityIn, f5, f8, event.getPartialRenderTick());
+                    model.setRotationAngles(entityIn, f5, f8, f7, f2, f6);
                     Minecraft minecraft = Minecraft.getInstance();
                     boolean flag = !entityIn.isInvisible();
                     boolean flag1 = !flag && !entityIn.isInvisibleToPlayer(minecraft.player);
                     boolean flag2 = minecraft.isEntityGlowing(entityIn);
-                    RenderType rendertype = BigBrainClientEvents.getRenderType(entityIn, renderer, renderer.getEntityModel(), flag, flag1, flag2);
+                    RenderType rendertype = BigBrainClientEvents.getRenderType(entityIn, renderer, model, flag, flag1, flag2);
                     if (rendertype != null) {
                         IVertexBuilder ivertexbuilder = event.getBuffers().getBuffer(rendertype);
                         int overlay = LivingRenderer.getPackedOverlay(entityIn, 0.0F);
-                        renderer.getEntityModel().render(stack, ivertexbuilder, event.getLight(), overlay, 1.0F, 1.0F, 1.0F, 0.3F / i + 1.0F);
+                        model.render(stack, ivertexbuilder, event.getLight(), overlay, 1.0F, 1.0F, 1.0F, 0.3F / i + 1.0F);
                     }
                     if (!entityIn.isSpectator()) {
                         if (BigBrainConfig.RenderEntityLayersDuringAfterImage) {

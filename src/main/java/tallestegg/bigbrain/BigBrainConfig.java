@@ -1,6 +1,7 @@
 package tallestegg.bigbrain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,12 +37,14 @@ public class BigBrainConfig {
     public static Boolean PolarBearFish;
     public static Boolean RenderAfterImage;
     public static Boolean RenderEntityLayersDuringAfterImage;
+    public static Boolean snowGolemSlow;
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
     public static Integer minPigBabiesBred;
     public static Integer maxPigBabiesBred;;
     public static List<String> MobBlackList;
+    public static List<String> AnimalBlackList;
 
     public static void bakeCommonConfig() {
         PillagerCover = COMMON.PillagerCover.get();
@@ -56,6 +59,8 @@ public class BigBrainConfig {
         BucklerTurningRunTime = COMMON.BucklerTurningRunTime.get();
         minPigBabiesBred = COMMON.minPigBabiesBred.get();
         maxPigBabiesBred = COMMON.maxPigBabiesBred.get();
+        snowGolemSlow = COMMON.snowGolemSlow.get();
+        AnimalBlackList = COMMON.AnimalCoverBlackList.get();
     }
 
     public static void bakeClientConfig() {
@@ -80,26 +85,44 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue BruteBuckler;
         public final ForgeConfigSpec.BooleanValue BangBlockDestruction;
         public final ForgeConfigSpec.BooleanValue PolarBearFish;
+        public final ForgeConfigSpec.BooleanValue snowGolemSlow;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
         public final ForgeConfigSpec.IntValue minPigBabiesBred;
         public final ForgeConfigSpec.IntValue maxPigBabiesBred;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
+        public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
-            PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
-            PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
-            PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
-            BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
-            BruteBuckler = builder.translation(BigBrain.MODID + ".config.bruteBuckler").define("Have brutes spawn with bucklers?", true);
+            builder.push("all mobs");
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
+            builder.pop();
+            builder.push("buckler");
+            BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
+            BruteBuckler = builder.translation(BigBrain.MODID + ".config.bruteBuckler").define("Have brutes spawn with bucklers?", true);
             BucklerCooldown = builder.translation(BigBrain.MODID + ".config.bucklerCoolDown").defineInRange("How long should the buckler's cooldown be in ticks?", 240, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE); // Thinking of removing this in 1.17.
             BucklerTurningRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move if you have the turning enchant be in ticks?", 30, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            builder.pop();
+            builder.push("pillager");
+            PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
+            PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
+            builder.pop();
+            builder.push("animals");
+            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Arrays.asList("minecraft:fox", "minecraft:cat"), String.class::isInstance);
+            builder.push("pigs");
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            builder.pop();
+            builder.pop();
+            builder.push("polar bears");
+            PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
+            builder.pop();
+            builder.push("snow golems");
+            snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").define("Allow snow balls made by snow golems to apply a slowness effect to mobs hit by it?", true);
+            builder.pop();
         }
     }
 
@@ -108,8 +131,10 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue RenderEntityLayersDuringAfterImage;
 
         public ClientConfig(ForgeConfigSpec.Builder builder) {
+            builder.push("after image");
             RenderAfterImage = builder.translation(BigBrain.MODID + ".config.afterImage").define("Render an after image while an entity is charging with a buckler?", true);
             RenderEntityLayersDuringAfterImage = builder.translation(BigBrain.MODID + ".config.entityLayers").comment("Keep in mind this won't affect their opacity due to technical reasons.").define("Render entity layers while rendering the after image?", false);
+            builder.pop();
         }
     }
 }
