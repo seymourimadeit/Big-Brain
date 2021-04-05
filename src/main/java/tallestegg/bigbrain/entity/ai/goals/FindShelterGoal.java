@@ -12,7 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class FindShelterGoal extends FleeSunGoal {
-    private final CreatureEntity entity;
+    protected final CreatureEntity entity;
 
     public FindShelterGoal(CreatureEntity entity) {
         super(entity, 1.35D);
@@ -23,7 +23,7 @@ public class FindShelterGoal extends FleeSunGoal {
     public boolean shouldExecute() {
         boolean raining = entity.getEntityWorld().isNightTime() || entity.getEntityWorld().isRainingAt(entity.getPosition());
         boolean isTamed = entity instanceof TameableEntity && ((TameableEntity) entity).isTamed();
-        return raining && !isTamed && entity.isServerWorld() && entity.getAttackTarget() == null && this.isPossibleShelter() && this.entity.getEntityWorld().canSeeSky(entity.getPosition());
+        return raining && !isTamed && entity.getAttackTarget() == null && this.isPossibleShelter() && this.entity.getEntityWorld().canSeeSky(entity.getPosition());
     }
 
     @Override
