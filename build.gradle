@@ -20,7 +20,7 @@ mixin {
     add sourceSets.main, "bigbrain.refmap.json"
 }
 
-version = '1.1.3'
+version = '1.2.0'
 group = 'tallestegg.bigbrain' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'bigbrain'
 
@@ -118,11 +118,17 @@ dependencies {
 
     // These dependencies get remapped to your current MCP mappings
     // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
+    //implementation fg.deobf("curse.maven:guardvillagers-360203:3253939")
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
+}
+
+repositories {
+    maven {
+        url "https://www.cursemaven.com"
+    }
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

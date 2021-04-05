@@ -17,7 +17,6 @@ import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
 public class ChargeTask<T extends PiglinBruteEntity> extends Task<T> {
-
     private ChargePhases chargePhase = ChargePhases.NONE;
     private int strafeTicks;
 

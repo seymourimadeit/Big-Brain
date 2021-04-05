@@ -23,7 +23,6 @@ import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.monster.piglin.PiglinTasks;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.CatEntity;
-import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraft.entity.passive.SnowGolemEntity;
@@ -105,9 +104,8 @@ public class BigBrainEvents {
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getEntity() instanceof LivingEntity) {
             LivingEntity entity = (LivingEntity) event.getEntity();
-            if (entity.isPotionActive(Effects.BLINDNESS)) {
+            if (entity.isPotionActive(Effects.BLINDNESS))
                 event.modifyVisibility(0.9D);
-            }
         }
     }
 
