@@ -225,8 +225,8 @@ public class BigBrainEvents {
 
         if (entity instanceof AnimalEntity && !BigBrainConfig.AnimalBlackList.contains(entity.getEntityString())) {
             AnimalEntity animal = (AnimalEntity) entity;
-            animal.goalSelector.addGoal(3, new FindShelterGoal(animal));
             animal.goalSelector.addGoal(1, new StayInShelterGoal(animal, 0.8D));
+            animal.goalSelector.addGoal(3, new FindShelterGoal(animal));
         }
     }
 
