@@ -23,6 +23,7 @@ import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.monster.piglin.PiglinTasks;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.CatEntity;
+import net.minecraft.entity.passive.IFlyingAnimal;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraft.entity.passive.SnowGolemEntity;
@@ -223,7 +224,7 @@ public class BigBrainEvents {
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
         }
 
-        if (entity instanceof AnimalEntity && !BigBrainConfig.AnimalBlackList.contains(entity.getEntityString())) {
+        if (entity instanceof AnimalEntity && !BigBrainConfig.AnimalBlackList.contains(entity.getEntityString()) && !(entity instanceof IFlyingAnimal)) {
             AnimalEntity animal = (AnimalEntity) entity;
             animal.goalSelector.addGoal(1, new StayInShelterGoal(animal, 0.8D));
             animal.goalSelector.addGoal(3, new FindShelterGoal(animal));
@@ -238,10 +239,10 @@ public class BigBrainEvents {
     }
 
     public static void spawnRunningEffectsWhileCharging(LivingEntity entity) {
-        int i = MathHelper.floor(entity.getPosX());
-        int j = MathHelper.floor(entity.getPosY() - (double) 0.2F);
-        int k = MathHelper.floor(entity.getPosZ());
-        BlockPos blockpos = new BlockPos(i, j, k);
+        int x = MathHelper.floor(entity.getPosX());
+        int y = MathHelper.floor(entity.getPosY() - (double) 0.2F);
+        int z = MathHelper.floor(entity.getPosZ());
+        BlockPos blockpos = new BlockPos(x, y, z);
         BlockState blockstate = entity.world.getBlockState(blockpos);
         if (!blockstate.addRunningEffects(entity.world, blockpos, entity))
             if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
