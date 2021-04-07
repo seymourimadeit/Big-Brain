@@ -106,8 +106,8 @@ public class BigBrainEvents {
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getEntity() instanceof LivingEntity) {
             LivingEntity entity = (LivingEntity) event.getEntity();
-            if (entity.isPotionActive(Effects.BLINDNESS))
-                event.modifyVisibility(0.9D);
+            if (event.getLookingEntity() instanceof LivingEntity && ((LivingEntity) event.getLookingEntity()).isPotionActive(Effects.BLINDNESS))
+                event.modifyVisibility(0.1D);
         }
     }
 
