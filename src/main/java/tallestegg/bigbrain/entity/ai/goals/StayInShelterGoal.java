@@ -25,7 +25,11 @@ public class StayInShelterGoal extends RandomWalkingGoal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return super.shouldContinueExecuting() && !this.creature.getEntityWorld().canSeeSky(creature.getNavigator().getTargetPos());
+        return super.shouldContinueExecuting() && this.targetPosCanSeeSky();
+    }
+
+    public boolean targetPosCanSeeSky() {
+        return creature.getNavigator().getTargetPos() != null && !this.creature.getEntityWorld().canSeeSky(creature.getNavigator().getTargetPos());
     }
 
     @Override
