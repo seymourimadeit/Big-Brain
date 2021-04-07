@@ -9,22 +9,32 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputUpdateEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
 public class BigBrainClientEvents {
@@ -36,6 +46,27 @@ public class BigBrainClientEvents {
         if (((IBucklerUser) player).isBucklerDashing()) {
             event.getMovementInput().jump = false;
             event.getMovementInput().moveStrafe = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderHand(RenderHandEvent event) {
+        MatrixStack mStack = event.getMatrixStack();
+        ItemStack stack = event.getItemStack();
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+        float partialTicks = event.getPartialTicks();
+        if (stack.getItem() instanceof BucklerItem && (player.isHandActive() && player.getActiveItemStack() == stack || ((IBucklerUser) player).isBucklerDashing())) {
+            boolean mainHand = event.getHand() == Hand.MAIN_HAND;
+            HandSide handside = mainHand ? player.getPrimaryHand() : player.getPrimaryHand().opposite();
+            boolean rightHand = handside == HandSide.RIGHT;
+            float f7 = (float) stack.getUseDuration() - ((float) player.getItemInUseCount() - partialTicks + 1.0F);
+            float f11 = f7 / 10.0F;
+            if (f11 > 1.0F) {
+                f11 = 1.0F;
+            }
+
+            mStack.translate(f11 * 0.2D, 0.0D, f11 * 0.2D);
+            mStack.rotate(Vector3f.YP.rotationDegrees((boolean) rightHand ? f11 : -f11 * 0.2F));
         }
     }
 

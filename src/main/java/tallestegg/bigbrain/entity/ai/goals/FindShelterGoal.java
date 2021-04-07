@@ -8,6 +8,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.goal.FleeSunGoal;
 import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -22,8 +23,8 @@ public class FindShelterGoal extends FleeSunGoal {
     @Override
     public boolean shouldExecute() {
         boolean raining = entity.getEntityWorld().isNightTime() || entity.getEntityWorld().isRainingAt(entity.getPosition());
-        boolean isTamed = entity instanceof TameableEntity && ((TameableEntity) entity).isTamed();
-        return raining && !isTamed && entity.getAttackTarget() == null && this.isPossibleShelter() && this.entity.getEntityWorld().canSeeSky(entity.getPosition());
+        boolean isTamed = entity instanceof TameableEntity && ((TameableEntity) entity).isTamed() || entity instanceof AbstractHorseEntity && ((AbstractHorseEntity)entity).getOwnerUniqueId() != null;
+        return raining && !isTamed && !entity.isBeingRidden() && entity.getAttackTarget() == null && this.isPossibleShelter() && this.entity.getEntityWorld().canSeeSky(entity.getPosition());
     }
 
     @Override

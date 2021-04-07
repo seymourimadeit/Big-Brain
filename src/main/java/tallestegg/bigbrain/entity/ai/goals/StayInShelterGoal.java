@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.goal.RandomWalkingGoal;
 import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -18,8 +19,8 @@ public class StayInShelterGoal extends RandomWalkingGoal {
     @Override
     public boolean shouldExecute() {
         boolean raining = creature.getEntityWorld().isNightTime() || creature.getEntityWorld().isRainingAt(creature.getPosition());
-        boolean isTamed = creature instanceof TameableEntity && ((TameableEntity) creature).isTamed();
-        return raining && !isTamed && creature.getAttackTarget() == null && !this.creature.getEntityWorld().canSeeSky(creature.getPosition()) && super.shouldExecute();
+        boolean isTamed = creature instanceof TameableEntity && ((TameableEntity) creature).isTamed() || creature instanceof AbstractHorseEntity && ((AbstractHorseEntity) creature).getOwnerUniqueId() != null;
+        return raining && !isTamed && !creature.isBeingRidden() && creature.getAttackTarget() == null && !this.creature.getEntityWorld().canSeeSky(creature.getPosition()) && super.shouldExecute();
     }
 
     @Override
