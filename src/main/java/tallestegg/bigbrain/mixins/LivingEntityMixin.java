@@ -27,7 +27,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
-
+// TODO convert this into a capability 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");
@@ -94,6 +94,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
             knockback.removeModifier(KNOCKBACK_RESISTANCE);
             if ((LivingEntity) (Object) this instanceof PlayerEntity)
                 speed.removeModifier(CHARGE_SPEED_BOOST);
+            this.setBucklerUseTimer(0);
         }
         if (dashing) {
             ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
