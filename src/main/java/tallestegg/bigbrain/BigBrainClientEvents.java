@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.item.ItemStack;
@@ -53,14 +54,21 @@ public class BigBrainClientEvents {
         if (stack.getItem() instanceof BucklerItem && (player.isHandActive() && player.getActiveItemStack() == stack || ((IBucklerUser) player).isBucklerDashing())) {
             boolean mainHand = event.getHand() == Hand.MAIN_HAND;
             HandSide handside = mainHand ? player.getPrimaryHand() : player.getPrimaryHand().opposite();
-            boolean rightHand = handside == HandSide.RIGHT;
+            boolean rightHanded = handside == HandSide.RIGHT;
             float f7 = (float) stack.getUseDuration() - ((float) player.getItemInUseCount() - partialTicks + 1.0F);
             float f11 = f7 / 10.0F;
             if (f11 > 1.0F) {
                 f11 = 1.0F;
             }
-            mStack.translate(f11 * 0.2D, 0.0D, f11 * 0.2D);
-            mStack.rotate(Vector3f.YP.rotationDegrees((boolean) rightHand ? f11 : -f11 * 0.2F));
+            mStack.push();
+            int i = rightHanded ? 1 : -1;
+            mStack.translate((double) ((float) i * 0.56F), (double) (-0.52F + event.getEquipProgress() * -0.6F), (double) -0.72F);
+            double translations = !rightHanded ? f11 * 0.2D : -f11;
+            mStack.translate(translations, 0.0D, translations);
+            ItemCameraTransforms.TransformType transform = !rightHanded ? ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND : ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND;
+            Minecraft.getInstance().getFirstPersonRenderer().renderItemSide(player, stack, transform, !rightHanded, mStack, event.getBuffers(), event.getLight());
+            mStack.pop();
+            event.setCanceled(true);
         }
     }
 
