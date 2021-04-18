@@ -11,6 +11,7 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import tallestegg.bigbrain.BigBrainConfig;
 
 public class FindShelterGoal extends FleeSunGoal {
     protected final CreatureEntity entity;
@@ -22,8 +23,8 @@ public class FindShelterGoal extends FleeSunGoal {
 
     @Override
     public boolean shouldExecute() {
-        boolean raining = entity.getEntityWorld().isNightTime() || entity.getEntityWorld().isRainingAt(entity.getPosition());
-        boolean isTamed = entity instanceof TameableEntity && ((TameableEntity) entity).isTamed() || entity instanceof AbstractHorseEntity && ((AbstractHorseEntity)entity).getOwnerUniqueId() != null;
+        boolean raining = entity.getEntityWorld().isNightTime() && !BigBrainConfig.NightAnimalBlackList.contains(entity.getEntityString()) || !BigBrainConfig.RainAnimalBlackList.contains(entity.getEntityString()) && entity.getEntityWorld().isRainingAt(entity.getPosition());
+        boolean isTamed = entity instanceof TameableEntity && ((TameableEntity) entity).isTamed() || entity instanceof AbstractHorseEntity && ((AbstractHorseEntity) entity).getOwnerUniqueId() != null;
         return raining && !isTamed && !entity.isBeingRidden() && entity.getAttackTarget() == null && this.isPossibleShelter() && this.entity.getEntityWorld().canSeeSky(entity.getPosition());
     }
 

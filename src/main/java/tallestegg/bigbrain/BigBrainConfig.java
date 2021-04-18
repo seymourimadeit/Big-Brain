@@ -46,6 +46,8 @@ public class BigBrainConfig {
     public static Integer maxPigBabiesBred;;
     public static List<String> MobBlackList;
     public static List<String> AnimalBlackList;
+    public static List<String> NightAnimalBlackList;
+    public static List<String> RainAnimalBlackList;
 
     public static void bakeCommonConfig() {
         PillagerCover = COMMON.PillagerCover.get();
@@ -62,6 +64,8 @@ public class BigBrainConfig {
         maxPigBabiesBred = COMMON.maxPigBabiesBred.get();
         snowGolemSlow = COMMON.snowGolemSlow.get();
         AnimalBlackList = COMMON.AnimalCoverBlackList.get();
+        NightAnimalBlackList = COMMON.NightCoverBlackList.get();
+        RainAnimalBlackList = COMMON.RainAnimalBlackList.get();
     }
 
     public static void bakeClientConfig() {
@@ -94,6 +98,8 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.IntValue maxPigBabiesBred;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
+        public final ForgeConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
+        public final ForgeConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             builder.push("all mobs");
@@ -112,7 +118,9 @@ public class BigBrainConfig {
             PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
             builder.pop();
             builder.push("animals");
-            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:cat", "minecraft:bee", "minecraft:wolf"));
+            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf"));
+            NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").define("Animal Night BlackList", Lists.newArrayList("minecraft:cat"));
+            RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());
             builder.push("pigs");
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);

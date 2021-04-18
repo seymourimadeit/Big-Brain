@@ -10,6 +10,7 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import tallestegg.bigbrain.BigBrainConfig;
 
 public class StayInShelterGoal extends RandomWalkingGoal {
     public StayInShelterGoal(CreatureEntity creatureIn, double speedIn) {
@@ -18,7 +19,7 @@ public class StayInShelterGoal extends RandomWalkingGoal {
 
     @Override
     public boolean shouldExecute() {
-        boolean raining = creature.getEntityWorld().isNightTime() || creature.getEntityWorld().isRainingAt(creature.getPosition());
+        boolean raining = creature.getEntityWorld().isNightTime() && !BigBrainConfig.NightAnimalBlackList.contains(creature.getEntityString()) || !BigBrainConfig.RainAnimalBlackList.contains(creature.getEntityString()) && creature.getEntityWorld().isRainingAt(creature.getPosition());
         boolean isTamed = creature instanceof TameableEntity && ((TameableEntity) creature).isTamed() || creature instanceof AbstractHorseEntity && ((AbstractHorseEntity) creature).getOwnerUniqueId() != null;
         return raining && !isTamed && !creature.isBeingRidden() && creature.getAttackTarget() == null && !this.creature.getEntityWorld().canSeeSky(creature.getPosition()) && super.shouldExecute();
     }

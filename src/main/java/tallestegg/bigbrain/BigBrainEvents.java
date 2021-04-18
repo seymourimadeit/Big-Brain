@@ -42,6 +42,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -82,7 +83,7 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
-        if (event.getParentA() instanceof PigEntity && event.getParentB() instanceof PigEntity) {
+        if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
             PigEntity pig = (PigEntity) event.getParentA();
             for (int i = 0; i < BigBrainConfig.minPigBabiesBred + pig.world.rand.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
                 PigEntity baby = EntityType.PIG.create(event.getChild().world);
@@ -174,6 +175,7 @@ public class BigBrainEvents {
         if (((IOneCriticalAfterCharge) event.getPlayer()).isCritical()) {
             event.setResult(Result.ALLOW);
             event.setDamageModifier(1.5F);
+            event.getPlayer().world.playSound((PlayerEntity) null, event.getPlayer().getPosX(), event.getPlayer().getPosY(), event.getPlayer().getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, event.getPlayer().getSoundCategory(), 1.0F, 1.0F);
             ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
         }
     }
@@ -270,12 +272,11 @@ public class BigBrainEvents {
                             if (entity.world instanceof ServerWorld) {
                                 // Collision is done on the server side, so a server side method must be used.
                                 ((ServerWorld) entity.world).spawnParticle(type, entity.getPosXRandom(1.0D), entity.getPosYRandom() + 1.0D, entity.getPosZRandom(1.0D), 1, d0, d1, d2, 1.0D);
-                                if (!entity.isSilent())
-                                    ((ServerWorld) entity.world).playSound((PlayerEntity) null, (double) entity.getPosition().getX(), (double) entity.getPosition().getY(), (double) entity.getPosition().getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.12F,
-                                            0.8F + entity.getRNG().nextFloat() * 0.4F);
                             }
                         }
                         if (bangLevel == 0) {
+                            if (!entity.isSilent())
+                                ((ServerWorld) entity.world).playSound((PlayerEntity) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.5F, 0.8F + entity.getRNG().nextFloat() * 0.4F);
                             entity2.attackEntityFrom(DamageSource.causeMobDamage(entity), f);
                             if (entity2 instanceof LivingEntity)
                                 ((LivingEntity) entity2).applyKnockback(f1, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
