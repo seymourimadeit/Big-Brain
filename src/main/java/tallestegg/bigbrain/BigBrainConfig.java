@@ -39,11 +39,13 @@ public class BigBrainConfig {
     public static Boolean RenderAfterImage;
     public static Boolean RenderEntityLayersDuringAfterImage;
     public static Boolean snowGolemSlow;
+    public static Boolean animalShelter;
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
     public static Integer minPigBabiesBred;
-    public static Integer maxPigBabiesBred;;
+    public static Integer maxPigBabiesBred;
+    public static Double mobBlindnessVision;
     public static List<String> MobBlackList;
     public static List<String> AnimalBlackList;
     public static List<String> NightAnimalBlackList;
@@ -66,6 +68,8 @@ public class BigBrainConfig {
         AnimalBlackList = COMMON.AnimalCoverBlackList.get();
         NightAnimalBlackList = COMMON.NightCoverBlackList.get();
         RainAnimalBlackList = COMMON.RainAnimalBlackList.get();
+        animalShelter = COMMON.animalShelter.get();
+        mobBlindnessVision = COMMON.mobBlindnessVision.get();
     }
 
     public static void bakeClientConfig() {
@@ -91,11 +95,13 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue BangBlockDestruction;
         public final ForgeConfigSpec.BooleanValue PolarBearFish;
         public final ForgeConfigSpec.BooleanValue snowGolemSlow;
+        public final ForgeConfigSpec.BooleanValue animalShelter;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
         public final ForgeConfigSpec.IntValue minPigBabiesBred;
         public final ForgeConfigSpec.IntValue maxPigBabiesBred;
+        public final ForgeConfigSpec.DoubleValue mobBlindnessVision;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
@@ -103,6 +109,8 @@ public class BigBrainConfig {
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             builder.push("all mobs");
+            mobBlindnessVision = builder.translation(BigBrain.MODID + ".config.blindness").comment("This determines the range a mob will detect other entities if they have the blindness potion, by default entities will only detect targets in a 10 block radius if they are blinded.")
+                    .defineInRange("Blindness range", 0.10D, -500.0D, 10000.0D);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
             builder.pop();
@@ -120,7 +128,8 @@ public class BigBrainConfig {
             builder.push("animals");
             AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf"));
             NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").define("Animal Night BlackList", Lists.newArrayList("minecraft:cat"));
-            RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());
+            RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalRainBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());
+            animalShelter = builder.translation(BigBrain.MODID + ".config.animalShelter").define("Animals seek shelter?", true);
             builder.push("pigs");
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);

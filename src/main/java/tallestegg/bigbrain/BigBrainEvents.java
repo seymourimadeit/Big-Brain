@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -36,7 +37,6 @@ import net.minecraft.loot.TableLootEntry;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.BlockParticleData;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
@@ -108,7 +108,7 @@ public class BigBrainEvents {
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getEntity() instanceof LivingEntity) {
             if (event.getLookingEntity() instanceof LivingEntity && ((LivingEntity) event.getLookingEntity()).isPotionActive(Effects.BLINDNESS))
-                event.modifyVisibility(0.1D);
+                event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
         }
     }
 
@@ -130,7 +130,6 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
-            ((IBucklerUser) entity).getBucklerUseTimer();
             if (!((IBucklerUser) entity).isBucklerDashing()) {
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() + 1);
                 int configValue = turningLevel == 0 ? BigBrainConfig.BucklerRunTime : BigBrainConfig.BucklerTurningRunTime;
@@ -142,6 +141,8 @@ public class BigBrainEvents {
             }
 
             if (((IBucklerUser) entity).isBucklerDashing()) {
+                if (entity instanceof PlayerEntity)
+                    ((PlayerEntity) entity).addExhaustion(0.20F * ((IBucklerUser) entity).getBucklerUseTimer());
                 BucklerItem.moveFowards(entity);
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
                 ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
@@ -226,7 +227,7 @@ public class BigBrainEvents {
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
         }
 
-        if (entity instanceof AnimalEntity && !BigBrainConfig.AnimalBlackList.contains(entity.getEntityString()) && !(entity instanceof IFlyingAnimal)) {
+        if (BigBrainConfig.animalShelter && entity instanceof AnimalEntity && !BigBrainConfig.AnimalBlackList.contains(entity.getEntityString()) && !(entity instanceof IFlyingAnimal)) {
             AnimalEntity animal = (AnimalEntity) entity;
             animal.goalSelector.addGoal(1, new StayInShelterGoal(animal, 0.8D));
             animal.goalSelector.addGoal(2, new FindShelterGoal(animal));
@@ -255,7 +256,7 @@ public class BigBrainEvents {
     }
 
     public static void shieldBash(LivingEntity entity, int turningLevel) {
-        if (!entity.isServerWorld())
+        if (entity.world instanceof ClientWorld)
             return;
         List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()), EntityPredicates.pushableBy(entity));
         if (!list.isEmpty() && turningLevel == 0) {
@@ -278,13 +279,14 @@ public class BigBrainEvents {
                             }
                         }
                         if (bangLevel == 0) {
-                            if (entity2.attackEntityFrom(DamageSource.causeMobDamage(entity), f))
+                            if (entity2.attackEntityFrom(DamageSource.causeMobDamage(entity), f)) {
+                                if (entity2 instanceof LivingEntity)
+                                    ((LivingEntity) entity2).applyKnockback(f1, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
                                 if (!entity.isSilent() && entity.world instanceof ServerWorld)
                                     ((ServerWorld) entity.world).playSound((PlayerEntity) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.5F, 0.8F + entity.getRNG().nextFloat() * 0.4F);
-                            if (entity2 instanceof LivingEntity)
-                                ((LivingEntity) entity2).applyKnockback(f1, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
-                            if (entity2 instanceof PlayerEntity && ((PlayerEntity) entity2).getActiveItemStack().isShield(((PlayerEntity) entity2)))
-                                ((PlayerEntity) entity2).disableShield(true);
+                                if (entity2 instanceof PlayerEntity && ((PlayerEntity) entity2).getActiveItemStack().isShield(((PlayerEntity) entity2)))
+                                    ((PlayerEntity) entity2).disableShield(true);
+                            }
                         } else {
                             if (!entity.isSilent() && entity.world instanceof ServerWorld)
                                 ((ServerWorld) entity.world).playSound((PlayerEntity) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.5F, 0.8F + entity.getRNG().nextFloat() * 0.4F);

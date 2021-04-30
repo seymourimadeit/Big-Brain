@@ -27,6 +27,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
+
 // TODO convert this into a capability 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
@@ -52,9 +53,9 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canBlockDamageSource")
     public void canBlockDamageSource(DamageSource damageSourceIn, CallbackInfoReturnable<Boolean> info) {
         boolean flag = false;
-        if (!damageSourceIn.isUnblockable() && this.isActiveItemStackBlocking() && !flag && this.activeItemStack.getItem() instanceof BucklerItem) 
+        if (!damageSourceIn.isUnblockable() && this.isActiveItemStackBlocking() && !flag && this.activeItemStack.getItem() instanceof BucklerItem)
             info.setReturnValue(false);
-        
+
     }
 
     @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
