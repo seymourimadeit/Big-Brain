@@ -141,8 +141,6 @@ public class BigBrainEvents {
             }
 
             if (((IBucklerUser) entity).isBucklerDashing()) {
-                if (entity instanceof PlayerEntity)
-                    ((PlayerEntity) entity).addExhaustion(0.20F * ((IBucklerUser) entity).getBucklerUseTimer());
                 BucklerItem.moveFowards(entity);
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
                 ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
