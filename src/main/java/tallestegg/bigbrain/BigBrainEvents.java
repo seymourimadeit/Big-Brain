@@ -278,8 +278,10 @@ public class BigBrainEvents {
                         }
                         if (bangLevel == 0) {
                             if (entity2.attackEntityFrom(DamageSource.causeMobDamage(entity), f)) {
-                                if (entity2 instanceof LivingEntity)
+                                if (entity2 instanceof LivingEntity) {
                                     ((LivingEntity) entity2).applyKnockback(f1, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
+                                    entity.setMotion(entity.getMotion().mul(0.6D, 1.0D, 0.6D));
+                                }
                                 if (!entity.isSilent() && entity.world instanceof ServerWorld)
                                     ((ServerWorld) entity.world).playSound((PlayerEntity) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.5F, 0.8F + entity.getRNG().nextFloat() * 0.4F);
                                 if (entity2 instanceof PlayerEntity && ((PlayerEntity) entity2).getActiveItemStack().isShield(((PlayerEntity) entity2)))
