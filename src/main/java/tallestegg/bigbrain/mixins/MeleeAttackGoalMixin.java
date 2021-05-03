@@ -25,7 +25,7 @@ public class MeleeAttackGoalMixin {
     }
     
     
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;field_234037_i_:I"), cancellable = true, method = "func_234039_g_()V", remap = false)
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;field_234037_i_:I"), cancellable = true, method = "func_234039_g_", remap = false)
     public void func_234039_g_(CallbackInfo info) {
         if (this.field_234037_i_ <= 0) {
             this.field_234037_i_ = 20;
