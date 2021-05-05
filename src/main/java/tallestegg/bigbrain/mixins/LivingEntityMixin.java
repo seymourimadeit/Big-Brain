@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
-// TODO convert this into a capability when port to 1.17
+// TODO convert this into a capability when i port to 1.17
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");

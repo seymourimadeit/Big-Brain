@@ -1,6 +1,6 @@
 package tallestegg.bigbrain.entity;
 
-//TODO make this a capability 
+//TODO convert this into a capability when i port to 1.17
 public interface IOneCriticalAfterCharge {
     boolean isCritical();
     
