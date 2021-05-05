@@ -40,6 +40,7 @@ public class BigBrainConfig {
     public static Boolean RenderEntityLayersDuringAfterImage;
     public static Boolean snowGolemSlow;
     public static Boolean animalShelter;
+    public static Boolean meleeFix;
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
@@ -70,6 +71,7 @@ public class BigBrainConfig {
         RainAnimalBlackList = COMMON.RainAnimalBlackList.get();
         animalShelter = COMMON.animalShelter.get();
         mobBlindnessVision = COMMON.mobBlindnessVision.get();
+        meleeFix = COMMON.meleeFix.get();
     }
 
     public static void bakeClientConfig() {
@@ -96,6 +98,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue PolarBearFish;
         public final ForgeConfigSpec.BooleanValue snowGolemSlow;
         public final ForgeConfigSpec.BooleanValue animalShelter;
+        public final ForgeConfigSpec.BooleanValue meleeFix;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
@@ -109,6 +112,7 @@ public class BigBrainConfig {
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             builder.push("all mobs");
+            meleeFix = builder.translation(BigBrain.MODID + ".config.meleeFix").define("Enable the fix for melee cooldowns for mobs?", true);
             mobBlindnessVision = builder.translation(BigBrain.MODID + ".config.blindness").comment("This determines the range a mob will detect other entities if they have the blindness potion, by default entities will only detect targets in a 10 block radius if they are blinded.")
                     .defineInRange("Blindness range", 0.10D, -500.0D, 10000.0D);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);

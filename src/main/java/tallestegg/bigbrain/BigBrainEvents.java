@@ -258,7 +258,7 @@ public class BigBrainEvents {
         if (!list.isEmpty() && entity.isServerWorld()) {
             for (int l = 0; l < list.size(); ++l) {
                 Entity entityHit = list.get(l);
-                if (entity.getBoundingBox().intersects(entityHit.getBoundingBox())) {
+                if (entityHit.getDistance(entity) <= entity.getDistance(entityHit)) {
                     entityHit.applyEntityCollision(entity);
                     int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
                     float f = 6.0F + ((float) entity.getRNG().nextInt(3));

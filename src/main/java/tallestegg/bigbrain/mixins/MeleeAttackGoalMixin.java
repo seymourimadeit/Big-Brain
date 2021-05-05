@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
+import tallestegg.bigbrain.BigBrainConfig;
 
 @Mixin(MeleeAttackGoal.class)
 public class MeleeAttackGoalMixin {
@@ -20,16 +21,23 @@ public class MeleeAttackGoalMixin {
     protected CreatureEntity attacker;
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;delayCounter:I"), cancellable = true, method = "startExecuting")
-    public void a(CallbackInfo info) {
-        info.cancel();
+    public void startExecuting(CallbackInfo info) {
+        if (BigBrainConfig.meleeFix)
+            info.cancel();
     }
-    
-    
+
+    @Inject(at = @At(value = "HEAD"), method = "tick")
+    public void tick(CallbackInfo info) {
+        System.out.println(field_234037_i_);
+    }
+
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;field_234037_i_:I"), cancellable = true, method = "func_234039_g_", remap = false)
     public void func_234039_g_(CallbackInfo info) {
-        if (this.field_234037_i_ <= 0) {
-            this.field_234037_i_ = 20;
+        if (BigBrainConfig.meleeFix) {
+            if (this.field_234037_i_ <= 0) {
+                this.field_234037_i_ = 20;
+            }
+            info.cancel();
         }
-        info.cancel();
     }
 }
