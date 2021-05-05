@@ -26,11 +26,6 @@ public class MeleeAttackGoalMixin {
             info.cancel();
     }
 
-    @Inject(at = @At(value = "HEAD"), method = "tick")
-    public void tick(CallbackInfo info) {
-        System.out.println(field_234037_i_);
-    }
-
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;field_234037_i_:I"), cancellable = true, method = "func_234039_g_", remap = false)
     public void func_234039_g_(CallbackInfo info) {
         if (BigBrainConfig.meleeFix) {
