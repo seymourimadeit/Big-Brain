@@ -130,7 +130,7 @@ public class BigBrainConfig {
             PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
             builder.pop();
             builder.push("animals");
-            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf"));
+            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf", "minecraft:turtle"));
             NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").define("Animal Night BlackList", Lists.newArrayList("minecraft:cat"));
             RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalRainBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());
             animalShelter = builder.translation(BigBrain.MODID + ".config.animalShelter").define("Animals seek shelter?", true);
