@@ -36,5 +36,14 @@
 			}
 		],
 		"subtitle": "subtitles.item.buckler.bash"
+	},
+	"item.buckler.ping": {
+		"sounds": [
+			{
+				"name": "bigbrain:buckler/bucklerping",
+				"volume": 0.9
+			}
+		],
+		"subtitle": "subtitles.item.buckler.ping"
 	}
 }

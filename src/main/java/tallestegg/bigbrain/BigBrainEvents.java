@@ -254,7 +254,7 @@ public class BigBrainEvents {
     }
 
     public static void shieldBash(LivingEntity entity) {
-        List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()), EntityPredicates.pushableBy(entity));
+        List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()).grow(1.0D), EntityPredicates.pushableBy(entity));
         if (!list.isEmpty() && entity.isServerWorld()) {
             for (int l = 0; l < list.size(); ++l) {
                 Entity entityHit = list.get(l);
