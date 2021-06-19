@@ -51,7 +51,7 @@ public class BigBrainClientEvents {
         ItemStack stack = event.getItemStack();
         ClientPlayerEntity player = Minecraft.getInstance().player;
         float partialTicks = event.getPartialTicks();
-        if (stack.getItem() instanceof BucklerItem && (player.isHandActive() && player.getActiveItemStack() == stack || ((IBucklerUser) player).isBucklerDashing())) {
+        if (stack.getItem() instanceof BucklerItem && (player.isHandActive() && player.getActiveItemStack() == stack || ((IBucklerUser) player).isBucklerDashing() && BucklerItem.isReady(stack))) {
             boolean mainHand = event.getHand() == Hand.MAIN_HAND;
             HandSide handside = mainHand ? player.getPrimaryHand() : player.getPrimaryHand().opposite();
             boolean rightHanded = handside == HandSide.RIGHT;
