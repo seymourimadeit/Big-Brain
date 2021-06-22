@@ -4,19 +4,20 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "bigbrain.refmap.json",
   "mixins": [
-     "MeleeAttackGoalMixin",
-     "RangedCrossbowAttackGoalMixin",
-     "PlayerEntityMixin",
-     "BruteBrainMixin",
-     "PiglinBruteMixin",
-     "LivingEntityMixin",
-     "MovementControllerMixin",
-     "LookControllerMixin",
-     "PiglinBrainMixin"
+    "BruteBrainMixin",
+    "LivingEntityMixin",
+    "LookControllerMixin",
+    "MeleeAttackGoalMixin",
+    "MovementControllerMixin",
+    "PiglinBrainMixin",
+    "PiglinBruteMixin",
+    "PlayerEntityMixin",
+    "ProjectileHelperMixin",
+    "RangedCrossbowAttackGoalMixin"
   ],
   "client": [
-     "PlayerModelMixin",
-     "MouseHelperMixin"
+    "MouseHelperMixin",
+    "PlayerModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

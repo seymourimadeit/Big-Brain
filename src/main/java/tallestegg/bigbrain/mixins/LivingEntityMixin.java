@@ -1,7 +1,10 @@
 package tallestegg.bigbrain.mixins;
 
 import java.util.UUID;
+import java.util.function.Predicate;
 
+import net.minecraft.item.Item;
+import net.minecraft.item.ShootableItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -132,4 +135,15 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
 
     @Shadow
     protected abstract boolean isActiveItemStackBlocking();
+
+    @Shadow public abstract boolean func_233634_a_(Predicate<Item> itemPredicate);
+
+    @Inject(at = @At("HEAD"), method = "canEquip", cancellable = true)
+    private void betterIsHolding(Item itemIn, CallbackInfoReturnable<Boolean> cir){
+        if(itemIn instanceof ShootableItem){
+            Class<? extends Item> itemInClass = itemIn.getClass();
+            Predicate<Item> itemPredicate = testItem -> testItem.getClass().isAssignableFrom(itemInClass);
+            cir.setReturnValue(this.func_233634_a_(itemPredicate));
+        }
+    }
 }
