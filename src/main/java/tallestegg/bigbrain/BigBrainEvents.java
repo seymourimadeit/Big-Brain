@@ -3,6 +3,7 @@ package tallestegg.bigbrain;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import net.minecraft.block.BlockRenderType;
@@ -43,6 +44,7 @@ import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -146,6 +148,8 @@ public class BigBrainEvents {
                 BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
                 if (turningLevel == 0)
                     BigBrainEvents.shieldBash(entity);
+             //   if (turningLevel > 0 && entity.collidedHorizontally)
+                   // entity.setMotion(0.0D, 1.0D, 0.0D);
                 if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
                     Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                     ItemStack stack = entity.getHeldItem(hand);
@@ -254,11 +258,16 @@ public class BigBrainEvents {
     }
 
     public static void shieldBash(LivingEntity entity) {
-        List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()), EntityPredicates.pushableBy(entity));
-        if (!list.isEmpty() && entity.isServerWorld()) {
-            for (int l = 0; l < list.size(); ++l) {
-                Entity entityHit = list.get(l);
-                if (entityHit.getDistance(entity) <= entity.getDistance(entityHit)) {
+        double maxValue = Double.MAX_VALUE;
+        Entity entityHit = null;
+        for (Entity entitiyThatIsNear : entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()), EntityPredicates.pushableBy(entity))) {
+            AxisAlignedBB axisalignedbb = entitiyThatIsNear.getBoundingBox().grow((double) 0.3F);
+            Optional<Vector3d> optional = axisalignedbb.rayTrace(entity.getPositionVec(), entity.getPositionVec().add(entity.getMotion()));
+            if (optional.isPresent()) {
+                double distance = entity.getPositionVec().squareDistanceTo(optional.get());
+                if (distance < maxValue) {
+                    entityHit = entitiyThatIsNear;
+                    maxValue = distance;
                     entityHit.applyEntityCollision(entity);
                     int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
                     float f = 6.0F + ((float) entity.getRNG().nextInt(3));

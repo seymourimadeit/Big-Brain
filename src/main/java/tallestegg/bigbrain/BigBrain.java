@@ -47,7 +47,12 @@ public class BigBrain {
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
-        MinecraftForge.EVENT_BUS.register(new ItemModelHandler());
+        event.enqueueWork(() -> {
+            ItemModelsProperties.registerProperty(BigBrainItems.BUCKLER.get(), new ResourceLocation("blocking"), (stack, clientWorld, livingEntity) -> {
+                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && BucklerItem.isReady(stack);
+                return livingEntity != null && active ? 1.0F : 0.0F;
+            });
+        });
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event) {
@@ -67,15 +72,6 @@ public class BigBrain {
             if (event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
                 event.addSprite(BucklerTexture.BUCKLER_TEXTURE.getTextureLocation());
             }
-        }
-    }
-
-    public static class ItemModelHandler {
-        public ItemModelHandler() {
-            ItemModelsProperties.registerProperty(BigBrainItems.BUCKLER.get(), new ResourceLocation("blocking"), (stack, clientWorld, livingEntity) -> {
-                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && BucklerItem.isReady(stack);
-                return livingEntity != null && active ? 1.0F : 0.0F;
-            });
         }
     }
 }

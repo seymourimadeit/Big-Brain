@@ -66,18 +66,16 @@ public class BucklerItem extends ShieldItem {
     public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
         ItemStack itemstack = super.onItemUseFinish(stack, worldIn, entityLiving);
         if (entityLiving instanceof IBucklerUser) {
-            if (((IBucklerUser) entityLiving).getCooldown() > 0) {
-                ((IBucklerUser) entityLiving).setBucklerDashing(true);
-                BucklerItem.setReady(stack, true);
-                stack.damageItem(1, entityLiving, (entityLiving1) -> {
-                    entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
-                });
-                if (entityLiving instanceof PlayerEntity)
-                    ((PlayerEntity) entityLiving).getCooldownTracker().setCooldown(this, BigBrainConfig.BucklerCooldown);
-                entityLiving.resetActiveHand();
-                if (entityLiving instanceof AbstractPiglinEntity)
-                    entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isChild() ? (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.5F : (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.0F);
-            }
+            ((IBucklerUser) entityLiving).setBucklerDashing(true);
+            BucklerItem.setReady(stack, true);
+            stack.damageItem(1, entityLiving, (entityLiving1) -> {
+                entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
+            });
+            if (entityLiving instanceof PlayerEntity)
+                ((PlayerEntity) entityLiving).getCooldownTracker().setCooldown(this, BigBrainConfig.BucklerCooldown);
+            entityLiving.resetActiveHand();
+            if (entityLiving instanceof AbstractPiglinEntity)
+                entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isChild() ? (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.5F : (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.0F);
         }
         return itemstack;
     }
