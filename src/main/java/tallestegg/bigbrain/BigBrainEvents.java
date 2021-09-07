@@ -2,7 +2,6 @@ package tallestegg.bigbrain;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -148,8 +147,6 @@ public class BigBrainEvents {
                 BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
                 if (turningLevel == 0)
                     BigBrainEvents.shieldBash(entity);
-             //   if (turningLevel > 0 && entity.collidedHorizontally)
-                   // entity.setMotion(0.0D, 1.0D, 0.0D);
                 if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
                     Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
                     ItemStack stack = entity.getHeldItem(hand);
@@ -260,13 +257,13 @@ public class BigBrainEvents {
     public static void shieldBash(LivingEntity entity) {
         double maxValue = Double.MAX_VALUE;
         Entity entityHit = null;
-        for (Entity entitiyThatIsNear : entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()), EntityPredicates.pushableBy(entity))) {
-            AxisAlignedBB axisalignedbb = entitiyThatIsNear.getBoundingBox().grow((double) 0.3F);
+        for (Entity entityThatIsNear : entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()), EntityPredicates.pushableBy(entity))) {
+            AxisAlignedBB axisalignedbb = entityThatIsNear.getBoundingBox().grow((double) 0.3F);
             Optional<Vector3d> optional = axisalignedbb.rayTrace(entity.getPositionVec(), entity.getPositionVec().add(entity.getMotion()));
             if (optional.isPresent()) {
                 double distance = entity.getPositionVec().squareDistanceTo(optional.get());
                 if (distance < maxValue) {
-                    entityHit = entitiyThatIsNear;
+                    entityHit = entityThatIsNear;
                     maxValue = distance;
                     entityHit.applyEntityCollision(entity);
                     int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
