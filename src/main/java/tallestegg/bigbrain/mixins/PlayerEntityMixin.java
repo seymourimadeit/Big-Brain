@@ -5,52 +5,52 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements IOneCriticalAfterCharge {
-    private static final DataParameter<Boolean> CRITICAL = EntityDataManager.createKey(PlayerEntity.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CRITICAL = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
     
-    protected PlayerEntityMixin(EntityType<? extends LivingEntity> type, World worldIn) {
+    protected PlayerEntityMixin(EntityType<? extends LivingEntity> type, Level worldIn) {
         super(type, worldIn);
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "registerData")
-    protected void registerData(CallbackInfo info) {
-        this.dataManager.register(CRITICAL, false);
+    @Inject(at = @At(value = "TAIL"), method = "defineSynchedData")
+    protected void defineSynchedData(CallbackInfo info) {
+        this.entityData.define(CRITICAL, false);
     }
 
     @Override
-    public void swing(Hand handIn, boolean updateSelf) {
+    public void swing(InteractionHand handIn, boolean updateSelf) {
         super.swing(handIn, updateSelf);
         if (this.isCritical())
             this.setCritical(false);
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
-    public void writeAdditional(CompoundNBT compound, CallbackInfo info) {
+    @Inject(at = @At(value = "TAIL"), method = "addAdditionalSaveData")
+    public void writeAdditionalSaveData(CompoundTag compound, CallbackInfo info) {
         compound.putBoolean("Critical", this.isCritical());
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "readAdditional")
-    public void readAdditional(CompoundNBT compound, CallbackInfo info) {
+    @Inject(at = @At(value = "TAIL"), method = "readAdditionalSaveData")
+    public void readAdditionalSaveData(CompoundTag compound, CallbackInfo info) {
         this.setCritical(compound.getBoolean("Critical"));
     }
 
     public boolean isCritical() {
-        return this.dataManager.get(CRITICAL);
+        return this.entityData.get(CRITICAL);
     }
 
     public void setCritical(boolean critical) {
-        this.dataManager.set(CRITICAL, critical);
+        this.entityData.set(CRITICAL, critical);
     }
 }

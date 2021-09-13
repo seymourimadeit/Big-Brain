@@ -7,71 +7,71 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.entity.ICrossbowUser;
-import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.RangedCrossbowAttackGoal;
-import net.minecraft.entity.monster.MonsterEntity;
-import net.minecraft.entity.projectile.ProjectileHelper;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.RangedCrossbowAttackGoal;
+import net.minecraft.world.entity.monster.CrossbowAttackMob;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(RangedCrossbowAttackGoal.class)
-public class RangedCrossbowAttackGoalMixin<T extends MonsterEntity & IRangedAttackMob & ICrossbowUser> extends Goal {
-
+public class RangedCrossbowAttackGoalMixin<T extends Monster & RangedAttackMob & CrossbowAttackMob> extends Goal {
     @Shadow
     @Final
-    private T field_220748_a;
+    private T mob;
 
     @Shadow
-    private RangedCrossbowAttackGoal.CrossbowState field_220749_b = RangedCrossbowAttackGoal.CrossbowState.UNCHARGED;
+    private RangedCrossbowAttackGoal.CrossbowState crossbowState = RangedCrossbowAttackGoal.CrossbowState.UNCHARGED;
 
     @Shadow
-    private int field_220753_f;
-
-    @Final
-    @Shadow
-    private double field_220750_c;
+    private int attackDelay;
 
     @Final
     @Shadow
-    private float field_220751_d;
+    private double speedModifier;
+
+    @Final
+    @Shadow
+    private float attackRadiusSqr;
 
     @Shadow
-    private int field_220752_e;
+    private int seeTime;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/CrossbowItem;getChargeTime(Lnet/minecraft/item/ItemStack;)I"), method = "tick()V")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CrossbowItem;getChargeDuration(Lnet/minecraft/world/item/ItemStack;)I"), method = "tick")
     public void tick(CallbackInfo info) {
-        int i = this.field_220748_a.getItemInUseMaxCount();
-        ItemStack itemstack = this.field_220748_a.getActiveItemStack();
-        if (i >= CrossbowItem.getChargeTime(itemstack) || CrossbowItem.isCharged(itemstack)) {
-            this.field_220748_a.stopActiveHand();
-            this.field_220749_b = RangedCrossbowAttackGoal.CrossbowState.CHARGED;
-            this.field_220753_f = 20 + this.field_220748_a.getRNG().nextInt(20);
-            this.field_220748_a.setCharging(false);
+        int i = this.mob.getTicksUsingItem();
+        ItemStack itemstack = this.mob.getUseItem();
+        if (i >= CrossbowItem.getChargeDuration(itemstack) || CrossbowItem.isCharged(itemstack)) {
+            this.mob.releaseUsingItem();
+            this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.CHARGED;
+            this.attackDelay = 20 + this.mob.getRandom().nextInt(20);
+            this.mob.setChargingCrossbow(false);
         }
     }
 
-    @Inject(at = @At(value = "HEAD", target = "Lnet/minecraft/entity/ai/goal/RangedCrossbowAttackGoal;CrossbowState$UNCHARGED:Ljava/lang/Enum"), method = "tick()V")
-    public void test(CallbackInfo info) {
-        LivingEntity livingentity = this.field_220748_a.getAttackTarget();
+    @Inject(at = @At(value = "HEAD", target = "Lnet/minecraft/world/entity/ai/goal/RangedCrossbowAttackGoal;CrossbowState$UNCHARGED:Ljava/lang/Enum"), method = "tick")
+    public void tick2(CallbackInfo info) {
+        LivingEntity livingentity = this.mob.getTarget();
         if (livingentity != null) {
-            double d0 = this.field_220748_a.getDistanceSq(livingentity);
-            boolean flag2 = (d0 > (double) this.field_220751_d || this.field_220752_e < 5) && this.field_220753_f == 0;
-            if (this.field_220749_b == RangedCrossbowAttackGoal.CrossbowState.UNCHARGED && !CrossbowItem.isCharged(this.field_220748_a.getActiveItemStack())) {
+            double d0 = this.mob.distanceToSqr(livingentity);
+            boolean flag2 = (d0 > (double) this.attackRadiusSqr || this.seeTime < 5) && this.attackDelay == 0;
+            if (this.crossbowState == RangedCrossbowAttackGoal.CrossbowState.UNCHARGED
+                    && !CrossbowItem.isCharged(this.mob.getUseItem())) {
                 if (!flag2) {
-                    this.field_220748_a.setActiveHand(ProjectileHelper.getHandWith(this.field_220748_a, Items.CROSSBOW));
-                    this.field_220749_b = RangedCrossbowAttackGoal.CrossbowState.CHARGING;
-                    this.field_220748_a.setCharging(true);
+                    this.mob.startUsingItem(
+                            ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
+                    this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.CHARGING;
+                    this.mob.setChargingCrossbow(true);
                 }
             }
         }
     }
 
     @Shadow
-    public boolean shouldExecute() {
+    public boolean canUse() {
         return false;
     }
 }

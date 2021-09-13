@@ -1,10 +1,10 @@
 package tallestegg.bigbrain;
 
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.resources.ResourceLocation;
 
 public class BucklerTexture {
     @SuppressWarnings("deprecation")
-    public static final RenderMaterial BUCKLER_TEXTURE = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation(BigBrain.MODID, "entity/buckler/golden_buckler"));
+    public static final Material BUCKLER_TEXTURE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation(BigBrain.MODID, "entity/buckler/golden_buckler"));
 }

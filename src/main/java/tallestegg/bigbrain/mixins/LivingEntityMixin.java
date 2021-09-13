@@ -3,8 +3,6 @@ package tallestegg.bigbrain.mixins;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ShootableItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -13,21 +11,22 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
@@ -38,7 +37,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
     private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 1.0D, AttributeModifier.Operation.ADDITION);
-    private static final DataParameter<Boolean> DASHING = EntityDataManager.createKey(LivingEntity.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DASHING = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
 
     @Unique
     private int cooldown;
@@ -47,37 +46,37 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     private int bucklerUseTimer;
 
     @Shadow
-    protected ItemStack activeItemStack;
+    protected ItemStack useItem;
 
-    public LivingEntityMixin(EntityType<?> entityTypeIn, World worldIn) {
+    public LivingEntityMixin(EntityType<?> entityTypeIn, Level worldIn) {
         super(entityTypeIn, worldIn);
     }
 
-    @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canBlockDamageSource")
-    public void canBlockDamageSource(DamageSource damageSourceIn, CallbackInfoReturnable<Boolean> info) {
+    @Inject(at = @At(value = "RETURN"), cancellable = true, method = "isDamageSourceBlocked")
+    public void isDamageSourceBlocked(DamageSource damageSourceIn, CallbackInfoReturnable<Boolean> info) {
         boolean flag = false;
-        if (!damageSourceIn.isUnblockable() && this.isActiveItemStackBlocking() && !flag && this.activeItemStack.getItem() instanceof BucklerItem)
+        if (!damageSourceIn.isBypassArmor() && this.isBlocking() && !flag && this.useItem.getItem() instanceof BucklerItem)
             info.setReturnValue(false);
 
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "writeAdditional")
-    public void writeAdditional(CompoundNBT compound, CallbackInfo info) {
+    @Inject(at = @At(value = "TAIL"), method = "addAdditionalSaveData")
+    public void writeAdditional(CompoundTag compound, CallbackInfo info) {
         compound.putBoolean("BucklerDashing", this.isBucklerDashing());
         compound.putInt("ChargeCooldown", this.getCooldown());
         compound.putInt("BucklerUseTimer", this.getBucklerUseTimer());
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "readAdditional")
-    public void readAdditional(CompoundNBT compound, CallbackInfo info) {
+    @Inject(at = @At(value = "TAIL"), method = "readAdditionalSaveData")
+    public void readAdditional(CompoundTag compound, CallbackInfo info) {
         this.setBucklerDashing(compound.getBoolean("BucklerDashing"));
         this.setCooldown(compound.getInt("ChargeCooldown"));
         this.setBucklerUseTimer(compound.getInt("BucklerUseTimer"));
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "registerData")
-    protected void registerData(CallbackInfo info) {
-        this.dataManager.register(DASHING, false);
+    @Inject(at = @At(value = "TAIL"), method = "defineSynchedData")
+    protected void defineSynchedData(CallbackInfo info) {
+        this.entityData.define(DASHING, false);
     }
 
     public int getCooldown() {
@@ -90,34 +89,34 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
 
     public void setBucklerDashing(boolean dashing) {
         if (!dashing) {
-            ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+            AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            AttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
             if (speed == null || knockback == null) {
                 return;
             }
             knockback.removeModifier(KNOCKBACK_RESISTANCE);
-            if ((LivingEntity) (Object) this instanceof PlayerEntity)
+            if ((LivingEntity) (Object) this instanceof Player)
                 speed.removeModifier(CHARGE_SPEED_BOOST);
             this.setBucklerUseTimer(0);
         }
         if (dashing) {
-            ModifiableAttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            ModifiableAttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+            AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            AttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
             if (speed == null || knockback == null) {
                 return;
             }
             knockback.removeModifier(KNOCKBACK_RESISTANCE);
-            knockback.applyNonPersistentModifier(KNOCKBACK_RESISTANCE);
-            if ((LivingEntity) (Object) this instanceof PlayerEntity) {
+            knockback.addTransientModifier(KNOCKBACK_RESISTANCE);
+            if ((LivingEntity) (Object) this instanceof Player) {
                 speed.removeModifier(CHARGE_SPEED_BOOST);
-                speed.applyNonPersistentModifier(CHARGE_SPEED_BOOST);
+                speed.addTransientModifier(CHARGE_SPEED_BOOST);
             }
         }
-        this.dataManager.set(DASHING, dashing);
+        this.entityData.set(DASHING, dashing);
     }
 
     public boolean isBucklerDashing() {
-        return this.dataManager.get(DASHING);
+        return this.entityData.get(DASHING);
     }
 
     @Override
@@ -131,19 +130,10 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     }
 
     @Shadow
-    protected abstract ModifiableAttributeInstance getAttribute(Attribute knockbackResistance);
+    protected abstract AttributeInstance getAttribute(Attribute knockbackResistance);
 
     @Shadow
-    protected abstract boolean isActiveItemStackBlocking();
+    protected abstract boolean isBlocking();
 
-    @Shadow public abstract boolean func_233634_a_(Predicate<Item> itemPredicate);
-
-    @Inject(at = @At("HEAD"), method = "canEquip", cancellable = true)
-    private void betterIsHolding(Item itemIn, CallbackInfoReturnable<Boolean> cir){
-        if(itemIn instanceof ShootableItem){
-            Class<? extends Item> itemInClass = itemIn.getClass();
-            Predicate<Item> itemPredicate = testItem -> testItem.getClass().isAssignableFrom(itemInClass);
-            cir.setReturnValue(this.func_233634_a_(itemPredicate));
-        }
-    }
+    @Shadow public abstract boolean isHolding(Predicate<Item> itemPredicate);
 }

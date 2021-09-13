@@ -1,12 +1,11 @@
 package tallestegg.bigbrain;
 
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -17,9 +16,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import tallestegg.bigbrain.capablities.ILoaf;
-import tallestegg.bigbrain.capablities.Loaf;
-import tallestegg.bigbrain.capablities.LoafStorage;
 import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod(BigBrain.MODID)
@@ -41,15 +37,12 @@ public class BigBrain {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            CapabilityManager.INSTANCE.register(ILoaf.class, new LoafStorage(), Loaf::new);
-        });
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemModelsProperties.registerProperty(BigBrainItems.BUCKLER.get(), new ResourceLocation("blocking"), (stack, clientWorld, livingEntity) -> {
-                boolean active = livingEntity != null && livingEntity.isHandActive() && livingEntity.getActiveItemStack() == stack || livingEntity != null && BucklerItem.isReady(stack);
+            ItemProperties.register(BigBrainItems.BUCKLER.get(), new ResourceLocation("blocking"), (stack, clientWorld, livingEntity, useTime) -> {
+                boolean active = livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == stack || livingEntity != null && BucklerItem.isReady(stack);
                 return livingEntity != null && active ? 1.0F : 0.0F;
             });
         });
@@ -69,8 +62,8 @@ public class BigBrain {
         @SuppressWarnings("deprecation")
         @SubscribeEvent
         public static void onStitch(TextureStitchEvent.Pre event) {
-            if (event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
-                event.addSprite(BucklerTexture.BUCKLER_TEXTURE.getTextureLocation());
+            if (event.getMap().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
+                event.addSprite(BucklerTexture.BUCKLER_TEXTURE.texture());
             }
         }
     }

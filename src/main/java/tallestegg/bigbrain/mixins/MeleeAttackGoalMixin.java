@@ -7,30 +7,30 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import tallestegg.bigbrain.BigBrainConfig;
 
 @Mixin(MeleeAttackGoal.class)
 public class MeleeAttackGoalMixin {
     @Shadow
-    public int field_234037_i_;
+    public int ticksUntilNextAttack;
 
     @Shadow
     @Final
-    protected CreatureEntity attacker;
+    protected PathfinderMob mob;
 
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;delayCounter:I"), cancellable = true, method = "startExecuting")
-    public void startExecuting(CallbackInfo info) {
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/ai/goal/MeleeAttackGoal;ticksUntilNextPathRecalculation:I"), cancellable = true, method = "start")
+    public void start(CallbackInfo info) {
         if (BigBrainConfig.meleeFix)
             info.cancel();
     }
 
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/entity/ai/goal/MeleeAttackGoal;field_234037_i_:I"), cancellable = true, method = "func_234039_g_", remap = false)
-    public void func_234039_g_(CallbackInfo info) {
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/ai/goal/MeleeAttackGoal;ticksUntilNextAttack:I"), cancellable = true, method = "resetAttackCooldown", remap = false)
+    public void resetAttackCooldown(CallbackInfo info) {
         if (BigBrainConfig.meleeFix) {
-            if (this.field_234037_i_ <= 0) {
-                this.field_234037_i_ = 20;
+            if (this.ticksUntilNextAttack <= 0) {
+                this.ticksUntilNextAttack = 20;
             }
             info.cancel();
         }

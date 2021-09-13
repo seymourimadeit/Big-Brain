@@ -10,20 +10,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ILivingEntityData;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
-import net.minecraft.entity.monster.piglin.PiglinBruteEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.BigBrainItems;
@@ -31,63 +31,63 @@ import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
 //This is where the magic happens, and by magic, I mean mechanically automated goring into commodities!
-@Mixin(PiglinBruteEntity.class)
-public abstract class PiglinBruteMixin extends AbstractPiglinEntity implements IBucklerUser {
+@Mixin(PiglinBrute.class)
+public abstract class PiglinBruteMixin extends AbstractPiglin implements IBucklerUser {
 
-    protected PiglinBruteMixin(EntityType<? extends AbstractPiglinEntity> type, World worldIn) {
+    protected PiglinBruteMixin(EntityType<? extends AbstractPiglin> type, Level worldIn) {
         super(type, worldIn);
     }
 
-    @Inject(at = @At("TAIL"), method = "onInitialSpawn(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/entity/SpawnReason;Lnet/minecraft/entity/ILivingEntityData;Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/entity/ILivingEntityData;")
-    public ILivingEntityData onInitialSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag, CallbackInfoReturnable<ILivingEntityData> info) {
-        this.setEnchantmentBasedOnDifficulty(difficultyIn);
-        return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
+    @Inject(at = @At("TAIL"), method = "finalizeSpawn(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/world/entity/MobSpawnType;Lnet/minecraft/world/entity/SpawnGroupData;Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/world/entity/SpawnGroupData;")
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor p_35058_, DifficultyInstance p_35059_, MobSpawnType p_35060_, @Nullable SpawnGroupData p_35061_, @Nullable CompoundTag p_35062_, CallbackInfoReturnable<SpawnGroupData> info) {
+        this.populateDefaultEquipmentEnchantments(p_35059_);
+        return super.finalizeSpawn(p_35058_, p_35059_, p_35060_, p_35061_, p_35062_);
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "setEquipmentBasedOnDifficulty")
+    @Inject(at = @At(value = "TAIL"), method = "populateDefaultEquipmentSlots")
     protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty, CallbackInfo info) {
         if (!BigBrainConfig.BruteSpawningWithBuckler)
             return;
-        this.setItemStackToSlot(EquipmentSlotType.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
+        this.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
         this.setCooldown(240);
     }
 
     @Override
-    protected void func_241844_w(float p_241844_1_) {
-        if (this.rand.nextInt(300) == 0) {
-            ItemStack itemstack = this.getHeldItemOffhand();
+    protected void enchantSpawnedWeapon(float p_241844_1_) {
+        if (this.random.nextInt(300) == 0) {
+            ItemStack itemstack = this.getOffhandItem();
             if (itemstack.getItem() instanceof BucklerItem) {
                 Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
                 map.putIfAbsent(BigBrainEnchantments.TURNING.get(), 1);
                 EnchantmentHelper.setEnchantments(map, itemstack);
-                this.setItemStackToSlot(EquipmentSlotType.OFFHAND, itemstack);
+                this.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
             }
         }
-        if (this.rand.nextInt(500) == 0) {
-            ItemStack itemstack = this.getHeldItemOffhand();
+        if (this.random.nextInt(500) == 0) {
+            ItemStack itemstack = this.getOffhandItem();
             if (itemstack.getItem() instanceof BucklerItem) {
                 Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
                 map.putIfAbsent(BigBrainEnchantments.BANG.get(), 1);
                 EnchantmentHelper.setEnchantments(map, itemstack);
-                this.setItemStackToSlot(EquipmentSlotType.OFFHAND, itemstack);
+                this.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
             }
         }
     }
 
     @Override
-    protected void dropSpecialItems(DamageSource source, int looting, boolean recentlyHitIn) {
-        super.dropSpecialItems(source, looting, recentlyHitIn);
-        ItemStack itemstack = this.getHeldItemOffhand();
+    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHitIn) {
+        super.dropCustomDeathLoot(source, looting, recentlyHitIn);
+        ItemStack itemstack = this.getOffhandItem();
         if (itemstack.getItem() instanceof BucklerItem) {
             float f = 0.10F;
             boolean flag = f > 1.0F;
-            if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack) && (recentlyHitIn || flag) && Math.max(this.rand.nextFloat() - (float) looting * 0.01F, 0.0F) < f) {
-                if (!flag && itemstack.isDamageable()) {
-                    itemstack.setDamage(this.rand.nextInt(this.rand.nextInt(itemstack.getMaxDamage() / 2)));
+            if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack) && (recentlyHitIn || flag) && Math.max(this.random.nextFloat() - (float) looting * 0.01F, 0.0F) < f) {
+                if (!flag && itemstack.isDamageableItem()) {
+                    itemstack.setDamageValue(this.random.nextInt(this.random.nextInt(itemstack.getMaxDamage() / 2)));
                 }
 
-                this.entityDropItem(itemstack);
-                this.setItemStackToSlot(EquipmentSlotType.OFFHAND, ItemStack.EMPTY);
+                this.spawnAtLocation(itemstack);
+                this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
             }
         }
     }

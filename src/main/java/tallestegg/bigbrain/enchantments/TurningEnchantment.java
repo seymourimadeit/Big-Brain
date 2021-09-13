@@ -1,36 +1,36 @@
 package tallestegg.bigbrain.enchantments;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.entity.EquipmentSlot;
 import tallestegg.bigbrain.BigBrainEnchantments;
 
 public class TurningEnchantment extends Enchantment {
-    public TurningEnchantment(Enchantment.Rarity rarity, EquipmentSlotType... slots) {
+    public TurningEnchantment(Enchantment.Rarity rarity, EquipmentSlot... slots) {
         super(rarity, BigBrainEnchantments.BUCKLER, slots);
     }
 
     @Override
-    public int getMinEnchantability(int enchantmentLevel) {
+    public int getMinCost(int enchantmentLevel) {
         return 1 + (enchantmentLevel - 1) * 10;
     }
 
     @Override
-    public int getMaxEnchantability(int enchantmentLevel) {
+    public int getMaxCost(int enchantmentLevel) {
         return 15;
     }
 
     @Override
-    public boolean isTreasureEnchantment() {
+    public boolean isTreasureOnly() {
         return false;
     }
 
     @Override
-    public boolean canVillagerTrade() {
+    public boolean isTradeable() {
         return false;
     }
 
     @Override
-    public boolean canGenerateInLoot() {
+    public boolean isDiscoverable() {
         return true;
     }
 
@@ -40,7 +40,7 @@ public class TurningEnchantment extends Enchantment {
     }
     
     @Override
-    public boolean canApplyTogether(Enchantment ench) {
-        return ench instanceof BangEnchantment ? false : super.canApplyTogether(ench);
+    public boolean checkCompatibility(Enchantment ench) {
+        return ench instanceof BangEnchantment ? false : super.checkCompatibility(ench);
     }
 }

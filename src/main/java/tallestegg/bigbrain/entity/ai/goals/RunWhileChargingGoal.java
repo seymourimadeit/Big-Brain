@@ -2,78 +2,80 @@ package tallestegg.bigbrain.entity.ai.goals;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.RandomPositionGenerator;
-import net.minecraft.entity.ai.goal.RandomWalkingGoal;
-import net.minecraft.entity.monster.PillagerEntity;
-import net.minecraft.entity.projectile.ProjectileHelper;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.phys.Vec3;
 
-public class RunWhileChargingGoal extends RandomWalkingGoal {
+public class RunWhileChargingGoal extends RandomStrollGoal {
 
-    public RunWhileChargingGoal(CreatureEntity creatureIn, double speedIn) {
+    public RunWhileChargingGoal(PathfinderMob creatureIn, double speedIn) {
         super(creatureIn, speedIn);
     }
 
     @Override
-    public boolean shouldExecute() {
-        return ((PillagerEntity) creature).isHandActive() && creature.getActiveItemStack().getItem() instanceof CrossbowItem && creature.getAttackTarget() != null && !CrossbowItem.isCharged(creature.getActiveItemStack())
-                && EnchantmentHelper.getEnchantmentLevel(Enchantments.MULTISHOT, this.creature.getHeldItemMainhand()) == 0 && this.findPosition();
+    public boolean canUse() {
+        return ((Pillager) mob).isUsingItem() && mob.getUseItem().getItem() instanceof CrossbowItem
+                && mob.getTarget() != null && !CrossbowItem.isCharged(mob.getUseItem())
+                && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, this.mob.getMainHandItem()) == 0
+                && this.findPosition();
     }
 
     public boolean findPosition() {
-        Vector3d vector3d = this.getPosition();
+        Vec3 vector3d = this.getPosition();
         if (vector3d == null) {
             return false;
         } else {
-            this.x = vector3d.x;
-            this.y = vector3d.y;
-            this.z = vector3d.z;
+            this.wantedX = vector3d.x;
+            this.wantedY = vector3d.y;
+            this.wantedZ = vector3d.z;
             return true;
         }
     }
 
     @Override
-    public void startExecuting() {
-        super.startExecuting();
-        this.creature.setActiveHand(ProjectileHelper.getHandWith(this.creature, Items.CROSSBOW));
-        ((PillagerEntity) creature).setCharging(true);
-        if (creature.getAttackTarget() != null) {
-            creature.faceEntity(creature.getAttackTarget(), 30.0F, 30.0F);
-            creature.getLookController().setLookPositionWithEntity(creature.getAttackTarget(), 30.0F, 30.0F);
+    public void start() {
+        super.start();
+        this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(mob, item -> item instanceof CrossbowItem));
+        ((Pillager) mob).setChargingCrossbow(true);
+        if (mob.getTarget() != null) {
+            mob.lookAt(mob.getTarget(), 30.0F, 30.0F);
+            mob.getLookControl().setLookAt(mob.getTarget(), 30.0F, 30.0F);
         }
     }
 
     @Override
     public void tick() {
-        int i = this.creature.getItemInUseMaxCount();
-        ItemStack itemstack = this.creature.getActiveItemStack();
-        if (i >= CrossbowItem.getChargeTime(itemstack)) {
-            this.creature.stopActiveHand();
-            ((PillagerEntity) creature).setCharging(false);
+        int i = this.mob.getTicksUsingItem();
+        ItemStack itemstack = this.mob.getUseItem();
+        if (i >= CrossbowItem.getChargeDuration(itemstack)) {
+            this.mob.releaseUsingItem();
+            ((Pillager) mob).setChargingCrossbow(false);
         }
     }
 
     @Override
-    public void resetTask() {
-        super.resetTask();
-        this.creature.stopActiveHand();
-        ((PillagerEntity) creature).setCharging(false);
+    public void stop() {
+        super.stop();
+        this.mob.releaseUsingItem();
+        ((Pillager) mob).setChargingCrossbow(false);
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
-        return !CrossbowItem.isCharged(creature.getActiveItemStack()) && ((PillagerEntity) creature).isHandActive() && creature.getActiveItemStack().getItem() instanceof CrossbowItem && !this.creature.isBeingRidden();
+    public boolean canContinueToUse() {
+        return !CrossbowItem.isCharged(mob.getUseItem()) && ((Pillager) mob).isUsingItem()
+                && mob.getUseItem().getItem() instanceof CrossbowItem && !this.mob.isVehicle();
     }
 
     @Override
     @Nullable
-    protected Vector3d getPosition() {
-        return RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.creature, 16, 7, this.creature.getAttackTarget().getPositionVec());
+    protected Vec3 getPosition() {
+        return DefaultRandomPos.getPosAway(this.mob, 16, 7, this.mob.getTarget().position());
     }
 }

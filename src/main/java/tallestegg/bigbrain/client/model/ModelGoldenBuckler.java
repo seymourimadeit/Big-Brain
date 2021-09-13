@@ -1,39 +1,51 @@
 package tallestegg.bigbrain.client.model;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.Model;
-import net.minecraft.client.renderer.model.ModelRenderer;
 
 /**
  * ModelGoldenBuckler - MCVinnyq Created using Tabula 8.0.0
  */
 public class ModelGoldenBuckler extends Model {
-    public ModelRenderer base;
+    public final ModelPart root;
+    public final ModelPart base;
+    public final ModelPart handle;
 
-    public ModelGoldenBuckler() {
-        super(RenderType::getEntitySolid);
-        this.textureWidth = 32;
-        this.textureHeight = 32;
-        this.base = new ModelRenderer(this, 0, 0);
-        this.base.setRotationPoint(0.0F, 0.0F, 0.0F);
-        this.base.addBox(-5.0F, -5.0F, -2.0F, 10.0F, 10.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.base.setTextureOffset(0, 11).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 6.0F, 6.0F, 0.0F, 0.0F, 0.0F);
+    public ModelGoldenBuckler(ModelPart part) {
+        super(RenderType::entitySolid);
+        this.root = part;
+        this.base = part.getChild("base");
+        this.handle = part.getChild("handle");
     }
+    
+    public static LayerDefinition createLayer() {
+        MeshDefinition meshdefinition = new MeshDefinition();
+        PartDefinition partdefinition = meshdefinition.getRoot();
+        partdefinition.addOrReplaceChild("base", CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, -5.0F, -2.0F, 10.0F, 10.0F, 1.0F), PartPose.ZERO);
+        partdefinition.addOrReplaceChild("handle", CubeListBuilder.create().texOffs(0, 11).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 6.0F, 6.0F), PartPose.ZERO);
+        return LayerDefinition.create(meshdefinition, 32, 32);
+     }
 
     @Override
-    public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        this.base.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn);
+    public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+        this.root.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn);
     }
 
     /**
      * This is a helper function from Tabula to set the rotation of model parts
      */
-    public void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.rotateAngleX = x;
-        modelRenderer.rotateAngleY = y;
-        modelRenderer.rotateAngleZ = z;
+    public void setRotateAngle(ModelPart modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot = x;
+        modelRenderer.yRot = y;
+        modelRenderer.zRot = z;
     }
 }

@@ -7,75 +7,75 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.renderer.entity.model.AgeableModel;
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
-@Mixin(BipedModel.class)
-public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableModel<T> {
+@Mixin(HumanoidModel.class)
+public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableListModel<T> {
     @Shadow
     @Final
-    public ModelRenderer bipedLeftArm;
+    public ModelPart leftArm;
 
     @Shadow
     @Final
-    public ModelRenderer bipedRightArm;
+    public ModelPart rightArm;
 
-    @Inject(at = @At("TAIL"), method = "setRotationAngles(Lnet/minecraft/entity/LivingEntity;FFFFF)V")
-    public void setRotationAngles(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo info) {
-        if (entityIn.getPrimaryHand() == HandSide.RIGHT) {
-            this.bucklerAnimationsRightArm(Hand.MAIN_HAND, entityIn);
-            this.bucklerAnimationsLeftArm(Hand.OFF_HAND, entityIn);
+    @Inject(at = @At("TAIL"), method = "setupAnim")
+    public void setupAnim(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo info) {
+        if (entityIn.getMainArm() == HumanoidArm.RIGHT) {
+            this.bucklerAnimationsRightArm(InteractionHand.MAIN_HAND, entityIn);
+            this.bucklerAnimationsLeftArm(InteractionHand.OFF_HAND, entityIn);
         } else {
-            this.bucklerAnimationsLeftArm(Hand.MAIN_HAND, entityIn);
-            this.bucklerAnimationsRightArm(Hand.OFF_HAND, entityIn);
+            this.bucklerAnimationsLeftArm(InteractionHand.MAIN_HAND, entityIn);
+            this.bucklerAnimationsRightArm(InteractionHand.OFF_HAND, entityIn);
         }
     }
 
-    public void bucklerAnimationsLeftArm(Hand hand, T entityIn) {
-        if (entityIn.getActiveHand() == hand && entityIn.getHeldItem(entityIn.getActiveHand()).getItem() instanceof BucklerItem) {
-            float useDuration = (float) entityIn.getHeldItem(entityIn.getActiveHand()).getUseDuration();
-            float useDurationClamped = MathHelper.clamp((float) entityIn.getItemInUseMaxCount(), 0.0F, useDuration);
+    public void bucklerAnimationsLeftArm(InteractionHand hand, T entityIn) {
+        if (entityIn.getUsedItemHand() == hand && entityIn.getItemInHand(entityIn.getUsedItemHand()).getItem() instanceof BucklerItem) {
+            float useDuration = (float) entityIn.getItemInHand(entityIn.getUsedItemHand()).getUseDuration();
+            float useDurationClamped = Mth.clamp((float) entityIn.getTicksUsingItem(), 0.0F, useDuration);
             float result = useDurationClamped / useDuration;
-            this.bipedLeftArm.rotateAngleY = MathHelper.lerp(result, bipedLeftArm.rotateAngleY, 1.1466812652970528F);
-            this.bipedLeftArm.rotateAngleX = MathHelper.lerp(result, bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleX * 0.1F - 1.5F);
+            this.leftArm.yRot = Mth.lerp(result, leftArm.yRot, 1.1466812652970528F);
+            this.leftArm.xRot = Mth.lerp(result, leftArm.xRot, this.leftArm.xRot * 0.1F - 1.5F);
         }
         if (entityIn instanceof IBucklerUser)
-            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
-                ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
+            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getItemInHand(hand))) {
+                ItemStack handItems = hand == InteractionHand.MAIN_HAND ? entityIn.getOffhandItem() : entityIn.getMainHandItem();
                 if (!handItems.isEmpty()) {
-                    this.bipedRightArm.rotateAngleX = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;
-                    this.bipedRightArm.rotateAngleY = ((float) Math.PI / 6F);
+                    this.rightArm.xRot = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;
+                    this.rightArm.yRot = ((float) Math.PI / 6F);
                 }
-                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.1F - 1.5F;
-                this.bipedLeftArm.rotateAngleY = 1.1466812652970528F;
+                this.leftArm.xRot = this.leftArm.xRot * 0.1F - 1.5F;
+                this.leftArm.yRot = 1.1466812652970528F;
             }
     }
 
-    public void bucklerAnimationsRightArm(Hand hand, T entityIn) {
-        if (entityIn.getActiveHand() == hand && entityIn.getHeldItem(entityIn.getActiveHand()).getItem() instanceof BucklerItem) {
-            float useDuration = (float) entityIn.getHeldItem(entityIn.getActiveHand()).getUseDuration();
-            float useDurationClamped = MathHelper.clamp((float) entityIn.getItemInUseMaxCount(), 0.0F, useDuration);
+    public void bucklerAnimationsRightArm(InteractionHand hand, T entityIn) {
+        if (entityIn.getUsedItemHand() == hand && entityIn.getItemInHand(entityIn.getUsedItemHand()).getItem() instanceof BucklerItem) {
+            float useDuration = (float) entityIn.getItemInHand(entityIn.getUsedItemHand()).getUseDuration();
+            float useDurationClamped = Mth.clamp((float) entityIn.getTicksUsingItem(), 0.0F, useDuration);
             float result = useDurationClamped / useDuration;
-            this.bipedRightArm.rotateAngleY = MathHelper.lerp(result, bipedRightArm.rotateAngleY, -1.1466812652970528F);
-            this.bipedRightArm.rotateAngleX = MathHelper.lerp(result, bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleX * 0.1F - 1.5F);
+            this.rightArm.yRot = Mth.lerp(result, rightArm.yRot, -1.1466812652970528F);
+            this.rightArm.xRot = Mth.lerp(result, rightArm.xRot, this.rightArm.xRot * 0.1F - 1.5F);
         }
         if (entityIn instanceof IBucklerUser) {
-            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getHeldItem(hand))) {
-                ItemStack handItems = hand == Hand.MAIN_HAND ? entityIn.getHeldItemOffhand() : entityIn.getHeldItemMainhand();
+            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getItemInHand(hand))) {
+                ItemStack handItems = hand == InteractionHand.MAIN_HAND ? entityIn.getOffhandItem() : entityIn.getMainHandItem();
                 if (!handItems.isEmpty()) {
-                    this.bipedLeftArm.rotateAngleX = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;
-                    this.bipedLeftArm.rotateAngleY = (-(float) Math.PI / 6F);
+                    this.leftArm.xRot = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;
+                    this.leftArm.yRot = (-(float) Math.PI / 6F);
                 }
-                this.bipedRightArm.rotateAngleX = 0.0F * 0.1F - 1.5F;
-                this.bipedRightArm.rotateAngleY = -1.1466812652970528F;
+                this.rightArm.xRot = 0.0F * 0.1F - 1.5F;
+                this.rightArm.yRot = -1.1466812652970528F;
             }
         }
     }

@@ -5,54 +5,51 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.monster.PillagerEntity;
-import net.minecraft.entity.monster.WitherSkeletonEntity;
-import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
-import net.minecraft.entity.monster.piglin.PiglinTasks;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.CatEntity;
-import net.minecraft.entity.passive.IFlyingAnimal;
-import net.minecraft.entity.passive.PigEntity;
-import net.minecraft.entity.passive.PolarBearEntity;
-import net.minecraft.entity.passive.SnowGolemEntity;
-import net.minecraft.entity.passive.fish.AbstractFishEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.SnowballEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootPool;
-import net.minecraft.loot.TableLootEntry;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.BlockParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityPredicates;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.ExplosionContext;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.AbstractFish;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.FlyingAnimal;
+import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.PolarBear;
+import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.entries.LootTableReference;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -66,9 +63,8 @@ import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
-import tallestegg.bigbrain.capablities.LoafProvider;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.FindShelterGoal;
@@ -80,17 +76,19 @@ import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
-    private static final Method setTargetPiglin = ObfuscationReflectionHelper.findMethod(PiglinTasks.class, "func_234509_e_", AbstractPiglinEntity.class, LivingEntity.class);
+    private static final Method setTargetPiglin = ObfuscationReflectionHelper.findMethod(PiglinAi.class,
+            "maybeRetaliate", AbstractPiglin.class, LivingEntity.class);
 
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
         if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
-            PigEntity pig = (PigEntity) event.getParentA();
-            for (int i = 0; i < BigBrainConfig.minPigBabiesBred + pig.world.rand.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
-                PigEntity baby = EntityType.PIG.create(event.getChild().world);
-                baby.copyLocationAndAnglesFrom(pig);
-                baby.setChild(true);
-                pig.getEntityWorld().addEntity(baby);
+            Pig pig = (Pig) event.getParentA();
+            for (int i = 0; i < BigBrainConfig.minPigBabiesBred
+                    + pig.level.random.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
+                Pig baby = EntityType.PIG.create(event.getChild().level);
+                baby.copyPosition(pig);
+                baby.setBaby(true);
+                pig.getCommandSenderWorld().addFreshEntity(baby);
             }
         }
     }
@@ -99,7 +97,8 @@ public class BigBrainEvents {
     public static void onJump(LivingJumpEvent event) {
         if (event.getEntity() instanceof IBucklerUser) {
             if (((IBucklerUser) event.getEntity()).isBucklerDashing()) {
-                event.getEntity().setMotion(event.getEntity().getMotion().getX(), 0.0D, event.getEntity().getMotion().getZ());
+                event.getEntity().setDeltaMovement(event.getEntity().getDeltaMovement().x(), 0.0D,
+                        event.getEntity().getDeltaMovement().z());
             }
         }
     }
@@ -107,19 +106,20 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getEntity() instanceof LivingEntity) {
-            if (event.getLookingEntity() instanceof LivingEntity && ((LivingEntity) event.getLookingEntity()).isPotionActive(Effects.BLINDNESS))
+            if (event.getLookingEntity() instanceof LivingEntity
+                    && ((LivingEntity) event.getLookingEntity()).hasEffect(MobEffects.BLINDNESS))
                 event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
         }
     }
 
     @SubscribeEvent
-    public static void onProjectileImpact(ProjectileImpactEvent.Throwable event) {
-        if (event.getThrowable() instanceof SnowballEntity && BigBrainConfig.snowGolemSlow) {
-            if (event.getRayTraceResult().getType() == RayTraceResult.Type.ENTITY) {
-                Entity entity = ((EntityRayTraceResult) event.getRayTraceResult()).getEntity();
-                if (entity instanceof LivingEntity && event.getThrowable().func_234616_v_() instanceof SnowGolemEntity) {
+    public static void onProjectileImpact(ProjectileImpactEvent event) {
+        if (event.getProjectile() instanceof Snowball && BigBrainConfig.snowGolemSlow) {
+            if (event.getRayTraceResult().getType() == HitResult.Type.ENTITY) {
+                Entity entity = ((EntityHitResult) event.getRayTraceResult()).getEntity();
+                if (entity instanceof LivingEntity && event.getProjectile().getOwner() instanceof SnowGolem) {
                     LivingEntity living = (LivingEntity) entity;
-                    living.addPotionEffect(new EffectInstance(Effects.SLOWNESS, 20, 3));
+                    living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 3));
                 }
             }
         }
@@ -129,10 +129,12 @@ public class BigBrainEvents {
     public static void onLivingTick(LivingUpdateEvent event) {
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
-            int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
+            int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(),
+                    entity);
             if (!((IBucklerUser) entity).isBucklerDashing()) {
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() + 1);
-                int configValue = turningLevel == 0 ? BigBrainConfig.BucklerRunTime : BigBrainConfig.BucklerTurningRunTime;
+                int configValue = turningLevel == 0 ? BigBrainConfig.BucklerRunTime
+                        : BigBrainConfig.BucklerTurningRunTime;
                 if (((IBucklerUser) entity).getBucklerUseTimer() > configValue)
                     ((IBucklerUser) entity).setBucklerUseTimer(configValue);
                 ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
@@ -148,13 +150,15 @@ public class BigBrainEvents {
                 if (turningLevel == 0)
                     BigBrainEvents.shieldBash(entity);
                 if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
-                    Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
-                    ItemStack stack = entity.getHeldItem(hand);
+                    InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
+                            ? InteractionHand.MAIN_HAND
+                            : InteractionHand.OFF_HAND;
+                    ItemStack stack = entity.getItemInHand(hand);
                     ((IBucklerUser) entity).setBucklerDashing(false);
                     ((IBucklerUser) entity).setBucklerUseTimer(0);
                     ((IBucklerUser) entity).setCooldown(0);
                     BucklerItem.setReady(stack, false);
-                    entity.resetActiveHand();
+                    entity.stopUsingItem();
                 }
                 if (((IBucklerUser) entity).getCooldown() <= 0) {
                     ((IBucklerUser) entity).setCooldown(0);
@@ -167,7 +171,8 @@ public class BigBrainEvents {
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().toString().contains("minecraft:chests/bastion")) {
             ResourceLocation bucklerBastionLoot = new ResourceLocation(BigBrain.MODID, "chests/buckler_loot_table");
-            event.getTable().addPool(LootPool.builder().name("buckler_bastion_chests").addEntry(TableLootEntry.builder(bucklerBastionLoot)).build());
+            event.getTable().addPool(LootPool.lootPool().name("buckler_bastion_chests")
+                    .add(LootTableReference.lootTableReference(bucklerBastionLoot)).build());
         }
     }
 
@@ -176,18 +181,20 @@ public class BigBrainEvents {
         if (((IOneCriticalAfterCharge) event.getPlayer()).isCritical()) {
             event.setResult(Result.ALLOW);
             event.setDamageModifier(1.5F);
-            event.getPlayer().world.playSound((PlayerEntity) null, event.getPlayer().getPosX(), event.getPlayer().getPosY(), event.getPlayer().getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, event.getPlayer().getSoundCategory(), 1.0F, 1.0F);
+            event.getPlayer().level.playSound((Player) null, event.getPlayer().getX(), event.getPlayer().getY(),
+                    event.getPlayer().getZ(), SoundEvents.PLAYER_ATTACK_CRIT, event.getPlayer().getSoundSource(), 1.0F,
+                    1.0F);
             ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
         }
     }
 
     @SubscribeEvent
     public static void onSetAttackTarget(LivingSetAttackTargetEvent event) {
-        if (event.getEntity() instanceof AbstractPiglinEntity) {
+        if (event.getEntity() instanceof AbstractPiglin) {
             try {
-                setTargetPiglin.invoke(PiglinTasks.class, event.getEntity(), event.getTarget());
+                setTargetPiglin.invoke(PiglinAi.class, event.getEntity(), event.getTarget());
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                new RuntimeException("Big Brain has failed to invoke func_234509_e_");
+                new RuntimeException("Big Brain has failed to invoke maybeRetaliate");
             }
         }
     }
@@ -195,117 +202,140 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof PillagerEntity) {
-            PillagerEntity pillager = (PillagerEntity) entity;
+        if (entity instanceof Pillager) {
+            Pillager pillager = (Pillager) entity;
             if (BigBrainConfig.PillagerMultishot)
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
             if (BigBrainConfig.PillagerCover)
                 pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
         }
 
-        if (entity instanceof IMob && BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(entity.getEntityString())) {
-            MobEntity mob = (MobEntity) entity;
-            mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillagerEntity.class, true));
+        if (entity instanceof Enemy && BigBrainConfig.MobsAttackAllVillagers
+                && !BigBrainConfig.MobBlackList.contains(entity.getEncodeId())) {
+            Mob mob = (Mob) entity;
+            mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
         }
 
-        if (entity instanceof AbstractVillagerEntity && BigBrainConfig.MobsAttackAllVillagers) {
-            AbstractVillagerEntity villager = (AbstractVillagerEntity) entity;
-            villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, MobEntity.class, 8.0F, 1.0D, 0.5D, (p_213469_1_) -> {
-                return !BigBrainConfig.MobBlackList.contains(p_213469_1_.getEntityString());
-            }));
+        if (entity instanceof AbstractVillager && BigBrainConfig.MobsAttackAllVillagers) {
+            AbstractVillager villager = (AbstractVillager) entity;
+            villager.goalSelector.addGoal(2,
+                    new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (p_213469_1_) -> {
+                        return !BigBrainConfig.MobBlackList.contains(p_213469_1_.getEncodeId());
+                    }));
         }
 
         if (entity.getType().equals(ForgeRegistries.ENTITIES.getValue(new ResourceLocation("guardvillagers:guard")))) {
-            CreatureEntity creature = (CreatureEntity) entity;
+            PathfinderMob creature = (PathfinderMob) entity;
             creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
         }
 
-        if (entity instanceof PolarBearEntity) {
-            PolarBearEntity polar = (PolarBearEntity) entity;
+        if (entity instanceof PolarBear) {
+            PolarBear polar = (PolarBear) entity;
             if (BigBrainConfig.PolarBearFish)
-                polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFishEntity.class, 10, true, true, (Predicate<LivingEntity>) null));
+                polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true,
+                        true, (Predicate<LivingEntity>) null));
         }
 
-        if (BigBrainConfig.animalShelter && entity instanceof AnimalEntity && !BigBrainConfig.AnimalBlackList.contains(entity.getEntityString()) && !(entity instanceof IFlyingAnimal)) {
-            AnimalEntity animal = (AnimalEntity) entity;
+        if (BigBrainConfig.animalShelter && entity instanceof Animal
+                && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId())
+                && !(entity instanceof FlyingAnimal)) {
+            Animal animal = (Animal) entity;
             animal.goalSelector.addGoal(1, new StayInShelterGoal(animal, 0.8D));
             animal.goalSelector.addGoal(2, new FindShelterGoal(animal));
         }
     }
 
-    @SubscribeEvent
-    public static void onAttachEntityCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof CatEntity) {
-            event.addCapability(new ResourceLocation(BigBrain.MODID, "loaf"), new LoafProvider());
-        }
-    }
-
     public static void spawnRunningEffectsWhileCharging(LivingEntity entity) {
-        int x = MathHelper.floor(entity.getPosX());
-        int y = MathHelper.floor(entity.getPosY() - (double) 0.2F);
-        int z = MathHelper.floor(entity.getPosZ());
-        BlockPos blockpos = new BlockPos(x, y, z);
-        BlockState blockstate = entity.world.getBlockState(blockpos);
-        if (!blockstate.addRunningEffects(entity.world, blockpos, entity))
-            if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
-                Vector3d vector3d = entity.getMotion();
-                entity.world.addParticle(new BlockParticleData(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getPosX() + (entity.getRNG().nextDouble() - 1.0D) * (double) entity.getSize(entity.getPose()).width, entity.getPosY() + 0.1D,
-                        entity.getPosZ() + (entity.getRNG().nextDouble() - 1.0D) * (double) entity.getSize(entity.getPose()).width, vector3d.x * -4.0D, 1.5D, vector3d.z * -4.0D);
+        int i = Mth.floor(entity.getX());
+        int j = Mth.floor(entity.getY() - (double) 0.2F);
+        int k = Mth.floor(entity.getZ());
+        BlockPos blockpos = new BlockPos(i, j, k);
+        BlockState blockstate = entity.level.getBlockState(blockpos);
+        if (!blockstate.addRunningEffects(entity.level, blockpos, entity))
+            if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
+                Vec3 vec3 = entity.getDeltaMovement();
+                entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockpos),
+                        entity.getX() + (entity.getRandom().nextDouble() - 0.5D)
+                                * (double) entity.getDimensions(entity.getPose()).height,
+                        entity.getY() + 0.1D,
+                        entity.getZ() + (entity.getRandom().nextDouble() - 0.5D)
+                                * (double) entity.getDimensions(entity.getPose()).width,
+                        vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
             }
     }
 
     public static void shieldBash(LivingEntity entity) {
         double maxValue = Double.MAX_VALUE;
         Entity entityHit = null;
-        for (Entity entityThatIsNear : entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox().expand(entity.getMotion()), EntityPredicates.pushableBy(entity))) {
-            AxisAlignedBB axisalignedbb = entityThatIsNear.getBoundingBox().grow((double) 0.3F);
-            Optional<Vector3d> optional = axisalignedbb.rayTrace(entity.getPositionVec(), entity.getPositionVec().add(entity.getMotion()));
+        for (Entity entityThatIsNear : entity.level.getEntities(entity,
+                entity.getBoundingBox().expandTowards(entity.getDeltaMovement()),
+                EntitySelector.pushableBy(entity))) {
+            AABB axisalignedbb = entityThatIsNear.getBoundingBox().inflate((double) 0.3F);
+            Optional<Vec3> optional = axisalignedbb.clip(entity.position(),
+                    entity.position().add(entity.getDeltaMovement()));
             if (optional.isPresent()) {
-                double distance = entity.getPositionVec().squareDistanceTo(optional.get());
+                double distance = entity.position().distanceToSqr(optional.get());
                 if (distance < maxValue) {
                     entityHit = entityThatIsNear;
                     maxValue = distance;
-                    entityHit.applyEntityCollision(entity);
-                    int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
-                    float f = 6.0F + ((float) entity.getRNG().nextInt(3));
+                    entityHit.push(entity);
+                    int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(),
+                            entity);
+                    float f = 6.0F + ((float) entity.getRandom().nextInt(3));
                     float f1 = 3.0F;
                     if (f1 > 0.0F && entity instanceof LivingEntity) {
                         for (int duration = 0; duration < 10; ++duration) {
-                            double d0 = entity.getRNG().nextGaussian() * 0.02D;
-                            double d1 = entity.getRNG().nextGaussian() * 0.02D;
-                            double d2 = entity.getRNG().nextGaussian() * 0.02D;
-                            BasicParticleType type = entityHit instanceof WitherEntity || entityHit instanceof WitherSkeletonEntity ? ParticleTypes.SMOKE : ParticleTypes.CLOUD;
+                            double d0 = entity.getRandom().nextGaussian() * 0.02D;
+                            double d1 = entity.getRandom().nextGaussian() * 0.02D;
+                            double d2 = entity.getRandom().nextGaussian() * 0.02D;
+                            SimpleParticleType type = entityHit instanceof WitherBoss
+                                    || entityHit instanceof WitherSkeleton ? ParticleTypes.SMOKE : ParticleTypes.CLOUD;
                             // Collision is done on the server side, so a server side method must be used.
-                            ((ServerWorld) entity.world).spawnParticle(type, entity.getPosXRandom(1.0D), entity.getPosYRandom() + 1.0D, entity.getPosZRandom(1.0D), 1, d0, d1, d2, 1.0D);
+                            ((ServerLevel) entity.level).sendParticles(type, entity.getRandomX(1.0D),
+                                    entity.getRandomY() + 1.0D, entity.getRandomZ(1.0D), 1, d0, d1, d2, 1.0D);
                         }
                         if (bangLevel == 0) {
-                            if (entityHit.attackEntityFrom(DamageSource.causeMobDamage(entity), f)) {
+                            if (entityHit.hurt(DamageSource.mobAttack(entity), f)) {
                                 if (entityHit instanceof LivingEntity) {
-                                    ((LivingEntity) entityHit).applyKnockback(f1, (double) MathHelper.sin(entity.rotationYaw * ((float) Math.PI / 180F)), (double) (-MathHelper.cos(entity.rotationYaw * ((float) Math.PI / 180F))));
-                                    entity.setMotion(entity.getMotion().mul(0.6D, 1.0D, 0.6D));
+                                    ((LivingEntity) entityHit).knockback(f1,
+                                            (double) Mth.sin(entity.getXRot() * ((float) Math.PI / 180F)),
+                                            (double) (-Mth.cos(entity.getYRot() * ((float) Math.PI / 180F))));
+                                    entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
                                 }
                                 if (!entity.isSilent())
-                                    ((ServerWorld) entity.world).playSound((PlayerEntity) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.5F, 0.8F + entity.getRNG().nextFloat() * 0.4F);
-                                if (entityHit instanceof PlayerEntity && ((PlayerEntity) entityHit).getActiveItemStack().isShield(((PlayerEntity) entityHit)))
-                                    ((PlayerEntity) entityHit).disableShield(true);
+                                    ((ServerLevel) entity.level).playSound((Player) null, entity.getX(), entity.getY(),
+                                            entity.getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundSource(),
+                                            0.5F, 0.8F + entity.getRandom().nextFloat() * 0.4F);
+                                if (entityHit instanceof Player
+                                        && ((Player) entityHit).getUseItem().isShield(((Player) entityHit)))
+                                    ((Player) entityHit).disableShield(true);
                             }
                         } else {
                             if (!entity.isSilent())
-                                ((ServerWorld) entity.world).playSound((PlayerEntity) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundCategory(), 0.5F, 0.8F + entity.getRNG().nextFloat() * 0.4F);
-                            Hand hand = entity.getHeldItemMainhand().getItem() instanceof BucklerItem ? Hand.MAIN_HAND : Hand.OFF_HAND;
-                            ItemStack stack = entity.getHeldItem(hand);
-                            stack.damageItem(5 * bangLevel, entity, (player1) -> {
-                                player1.sendBreakAnimation(hand);
-                                if (entity instanceof PlayerEntity)
-                                    ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) entity, entity.getActiveItemStack(), hand);
+                                ((ServerLevel) entity.level).playSound((Player) null, entity.getX(), entity.getY(),
+                                        entity.getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundSource(), 0.5F,
+                                        0.8F + entity.getRandom().nextFloat() * 0.4F);
+                            InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
+                                    ? InteractionHand.MAIN_HAND
+                                    : InteractionHand.OFF_HAND;
+                            ItemStack stack = entity.getItemInHand(hand);
+                            stack.hurtAndBreak(5 * bangLevel, entity, (player1) -> {
+                                player1.broadcastBreakEvent(hand);
+                                if (entity instanceof Player)
+                                    ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(),
+                                            hand);
                             });
-                            Explosion.Mode mode = BigBrainConfig.BangBlockDestruction ? Explosion.Mode.BREAK : Explosion.Mode.NONE;
-                            entity.world.createExplosion((Entity) null, DamageSource.causeExplosionDamage(entity), (ExplosionContext) null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), (float) bangLevel * 1.0F, false, mode);
+                            Explosion.BlockInteraction mode = BigBrainConfig.BangBlockDestruction
+                                    ? Explosion.BlockInteraction.BREAK
+                                    : Explosion.BlockInteraction.NONE;
+                            entity.level.explode((Entity) null, entity.getX(), entity.getY(), entity.getZ(),
+                                    (float) bangLevel * 1.0F, mode);
                             ((IBucklerUser) entity).setBucklerDashing(false);
                         }
-                        entity.setLastAttackedEntity(entityHit);
+                        entity.setLastHurtMob(entityHit);
                         if (entity instanceof IOneCriticalAfterCharge)
-                            ((IOneCriticalAfterCharge) entity).setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity) == 0);
+                            ((IOneCriticalAfterCharge) entity).setCritical(BigBrainEnchantments
+                                    .getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity) == 0);
                     }
                 }
             }

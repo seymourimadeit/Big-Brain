@@ -2,75 +2,75 @@ package tallestegg.bigbrain.entity.ai.goals;
 
 import java.util.EnumSet;
 
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.Hand;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.InteractionHand;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
 
 //So Guards can use the buckler if the player puts it on their offhand.
-public class UseBucklerGoal<T extends CreatureEntity> extends Goal {
+public class UseBucklerGoal<T extends PathfinderMob> extends Goal {
     private final T owner;
     private int strafeTicks;
     private ChargePhases chargePhase = ChargePhases.NONE;
 
     public UseBucklerGoal(T owner) {
         this.owner = owner;
-        this.setMutexFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
-    public boolean shouldExecute() {
-        return ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && owner.getAttackTarget() != null && owner.canEntityBeSeen(owner.getAttackTarget()) && owner.getAttackTarget().getDistance(owner) >= 4.0D
-                && !owner.isInWaterRainOrBubbleColumn();
+    public boolean canUse() {
+        return ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getOffhandItem().getItem() instanceof BucklerItem && owner.getTarget() != null && owner.hasLineOfSight(owner.getTarget()) && owner.getTarget().distanceTo(owner) >= 4.0D
+                && !owner.isInWaterRainOrBubble();
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
-        return ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getHeldItemOffhand().getItem() instanceof BucklerItem && owner.getAttackTarget() != null && owner.canEntityBeSeen(owner.getAttackTarget()) && !owner.isInWaterRainOrBubbleColumn() && chargePhase != ChargePhases.FINISH;
+    public boolean canContinueToUse() {
+        return ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getOffhandItem().getItem() instanceof BucklerItem && owner.getTarget() != null && owner.hasLineOfSight(owner.getTarget()) && !owner.isInWaterRainOrBubble() && chargePhase != ChargePhases.FINISH;
     }
 
     @Override
     public void tick() {
-        LivingEntity livingEntity = owner.getAttackTarget();
+        LivingEntity livingEntity = owner.getTarget();
         if (livingEntity == null)
             return;
-        if (((IBucklerUser) owner).isBucklerDashing() && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getHeldItemOffhand()) > 0 || !((IBucklerUser) owner).isBucklerDashing())
-            owner.faceEntity(livingEntity, 30.0F, 30.0F);
-        if (owner.getDistance(livingEntity) >= 10.0D) {
-            owner.getNavigator().tryMoveToEntityLiving(livingEntity, 1.0D);
+        if (((IBucklerUser) owner).isBucklerDashing() && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getOffhandItem()) > 0 || !((IBucklerUser) owner).isBucklerDashing())
+            owner.lookAt(livingEntity, 30.0F, 30.0F);
+        if (owner.distanceTo(livingEntity) >= 10.0D) {
+            owner.getNavigation().moveTo(livingEntity, 1.0D);
         } else {
-            owner.getNavigator().clearPath();
+            owner.getNavigation().stop();
         }
-        if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && owner.getDistance(livingEntity) >= 4.0D && owner.getDistance(livingEntity) <= 10.0D) {
-            owner.getMoveHelper().strafe(-2.0F, 0.0F);
+        if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && owner.distanceTo(livingEntity) >= 4.0D && owner.distanceTo(livingEntity) <= 10.0D) {
+            owner.getMoveControl().strafe(-2.0F, 0.0F);
             strafeTicks--;
             if (strafeTicks == 0)
                 chargePhase = ChargePhases.CHARGE;
         } else if (chargePhase == ChargePhases.CHARGE) {
-            if (!owner.isHandActive())
-                owner.setActiveHand(Hand.OFF_HAND);
-            if (owner.getItemInUseMaxCount() >= owner.getActiveItemStack().getUseDuration())
+            if (!owner.isUsingItem())
+                owner.startUsingItem(InteractionHand.OFF_HAND);
+            if (owner.getTicksUsingItem() >= owner.getUseItem().getUseDuration())
                 chargePhase = ChargePhases.FINISH;
         }
     }
 
     @Override
-    public void startExecuting() {
-        owner.setAggroed(true);
+    public void start() {
+        owner.setAggressive(true);
         chargePhase = ChargePhases.STRAFE;
         strafeTicks = 20;
     }
 
     @Override
-    public void resetTask() {
-        owner.resetActiveHand();
-        owner.setAggroed(false);
-        owner.setAttackTarget(null);
+    public void stop() {
+        owner.stopUsingItem();
+        owner.setAggressive(false);
+        owner.setTarget(null);
     }
 
     public enum ChargePhases {

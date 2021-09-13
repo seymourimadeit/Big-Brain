@@ -1,32 +1,43 @@
 package tallestegg.bigbrain.client.renderers;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import tallestegg.bigbrain.BBModelLayers;
 import tallestegg.bigbrain.BigBrainItems;
 import tallestegg.bigbrain.BucklerTexture;
 import tallestegg.bigbrain.client.model.ModelGoldenBuckler;
 
-public class BucklerRenderer extends ItemStackTileEntityRenderer {
-    public final ModelGoldenBuckler bucklerModel = new ModelGoldenBuckler();
+public class BucklerRenderer extends BlockEntityWithoutLevelRenderer {
+    public final ModelGoldenBuckler bucklerModel;
+
+    public BucklerRenderer(BlockEntityRenderDispatcher berd, EntityModelSet set) {
+        super(berd, set);
+        this.bucklerModel = new ModelGoldenBuckler(set.bakeLayer(BBModelLayers.BUCKLER));
+    }
 
     @Override
-    public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+    public void renderByItem(ItemStack stack, ItemTransforms.TransformType p_239207_2_, PoseStack matrixStack,
+            MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         Item item = stack.getItem();
         if (item == BigBrainItems.BUCKLER.get()) {
-            matrixStack.push();
+            matrixStack.pushPose();
             matrixStack.scale(1.0F, -1.0F, -1.0F);
-            RenderMaterial rendermaterial = BucklerTexture.BUCKLER_TEXTURE;
-            IVertexBuilder ivertexbuilder = rendermaterial.getSprite().wrapBuffer(ItemRenderer.getEntityGlintVertexBuilder(buffer, this.bucklerModel.getRenderType(rendermaterial.getAtlasLocation()), true, stack.hasEffect()));
-            this.bucklerModel.base.render(matrixStack, ivertexbuilder, combinedLight, combinedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
-            matrixStack.pop();
+            Material rendermaterial = BucklerTexture.BUCKLER_TEXTURE;
+            VertexConsumer ivertexbuilder = rendermaterial.sprite().wrap(ItemRenderer.getFoilBufferDirect(buffer,
+                    this.bucklerModel.renderType(rendermaterial.atlasLocation()), true, stack.hasFoil()));
+            this.bucklerModel.root.render(matrixStack, ivertexbuilder, combinedLight, combinedOverlay, 1.0F, 1.0F, 1.0F,
+                    1.0F);
+            matrixStack.popPose();
         }
     }
 }

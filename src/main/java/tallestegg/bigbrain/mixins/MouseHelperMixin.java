@@ -8,17 +8,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.MouseHelper;
+import net.minecraft.client.MouseHandler;
 import tallestegg.bigbrain.BigBrainEnchantments;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
-@Mixin(MouseHelper.class)
+@Mixin(MouseHandler.class)
 public class MouseHelperMixin {
     @Final
     @Shadow
     private Minecraft minecraft;
 
-    @ModifyVariable(at = @At(value = "STORE", opcode = Opcodes.DSTORE), method = "updatePlayerLook", ordinal = 2)
+    @ModifyVariable(at = @At(value = "STORE", opcode = Opcodes.DSTORE), method = "turnPlayer", ordinal = 2)
     public double updatePlayerLook(double original) {
         return minecraft.player != null && ((IBucklerUser) minecraft.player).isBucklerDashing() && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), minecraft.player) == 0? 0.2F : original;
     }

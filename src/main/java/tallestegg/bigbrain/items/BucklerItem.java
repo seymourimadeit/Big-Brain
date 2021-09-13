@@ -1,30 +1,32 @@
 package tallestegg.bigbrain.items;
 
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShieldItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.IItemRenderProperties;
 import net.minecraftforge.common.Tags.Items;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.BigBrainEnchantments;
@@ -32,50 +34,61 @@ import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
-public class BucklerItem extends ShieldItem {
+public class BucklerItem extends ShieldItem implements IItemRenderProperties {
     public BucklerItem(Properties p_i48470_1_) {
-        super(p_i48470_1_.setISTER(BucklerItem::getISTER));
-        DispenserBlock.registerDispenseBehavior(this, ArmorItem.DISPENSER_BEHAVIOR);
-    }
-
-    private static Callable<ItemStackTileEntityRenderer> getISTER() {
-        return BucklerRenderer::new;
+        super(p_i48470_1_);
+        DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.charge")).mergeStyle(TextFormatting.BLUE));
-        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.while")).mergeStyle(TextFormatting.GRAY));
-        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.forward")).mergeStyle(TextFormatting.BLUE));
-        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.speed")).mergeStyle(TextFormatting.BLUE));
-        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0 && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0)
-            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.bash")).mergeStyle(TextFormatting.BLUE));
-        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) > 0)
-            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.explosion")).mergeStyle(TextFormatting.BLUE));
-        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.knockback")).mergeStyle(TextFormatting.BLUE));
-        if (EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0 && EnchantmentHelper.getEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0) {
-            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.critical")).mergeStyle(TextFormatting.BLUE));
-            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.critSwing")).mergeStyle(TextFormatting.RED));
-            tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.turnSpeed")).mergeStyle(TextFormatting.RED));
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> list, TooltipFlag tooltip) {
+        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.charge")).withStyle(ChatFormatting.BLUE));
+        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.while")).withStyle(ChatFormatting.GRAY));
+        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.forward")).withStyle(ChatFormatting.BLUE));
+        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.speed")).withStyle(ChatFormatting.BLUE));
+        if (EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0
+                && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0)
+            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.bash")).withStyle(ChatFormatting.BLUE));
+        if (EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) > 0)
+            list.add(
+                    (new TranslatableComponent("item.bigbrain.buckler.desc.explosion")).withStyle(ChatFormatting.BLUE));
+        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.knockback")).withStyle(ChatFormatting.BLUE));
+        if (EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0
+                && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0) {
+            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.critical")).withStyle(ChatFormatting.BLUE));
+            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.critSwing")).withStyle(ChatFormatting.RED));
+            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.turnSpeed")).withStyle(ChatFormatting.RED));
         }
-        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.noJumping")).mergeStyle(TextFormatting.RED));
-        tooltip.add((new TranslationTextComponent("item.bigbrain.buckler.desc.water")).mergeStyle(TextFormatting.RED));
+        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.noJumping")).withStyle(ChatFormatting.RED));
+        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.water")).withStyle(ChatFormatting.RED));
     }
 
     @Override
-    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
-        ItemStack itemstack = super.onItemUseFinish(stack, worldIn, entityLiving);
+    public void initializeClient(Consumer<IItemRenderProperties> consumer) {
+        consumer.accept(new IItemRenderProperties() {
+            @Override
+            public BlockEntityWithoutLevelRenderer getItemStackRenderer() {
+                return new BucklerRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+            }
+        });
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
+        ItemStack itemstack = super.finishUsingItem(stack, worldIn, entityLiving);
         if (entityLiving instanceof IBucklerUser) {
             ((IBucklerUser) entityLiving).setBucklerDashing(true);
             BucklerItem.setReady(stack, true);
-            stack.damageItem(1, entityLiving, (entityLiving1) -> {
-                entityLiving1.sendBreakAnimation(EquipmentSlotType.OFFHAND);
+            stack.hurtAndBreak(1, entityLiving, (entityLiving1) -> {
+                entityLiving1.broadcastBreakEvent(EquipmentSlot.OFFHAND);
             });
-            if (entityLiving instanceof PlayerEntity)
-                ((PlayerEntity) entityLiving).getCooldownTracker().setCooldown(this, BigBrainConfig.BucklerCooldown);
-            entityLiving.resetActiveHand();
-            if (entityLiving instanceof AbstractPiglinEntity)
-                entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isChild() ? (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.5F : (entityLiving.getRNG().nextFloat() - entityLiving.getRNG().nextFloat()) * 0.2F + 1.0F);
+            if (entityLiving instanceof Player)
+                ((Player) entityLiving).getCooldowns().addCooldown(this, BigBrainConfig.BucklerCooldown);
+            entityLiving.stopUsingItem();
+            if (entityLiving instanceof AbstractPiglin)
+                entityLiving.playSound(BigBrainSounds.PIGLIN_BRUTE_CHARGE.get(), 2.0F, entityLiving.isBaby()
+                        ? (entityLiving.getRandom().nextFloat() - entityLiving.getRandom().nextFloat()) * 0.2F + 1.5F
+                        : (entityLiving.getRandom().nextFloat() - entityLiving.getRandom().nextFloat()) * 0.2F + 1.0F);
         }
         return itemstack;
     }
@@ -86,41 +99,43 @@ public class BucklerItem extends ShieldItem {
     }
 
     @Override
-    public int getItemEnchantability() {
+    public int getEnchantmentValue() {
         return 1;
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        return !playerIn.isInWaterRainOrBubbleColumn() ? super.onItemRightClick(worldIn, playerIn, handIn) : ActionResult.resultPass(playerIn.getHeldItem(handIn));
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+        return !playerIn.isInWaterRainOrBubble() ? super.use(worldIn, playerIn, handIn)
+                : InteractionResultHolder.pass(playerIn.getItemInHand(handIn));
     }
 
     public static void moveFowards(LivingEntity entity) {
         if (entity.isAlive()) {
-            Vector3d look = entity.getLook(1.0F);
-            Vector3d motion = entity.getMotion();
-            if (entity instanceof PlayerEntity) {
-                entity.setMotion(look.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y, look.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            Vec3 look = entity.getViewVector(1.0F);
+            Vec3 motion = entity.getDeltaMovement();
+            if (entity instanceof Player) {
+                entity.setDeltaMovement(look.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y,
+                        look.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
             } else {
                 // This is the only way to make the piglin brute go faster without having it
                 // spazz out.
-                entity.setMotion(look.x * 1.0D, motion.y, look.z * 1.0D);
+                entity.setDeltaMovement(look.x * 1.0D, motion.y, look.z * 1.0D);
             }
         }
     }
-
+    
     public static boolean isReady(ItemStack stack) {
-        CompoundNBT compoundnbt = stack.getTag();
+        CompoundTag compoundnbt = stack.getTag();
         return compoundnbt != null && compoundnbt.getBoolean("Ready");
     }
 
     public static void setReady(ItemStack stack, boolean ready) {
-        CompoundNBT compoundnbt = stack.getOrCreateTag();
+        CompoundTag compoundnbt = stack.getOrCreateTag();
         compoundnbt.putBoolean("Ready", ready);
     }
 
     @Override
-    public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
+    public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
         return Items.INGOTS_GOLD.contains(repair.getItem());
     }
 
