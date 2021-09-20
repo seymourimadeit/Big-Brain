@@ -10,7 +10,6 @@ import com.google.common.collect.Lists;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 @EventBusSubscriber(modid = BigBrain.MODID, bus = EventBusSubscriber.Bus.MOD)
@@ -52,6 +51,7 @@ public class BigBrainConfig {
     public static List<String> AnimalBlackList;
     public static List<String> NightAnimalBlackList;
     public static List<String> RainAnimalBlackList;
+    public static List<String> EntitiesThatCanAlsoUseTheBuckler;
 
     public static void bakeCommonConfig() {
         PillagerCover = COMMON.PillagerCover.get();
@@ -73,6 +73,7 @@ public class BigBrainConfig {
         animalShelter = COMMON.animalShelter.get();
         mobBlindnessVision = COMMON.mobBlindnessVision.get();
         meleeFix = COMMON.meleeFix.get();
+        EntitiesThatCanAlsoUseTheBuckler = COMMON.EntitiesThatCanAlsoUseTheBuckler.get();
     }
 
     public static void bakeClientConfig() {
@@ -110,6 +111,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
+        public final ForgeConfigSpec.ConfigValue<List<String>> EntitiesThatCanAlsoUseTheBuckler;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             builder.push("all mobs");
@@ -118,6 +120,7 @@ public class BigBrainConfig {
                     .defineInRange("Blindness range", 0.10D, -500.0D, 10000.0D);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
+            EntitiesThatCanAlsoUseTheBuckler = builder.translation(BigBrain.MODID + ".config.mobBucklerWhiteList").comment("Any mob id input in this list will be able to use the buckler").define("Mobs that can also use the buckler", Lists.newArrayList("guardvillagers:guard"));
             builder.pop();
             builder.push("buckler");
             BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
@@ -131,7 +134,7 @@ public class BigBrainConfig {
             PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
             builder.pop();
             builder.push("animals");
-            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf", "minecraft:turtle"));
+            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf", "minecraft:turtle", "minecraft:polar_bear", "minecraft:axolotl"));
             NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").define("Animal Night BlackList", Lists.newArrayList("minecraft:cat"));
             RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalRainBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());
             animalShelter = builder.translation(BigBrain.MODID + ".config.animalShelter").define("Animals seek shelter?", true);
@@ -144,7 +147,7 @@ public class BigBrainConfig {
             PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
             builder.pop();
             builder.push("snow golems");
-            snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").define("Allow snow balls made by snow golems to apply a slowness effect to mobs hit by it?", true);
+            snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").define("Allow snow balls made by snow golems to apply 5 seconds of freezing that can be added up when they hit an entity?", true);
             builder.pop();
         }
     }

@@ -50,6 +50,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -64,20 +65,19 @@ import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.registries.ForgeRegistries;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.entity.ai.goals.FindShelterGoal;
 import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
+import tallestegg.bigbrain.entity.ai.goals.RestrictSunAnimalGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
-import tallestegg.bigbrain.entity.ai.goals.StayInShelterGoal;
 import tallestegg.bigbrain.entity.ai.goals.UseBucklerGoal;
 import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
-    private static final Method setTargetPiglin = ObfuscationReflectionHelper.findMethod(PiglinAi.class,
-            "maybeRetaliate", AbstractPiglin.class, LivingEntity.class);
+    private static final Method setTargetPiglin = ObfuscationReflectionHelper.findMethod(PiglinAi.class, "m_34624_",
+            AbstractPiglin.class, LivingEntity.class);
 
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
@@ -119,7 +119,8 @@ public class BigBrainEvents {
                 Entity entity = ((EntityHitResult) event.getRayTraceResult()).getEntity();
                 if (entity instanceof LivingEntity && event.getProjectile().getOwner() instanceof SnowGolem) {
                     LivingEntity living = (LivingEntity) entity;
-                    living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 3));
+                    if (living.canFreeze())
+                        living.setTicksFrozen(living.getTicksFrozen() + 100);
                 }
             }
         }
@@ -224,7 +225,7 @@ public class BigBrainEvents {
                     }));
         }
 
-        if (entity.getType().equals(ForgeRegistries.ENTITIES.getValue(new ResourceLocation("guardvillagers:guard")))) {
+        if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId())) {
             PathfinderMob creature = (PathfinderMob) entity;
             creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
         }
@@ -240,8 +241,8 @@ public class BigBrainEvents {
                 && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId())
                 && !(entity instanceof FlyingAnimal)) {
             Animal animal = (Animal) entity;
-            animal.goalSelector.addGoal(1, new StayInShelterGoal(animal, 0.8D));
-            animal.goalSelector.addGoal(2, new FindShelterGoal(animal));
+            animal.goalSelector.addGoal(2, new RestrictSunAnimalGoal(animal));
+            animal.goalSelector.addGoal(3, new FindShelterGoal(animal));
         }
     }
 
@@ -268,16 +269,15 @@ public class BigBrainEvents {
         double maxValue = Double.MAX_VALUE;
         Entity entityHit = null;
         for (Entity entityThatIsNear : entity.level.getEntities(entity,
-                entity.getBoundingBox().expandTowards(entity.getDeltaMovement()),
-                EntitySelector.pushableBy(entity))) {
+                entity.getBoundingBox().expandTowards(entity.getDeltaMovement()), EntitySelector.pushableBy(entity))) {
             AABB axisalignedbb = entityThatIsNear.getBoundingBox().inflate((double) 0.3F);
             Optional<Vec3> optional = axisalignedbb.clip(entity.position(),
                     entity.position().add(entity.getDeltaMovement()));
             if (optional.isPresent()) {
                 double distance = entity.position().distanceToSqr(optional.get());
                 if (distance < maxValue) {
-                    entityHit = entityThatIsNear;
                     maxValue = distance;
+                    entityHit = entityThatIsNear;
                     entityHit.push(entity);
                     int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(),
                             entity);
@@ -297,8 +297,8 @@ public class BigBrainEvents {
                         if (bangLevel == 0) {
                             if (entityHit.hurt(DamageSource.mobAttack(entity), f)) {
                                 if (entityHit instanceof LivingEntity) {
-                                    ((LivingEntity) entityHit).knockback(f1,
-                                            (double) Mth.sin(entity.getXRot() * ((float) Math.PI / 180F)),
+                                    ((LivingEntity) entityHit).knockback((double) (f1),
+                                            (double) Mth.sin(entity.getYRot() * ((float) Math.PI / 180F)),
                                             (double) (-Mth.cos(entity.getYRot() * ((float) Math.PI / 180F))));
                                     entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
                                 }
@@ -307,14 +307,10 @@ public class BigBrainEvents {
                                             entity.getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundSource(),
                                             0.5F, 0.8F + entity.getRandom().nextFloat() * 0.4F);
                                 if (entityHit instanceof Player
-                                        && ((Player) entityHit).getUseItem().isShield(((Player) entityHit)))
+                                        && ((Player) entityHit).getUseItem().canPerformAction(ToolActions.SHIELD_BLOCK))
                                     ((Player) entityHit).disableShield(true);
                             }
                         } else {
-                            if (!entity.isSilent())
-                                ((ServerLevel) entity.level).playSound((Player) null, entity.getX(), entity.getY(),
-                                        entity.getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundSource(), 0.5F,
-                                        0.8F + entity.getRandom().nextFloat() * 0.4F);
                             InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
                                     ? InteractionHand.MAIN_HAND
                                     : InteractionHand.OFF_HAND;
@@ -322,8 +318,7 @@ public class BigBrainEvents {
                             stack.hurtAndBreak(5 * bangLevel, entity, (player1) -> {
                                 player1.broadcastBreakEvent(hand);
                                 if (entity instanceof Player)
-                                    ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(),
-                                            hand);
+                                    ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(), hand);
                             });
                             Explosion.BlockInteraction mode = BigBrainConfig.BangBlockDestruction
                                     ? Explosion.BlockInteraction.BREAK

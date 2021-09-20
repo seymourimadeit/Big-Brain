@@ -36,7 +36,7 @@ import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
 public class BigBrainClientEvents {
-    public static final Method preRenderCallback = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "scale", LivingEntity.class, PoseStack.class, float.class);
+    public static final Method preRenderCallback = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_7546_", LivingEntity.class, PoseStack.class, float.class);
     
     @SubscribeEvent
     public static void onMovementKeyPressed(InputUpdateEvent event) {
