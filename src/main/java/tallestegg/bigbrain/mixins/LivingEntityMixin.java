@@ -130,7 +130,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     }
 
     @Shadow
-    protected abstract AttributeInstance getAttribute(Attribute knockbackResistance);
+    public abstract AttributeInstance getAttribute(Attribute p_21052_);
 
     @Shadow
     protected abstract boolean isBlocking();
