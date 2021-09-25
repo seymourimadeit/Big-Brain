@@ -165,7 +165,7 @@ public class BigBrainEvents {
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
                 ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
                 BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
-                if (turningLevel == 0)
+                if (turningLevel == 0 && !entity.level.isClientSide())
                     BigBrainEvents.shieldBash(entity);
                 if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
                     InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
