@@ -147,7 +147,7 @@ public class BigBrainConfig {
             PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
             builder.pop();
             builder.push("snow golems");
-            snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").define("Allow snow balls made by snow golems to apply 5 seconds of freezing that can be added up when they hit an entity?", true);
+            snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").comment("Freezing time can be added up by successive shots.").define("Allow snow balls to apply 5 seconds of freezing when they hit an entity?", true);
             builder.pop();
         }
     }

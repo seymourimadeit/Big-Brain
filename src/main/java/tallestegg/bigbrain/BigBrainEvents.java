@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -30,7 +29,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.animal.PolarBear;
-import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Pillager;
@@ -40,7 +38,9 @@ import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -61,6 +61,7 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -117,11 +118,24 @@ public class BigBrainEvents {
         if (event.getProjectile() instanceof Snowball && BigBrainConfig.snowGolemSlow) {
             if (event.getRayTraceResult().getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult) event.getRayTraceResult()).getEntity();
-                if (entity instanceof LivingEntity && event.getProjectile().getOwner() instanceof SnowGolem) {
+                if (entity instanceof LivingEntity) {
                     LivingEntity living = (LivingEntity) entity;
                     if (living.canFreeze())
                         living.setTicksFrozen(living.getTicksFrozen() + 100);
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRightClick(PlayerInteractEvent.RightClickItem event) {
+        ItemStack stack = event.getItemStack();
+        Item item = stack.getItem();
+        Player player = (Player) event.getPlayer();
+        if (BigBrainConfig.snowGolemSlow) {
+            if (item == Items.SNOWBALL) {
+                player.swing(event.getHand(), true);
+                player.getCooldowns().addCooldown(item, 4);
             }
         }
     }
