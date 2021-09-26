@@ -303,8 +303,8 @@ public class BigBrainEvents {
             if (optional.isPresent()) {
                 double distance = entity.position().distanceToSqr(optional.get());
                 if (distance < maxValue) {
-                    maxValue = distance;
                     entityHit = entityThatIsNear;
+                    maxValue = distance;
                     entityHit.push(entity);
                     int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(),
                             entity);
