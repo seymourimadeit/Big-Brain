@@ -2,7 +2,7 @@ package tallestegg.bigbrain;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.List;
 import java.util.function.Predicate;
 
 import net.minecraft.ChatFormatting;
@@ -19,13 +19,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
@@ -48,7 +48,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -165,22 +164,81 @@ public class BigBrainEvents {
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
                 ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
                 BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
-                if (turningLevel == 0 && !entity.level.isClientSide())
-                    BigBrainEvents.shieldBash(entity);
-                if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
-                    InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
-                            ? InteractionHand.MAIN_HAND
-                            : InteractionHand.OFF_HAND;
-                    ItemStack stack = entity.getItemInHand(hand);
-                    ((IBucklerUser) entity).setBucklerDashing(false);
-                    ((IBucklerUser) entity).setBucklerUseTimer(0);
-                    ((IBucklerUser) entity).setCooldown(0);
-                    BucklerItem.setReady(stack, false);
-                    entity.stopUsingItem();
+                if (turningLevel == 0 && !entity.level.isClientSide()) {
+                    List<LivingEntity> list = entity.level.getNearbyEntities(LivingEntity.class,
+                            TargetingConditions.forCombat(), entity, entity.getBoundingBox());
+                    if (!list.isEmpty()) {
+                        LivingEntity entityHit = list.get(0);
+                        entityHit.push(entity);
+                        int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(),
+                                entity);
+                        float f = 6.0F + ((float) entity.getRandom().nextInt(3));
+                        float f1 = 3.0F;
+                        if (f1 > 0.0F) {
+                            for (int duration = 0; duration < 10; ++duration) {
+                                double d0 = entity.getRandom().nextGaussian() * 0.02D;
+                                double d1 = entity.getRandom().nextGaussian() * 0.02D;
+                                double d2 = entity.getRandom().nextGaussian() * 0.02D;
+                                SimpleParticleType type = entityHit instanceof WitherBoss
+                                        || entityHit instanceof WitherSkeleton ? ParticleTypes.SMOKE
+                                                : ParticleTypes.CLOUD;
+                                // Collision is done on the server side, so a server side method must be used.
+                                ((ServerLevel) entity.level).sendParticles(type, entity.getRandomX(1.0D),
+                                        entity.getRandomY() + 1.0D, entity.getRandomZ(1.0D), 1, d0, d1, d2, 1.0D);
+                            }
+                            if (bangLevel == 0) {
+                                if (entityHit.hurt(DamageSource.mobAttack(entity), f)) {
+                                    entityHit.knockback((double) (f1),
+                                            (double) Mth.sin(entity.getYRot() * ((float) Math.PI / 180F)),
+                                            (double) (-Mth.cos(entity.getYRot() * ((float) Math.PI / 180F))));
+                                    entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
+                                }
+                                if (!entity.isSilent())
+                                    ((ServerLevel) entity.level).playSound((Player) null, entity.getX(), entity.getY(),
+                                            entity.getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundSource(),
+                                            0.5F, 0.8F + entity.getRandom().nextFloat() * 0.4F);
+                                if (entityHit instanceof Player
+                                        && ((Player) entityHit).getUseItem().canPerformAction(ToolActions.SHIELD_BLOCK))
+                                    ((Player) entityHit).disableShield(true);
+                            } else {
+                                InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
+                                        ? InteractionHand.MAIN_HAND
+                                        : InteractionHand.OFF_HAND;
+                                ItemStack stack = entity.getItemInHand(hand);
+                                stack.hurtAndBreak(5 * bangLevel, entity, (player1) -> {
+                                    player1.broadcastBreakEvent(hand);
+                                    if (entity instanceof Player)
+                                        ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(),
+                                                hand);
+                                });
+                                Explosion.BlockInteraction mode = BigBrainConfig.BangBlockDestruction
+                                        ? Explosion.BlockInteraction.BREAK
+                                        : Explosion.BlockInteraction.NONE;
+                                entity.level.explode((Entity) null, entity.getX(), entity.getY(), entity.getZ(),
+                                        (float) bangLevel * 1.0F, mode);
+                                ((IBucklerUser) entity).setBucklerDashing(false);
+                            }
+                            entity.setLastHurtMob(entityHit);
+                            if (entity instanceof IOneCriticalAfterCharge)
+                                ((IOneCriticalAfterCharge) entity).setCritical(BigBrainEnchantments
+                                        .getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity) == 0);
+                        }
+                    }
                 }
-                if (((IBucklerUser) entity).getCooldown() <= 0) {
-                    ((IBucklerUser) entity).setCooldown(0);
-                }
+            }
+            if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
+                InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
+                        ? InteractionHand.MAIN_HAND
+                        : InteractionHand.OFF_HAND;
+                ItemStack stack = entity.getItemInHand(hand);
+                ((IBucklerUser) entity).setBucklerDashing(false);
+                ((IBucklerUser) entity).setBucklerUseTimer(0);
+                ((IBucklerUser) entity).setCooldown(0);
+                BucklerItem.setReady(stack, false);
+                entity.stopUsingItem();
+            }
+            if (((IBucklerUser) entity).getCooldown() <= 0) {
+                ((IBucklerUser) entity).setCooldown(0);
             }
         }
     }
@@ -290,77 +348,5 @@ public class BigBrainEvents {
                                 * (double) entity.getDimensions(entity.getPose()).width,
                         vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
             }
-    }
-
-    public static void shieldBash(LivingEntity entity) {
-        double maxValue = Double.MAX_VALUE;
-        Entity entityHit = null;
-        for (Entity entityThatIsNear : entity.level.getEntities(entity,
-                entity.getBoundingBox().expandTowards(entity.getDeltaMovement()), EntitySelector.pushableBy(entity))) {
-            AABB axisalignedbb = entityThatIsNear.getBoundingBox().inflate((double) 0.3F);
-            Optional<Vec3> optional = axisalignedbb.clip(entity.position(),
-                    entity.position().add(entity.getDeltaMovement()));
-            if (optional.isPresent()) {
-                double distance = entity.position().distanceToSqr(optional.get());
-                if (distance < maxValue) {
-                    entityHit = entityThatIsNear;
-                    maxValue = distance;
-                    entityHit.push(entity);
-                    int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(),
-                            entity);
-                    float f = 6.0F + ((float) entity.getRandom().nextInt(3));
-                    float f1 = 3.0F;
-                    if (f1 > 0.0F && entity instanceof LivingEntity) {
-                        for (int duration = 0; duration < 10; ++duration) {
-                            double d0 = entity.getRandom().nextGaussian() * 0.02D;
-                            double d1 = entity.getRandom().nextGaussian() * 0.02D;
-                            double d2 = entity.getRandom().nextGaussian() * 0.02D;
-                            SimpleParticleType type = entityHit instanceof WitherBoss
-                                    || entityHit instanceof WitherSkeleton ? ParticleTypes.SMOKE : ParticleTypes.CLOUD;
-                            // Collision is done on the server side, so a server side method must be used.
-                            ((ServerLevel) entity.level).sendParticles(type, entity.getRandomX(1.0D),
-                                    entity.getRandomY() + 1.0D, entity.getRandomZ(1.0D), 1, d0, d1, d2, 1.0D);
-                        }
-                        if (bangLevel == 0) {
-                            if (entityHit.hurt(DamageSource.mobAttack(entity), f)) {
-                                if (entityHit instanceof LivingEntity) {
-                                    ((LivingEntity) entityHit).knockback((double) (f1),
-                                            (double) Mth.sin(entity.getYRot() * ((float) Math.PI / 180F)),
-                                            (double) (-Mth.cos(entity.getYRot() * ((float) Math.PI / 180F))));
-                                    entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
-                                }
-                                if (!entity.isSilent())
-                                    ((ServerLevel) entity.level).playSound((Player) null, entity.getX(), entity.getY(),
-                                            entity.getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundSource(),
-                                            0.5F, 0.8F + entity.getRandom().nextFloat() * 0.4F);
-                                if (entityHit instanceof Player
-                                        && ((Player) entityHit).getUseItem().canPerformAction(ToolActions.SHIELD_BLOCK))
-                                    ((Player) entityHit).disableShield(true);
-                            }
-                        } else {
-                            InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
-                                    ? InteractionHand.MAIN_HAND
-                                    : InteractionHand.OFF_HAND;
-                            ItemStack stack = entity.getItemInHand(hand);
-                            stack.hurtAndBreak(5 * bangLevel, entity, (player1) -> {
-                                player1.broadcastBreakEvent(hand);
-                                if (entity instanceof Player)
-                                    ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(), hand);
-                            });
-                            Explosion.BlockInteraction mode = BigBrainConfig.BangBlockDestruction
-                                    ? Explosion.BlockInteraction.BREAK
-                                    : Explosion.BlockInteraction.NONE;
-                            entity.level.explode((Entity) null, entity.getX(), entity.getY(), entity.getZ(),
-                                    (float) bangLevel * 1.0F, mode);
-                            ((IBucklerUser) entity).setBucklerDashing(false);
-                        }
-                        entity.setLastHurtMob(entityHit);
-                        if (entity instanceof IOneCriticalAfterCharge)
-                            ((IOneCriticalAfterCharge) entity).setCritical(BigBrainEnchantments
-                                    .getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity) == 0);
-                    }
-                }
-            }
-        }
     }
 }
