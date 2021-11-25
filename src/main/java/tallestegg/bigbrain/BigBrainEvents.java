@@ -29,10 +29,16 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
+import net.minecraft.world.entity.animal.Ocelot;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.animal.PolarBear;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
@@ -172,9 +178,9 @@ public class BigBrainEvents {
                         entityHit.push(entity);
                         int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(),
                                 entity);
-                        float f = 6.0F + ((float) entity.getRandom().nextInt(3));
-                        float f1 = 3.0F;
-                        if (f1 > 0.0F) {
+                        float damage = 6.0F + ((float) entity.getRandom().nextInt(3));
+                        float knockbackStrength = 3.0F;
+                        if (knockbackStrength > 0.0F) {
                             for (int duration = 0; duration < 10; ++duration) {
                                 double d0 = entity.getRandom().nextGaussian() * 0.02D;
                                 double d1 = entity.getRandom().nextGaussian() * 0.02D;
@@ -187,8 +193,8 @@ public class BigBrainEvents {
                                         entity.getRandomY() + 1.0D, entity.getRandomZ(1.0D), 1, d0, d1, d2, 1.0D);
                             }
                             if (bangLevel == 0) {
-                                if (entityHit.hurt(DamageSource.mobAttack(entity), f)) {
-                                    entityHit.knockback((double) (f1),
+                                if (entityHit.hurt(DamageSource.mobAttack(entity), damage)) {
+                                    entityHit.knockback((double) (knockbackStrength),
                                             (double) Mth.sin(entity.getYRot() * ((float) Math.PI / 180F)),
                                             (double) (-Mth.cos(entity.getYRot() * ((float) Math.PI / 180F))));
                                     entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
@@ -292,33 +298,56 @@ public class BigBrainEvents {
             mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
         }
 
-        if (entity instanceof AbstractVillager && BigBrainConfig.MobsAttackAllVillagers) {
-            AbstractVillager villager = (AbstractVillager) entity;
+        if (entity instanceof AbstractVillager villager && BigBrainConfig.MobsAttackAllVillagers) {
             villager.goalSelector.addGoal(2,
-                    new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (p_213469_1_) -> {
-                        return !BigBrainConfig.MobBlackList.contains(p_213469_1_.getEncodeId());
+                    new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> {
+                        return !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId());
                     }));
         }
 
-        if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId())) {
-            PathfinderMob creature = (PathfinderMob) entity;
+        if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId())
+                && entity instanceof PathfinderMob creature)
             creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
-        }
 
-        if (entity instanceof PolarBear) {
-            PolarBear polar = (PolarBear) entity;
+        if (entity instanceof PolarBear polar) {
             if (BigBrainConfig.PolarBearFish)
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true,
                         true, (Predicate<LivingEntity>) null));
         }
 
-        if (BigBrainConfig.animalShelter && entity instanceof Animal
+        if (BigBrainConfig.animalShelter && entity instanceof Animal animal
                 && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId())
                 && !(entity instanceof FlyingAnimal)) {
-            Animal animal = (Animal) entity;
             animal.goalSelector.addGoal(2, new RestrictSunAnimalGoal(animal));
             animal.goalSelector.addGoal(3, new FindShelterGoal(animal));
         }
+
+        if (entity instanceof Sheep sheep) {
+            if (BigBrainConfig.sheepRunAway)
+                sheep.goalSelector.addGoal(2, new AvoidEntityGoal<>(sheep, Wolf.class, 8.0F, 1.0D, 1.6D));
+        }
+
+        if (entity instanceof Ocelot ocelot) {
+            if (BigBrainConfig.ocelotPhantom)
+                ocelot.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(ocelot, Phantom.class, 10, true,
+                        true, (Predicate<LivingEntity>) null));
+            if (BigBrainConfig.ocelotCreeper)
+                ocelot.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(ocelot, Creeper.class, 10, true,
+                        true, (Predicate<LivingEntity>) null));
+            if (BigBrainConfig.ocelotParrot)
+                ocelot.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(ocelot, Parrot.class, 10, true, true,
+                        (Predicate<LivingEntity>) null));
+        }
+
+        if (entity instanceof Parrot parrot)
+            if (BigBrainConfig.ocelotParrot)
+                parrot.goalSelector.addGoal(2, new AvoidEntityGoal<>(parrot, Ocelot.class, 8.0F, 1.0D, 5.0D));
+    }
+
+    @SubscribeEvent
+    public static void onTargetSet(LivingSetAttackTargetEvent event) {
+        if (event.getEntity()instanceof Creeper creeper && event.getTarget()instanceof Ocelot ocelot)
+            creeper.setTarget(null);
     }
 
     @SubscribeEvent

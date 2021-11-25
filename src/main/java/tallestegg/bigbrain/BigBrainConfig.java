@@ -41,6 +41,10 @@ public class BigBrainConfig {
     public static Boolean snowGolemSlow;
     public static Boolean animalShelter;
     public static Boolean meleeFix;
+    public static Boolean ocelotParrot;
+    public static Boolean ocelotPhantom;
+    public static Boolean ocelotCreeper;
+    public static Boolean sheepRunAway;
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
@@ -74,6 +78,10 @@ public class BigBrainConfig {
         mobBlindnessVision = COMMON.mobBlindnessVision.get();
         meleeFix = COMMON.meleeFix.get();
         EntitiesThatCanAlsoUseTheBuckler = COMMON.EntitiesThatCanAlsoUseTheBuckler.get();
+        ocelotCreeper = COMMON.ocelotCreeper.get();
+        ocelotParrot = COMMON.ocelotParrot.get();
+        ocelotPhantom = COMMON.ocelotPhantom.get();
+        sheepRunAway = COMMON.sheepRunAway.get();
     }
 
     public static void bakeClientConfig() {
@@ -101,6 +109,10 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue snowGolemSlow;
         public final ForgeConfigSpec.BooleanValue animalShelter;
         public final ForgeConfigSpec.BooleanValue meleeFix;
+        public final ForgeConfigSpec.BooleanValue ocelotParrot;
+        public final ForgeConfigSpec.BooleanValue ocelotPhantom;
+        public final ForgeConfigSpec.BooleanValue ocelotCreeper;
+        public final ForgeConfigSpec.BooleanValue sheepRunAway;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
@@ -145,6 +157,14 @@ public class BigBrainConfig {
             builder.pop();
             builder.push("polar bears");
             PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
+            builder.pop();
+            builder.push("ocelots");
+            ocelotCreeper = builder.define("Have ocelots attack creepers? (Creepers won't attack back)", true);
+            ocelotParrot = builder.define("Have ocelots attack parrots?", true);
+            ocelotPhantom = builder.define("Have ocelots attack phantoms?", true);
+            builder.pop();
+            builder.push("sheep");
+            sheepRunAway = builder.define("Have sheep run away from wolves?", true);
             builder.pop();
             builder.push("snow golems");
             snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").comment("Freezing time can be added up by successive shots.").define("Allow snow balls to apply 5 seconds of freezing when they hit an entity?", true);
