@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -164,6 +165,27 @@ public class BigBrainEvents {
                 if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
                     ((IBucklerUser) entity).setCooldown(BigBrainConfig.BucklerCooldown);
             }
+
+          /*  if (entity instanceof IOneCriticalAfterCharge) {
+                for (int i = 0; i < 5; ++i) {
+                    Vec3 vec3 = new Vec3(((double) entity.getRandom().nextFloat() - 0.5D) * 0.1D,
+                            Math.random() * 0.1D + 0.1D, 0.0D);
+                    //vec3 = vec3.xRot(-entity.getXRot() * ((float) Math.PI / 180F));
+                    vec3 = vec3.yRot((float) (-entity.getY() * ((float) Math.PI / 180F)));
+                    double d0 = (double) (-entity.getRandom().nextFloat()) * 0.6D - 0.3D;
+                    Vec3 vec31 = new Vec3(((double) entity.getRandom().nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
+                    //vec31 = vec31.xRot(-entity.getXRot() * ((float) Math.PI / 180F));
+                    vec31 = vec31.yRot(-entity.getYRot() * ((float) Math.PI / 180F));
+                    vec31 = vec31.add(entity.getX() + 0.2, entity.getY() + 1.5, entity.getZ());
+                    if (entity.level instanceof ServerLevel) // Forge: Fix MC-2518 spawnParticle is nooped on server,
+                                                             // need to use server specific variant
+                        ((ServerLevel) entity.level).sendParticles(ParticleTypes.CRIT, vec31.x, vec31.y, vec31.z, 1,
+                                vec3.x, vec3.y + 0.05D, vec3.z, 0.0D);
+                    else
+                        entity.level.addParticle(ParticleTypes.CRIT, vec31.x, vec31.y, vec31.z, vec3.x, vec3.y + 0.05D,
+                                vec3.z);
+                }
+            }*/
 
             if (((IBucklerUser) entity).isBucklerDashing()) {
                 BucklerItem.moveFowards(entity);
