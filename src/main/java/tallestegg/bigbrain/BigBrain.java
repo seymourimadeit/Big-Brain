@@ -57,7 +57,7 @@ public class BigBrain {
         @SuppressWarnings("deprecation")
         @SubscribeEvent
         public static void onStitch(TextureStitchEvent.Pre event) {
-            if (event.getMap().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
+            if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
                 event.addSprite(BucklerTexture.BUCKLER_TEXTURE.texture());
             }
         }

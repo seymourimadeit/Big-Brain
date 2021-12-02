@@ -139,8 +139,9 @@ public class BucklerItem extends ShieldItem implements IItemRenderProperties {
         return Items.INGOTS_GOLD.contains(repair.getItem());
     }
 
+
     @Override
-    public boolean isShield(ItemStack stack, @Nullable LivingEntity entity) {
-        return true;
+    public boolean canPerformAction(ItemStack stack, net.minecraftforge.common.ToolAction toolAction) {
+       return net.minecraftforge.common.ToolActions.DEFAULT_SHIELD_ACTIONS.contains(toolAction);
     }
 }
