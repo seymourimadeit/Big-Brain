@@ -38,7 +38,8 @@ public class BigBrainClientEvents {
     
     @SubscribeEvent
     public static void onMovementKeyPressed(MovementInputUpdateEvent event) {
-        LocalPlayer player = Minecraft.getInstance().player;
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
         if (((IBucklerUser) player).isBucklerDashing()) {
             event.getInput().jumping = false;
             event.getInput().leftImpulse = 0;
@@ -49,7 +50,8 @@ public class BigBrainClientEvents {
     public static void onRenderHand(RenderHandEvent event) {
         PoseStack mStack = event.getPoseStack();
         ItemStack stack = event.getItemStack();
-        LocalPlayer player = Minecraft.getInstance().player;
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
         float partialTicks = event.getPartialTicks();
         if (stack.getItem() instanceof BucklerItem && (player.isUsingItem() && player.getUseItem() == stack || ((IBucklerUser) player).isBucklerDashing() && BucklerItem.isReady(stack))) {
             boolean mainHand = event.getHand() == InteractionHand.MAIN_HAND;
