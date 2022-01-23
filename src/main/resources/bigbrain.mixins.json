@@ -16,9 +16,7 @@
   ],
   "client": [
     "MouseHelperMixin",
-    "PlayerModelMixin",
-    "IllagerModelMixin",
-    "ItemLayerRenderLayerMixin"
+    "PlayerModelMixin"
   ],
   "minVersion": "0.8.4"
 }

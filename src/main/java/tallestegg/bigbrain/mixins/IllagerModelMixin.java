@@ -16,7 +16,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.item.SpyglassItem;
 
-@Mixin(IllagerModel.class)
+/*@Mixin(IllagerModel.class)
 public abstract class IllagerModelMixin<T extends AbstractIllager> extends HierarchicalModel<T> {
 
     @Shadow
@@ -58,4 +58,4 @@ public abstract class IllagerModelMixin<T extends AbstractIllager> extends Hiera
             this.leftArm.yRot = this.head.yRot + 0.2617994F;
         }
     }
-}
+}*/
