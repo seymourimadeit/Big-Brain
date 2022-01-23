@@ -34,7 +34,7 @@ import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
-public class BucklerItem extends ShieldItem implements IItemRenderProperties {
+public class BucklerItem extends ShieldItem {
     public BucklerItem(Properties p_i48470_1_) {
         super(p_i48470_1_);
         DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
