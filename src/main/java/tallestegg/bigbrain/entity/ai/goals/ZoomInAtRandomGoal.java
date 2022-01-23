@@ -15,8 +15,8 @@ public class ZoomInAtRandomGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return pillager.getRandom().nextFloat() < 1.00F
-                && pillager.getOffhandItem().getItem() instanceof SpyglassItem && pillager.getTarget() == null;
+        return pillager.getTarget() == null && pillager.getRandom().nextFloat() < 0.10F
+                && pillager.getOffhandItem().getItem() instanceof SpyglassItem;
     }
 
     @Override
@@ -27,14 +27,13 @@ public class ZoomInAtRandomGoal extends Goal {
     @Override
     public void start() {
         this.zoomInTicks = 100;
+        if (pillager.getOffhandItem().getItem() instanceof SpyglassItem)
+            this.pillager.startUsingItem(InteractionHand.OFF_HAND);
     }
 
     @Override
     public void tick() {
         this.zoomInTicks--;
-        if (pillager.getOffhandItem().getItem() instanceof SpyglassItem)
-            this.pillager.startUsingItem(InteractionHand.OFF_HAND);
-        //System.out.println(this.zoomInTicks);
     }
     
     @Override

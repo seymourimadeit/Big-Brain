@@ -21,7 +21,7 @@ mixin {
     add sourceSets.main, "bigbrain.refmap.json"
 }
 
-version = '1.4.0'
+version = '1.4.1'
 group = 'tallestegg.bigbrain' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'bigbrain'
 

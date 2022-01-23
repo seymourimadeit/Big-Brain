@@ -23,7 +23,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -50,7 +49,6 @@ import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpyglassItem;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -83,7 +81,6 @@ import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGo
 import tallestegg.bigbrain.entity.ai.goals.RestrictSunAnimalGoal;
 import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
 import tallestegg.bigbrain.entity.ai.goals.UseBucklerGoal;
-import tallestegg.bigbrain.entity.ai.goals.ZoomInAtRandomGoal;
 import tallestegg.bigbrain.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
@@ -121,8 +118,6 @@ public class BigBrainEvents {
             if (event.getLookingEntity() instanceof LivingEntity
                     && ((LivingEntity) event.getLookingEntity()).hasEffect(MobEffects.BLINDNESS))
                 event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
-            if (((Mob) event.getLookingEntity()).getOffhandItem().getItem() instanceof SpyglassItem) {
-            }
         }
     }
 
@@ -295,7 +290,7 @@ public class BigBrainEvents {
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
             if (BigBrainConfig.PillagerCover)
                 pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
-            pillager.goalSelector.addGoal(1, new ZoomInAtRandomGoal(pillager));
+            //pillager.goalSelector.addGoal(1, new ZoomInAtRandomGoal(pillager));
         }
 
         if (entity instanceof Enemy && BigBrainConfig.MobsAttackAllVillagers
@@ -352,7 +347,7 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onTargetSet(LivingSetAttackTargetEvent event) {
-        if (event.getEntity()instanceof Creeper creeper && event.getTarget()instanceof Ocelot ocelot)
+        if (event.getEntity() instanceof Creeper creeper && event.getTarget()instanceof Ocelot ocelot)
             creeper.setTarget(null);
     }
 
