@@ -136,7 +136,7 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
-        return Items.INGOTS_GOLD.contains(repair.getItem());
+        return repair.is(Items.INGOTS_GOLD);
     }
 
 
