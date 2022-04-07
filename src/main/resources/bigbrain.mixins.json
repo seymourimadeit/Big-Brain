@@ -12,11 +12,14 @@
     "PiglinBrainMixin",
     "PiglinBruteMixin",
     "PlayerEntityMixin",
-    "RangedCrossbowAttackGoalMixin"
+    "RangedCrossbowAttackGoalMixin",
+    "PillagerMixin"
   ],
   "client": [
     "MouseHelperMixin",
-    "PlayerModelMixin"
+    "PlayerModelMixin",
+    "IllagerModelMixin",
+    "ItemLayerRenderLayerMixin"
   ],
   "minVersion": "0.8.4"
 }

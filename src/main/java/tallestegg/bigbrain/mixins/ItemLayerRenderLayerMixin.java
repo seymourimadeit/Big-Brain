@@ -24,7 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpyglassItem;
 
-/*@Mixin(ItemInHandLayer.class)
+@Mixin(ItemInHandLayer.class)
 public abstract class ItemLayerRenderLayerMixin<T extends LivingEntity, M extends EntityModel<T> & ArmedModel>
         extends RenderLayer<T, M> {
 
@@ -56,4 +56,4 @@ public abstract class ItemLayerRenderLayerMixin<T extends LivingEntity, M extend
                 ItemTransforms.TransformType.HEAD, false, p_174521_, p_174522_, p_174523_);
         p_174521_.popPose();
     }
-}*/
+}

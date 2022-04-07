@@ -35,7 +35,7 @@ public class ZoomInAtRandomGoal extends Goal {
     public void tick() {
         this.zoomInTicks--;
     }
-    
+
     @Override
     public void stop() {
         this.pillager.stopUsingItem();
