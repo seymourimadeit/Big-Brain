@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -23,9 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -42,7 +39,6 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.WitherSkeleton;
@@ -51,12 +47,12 @@ import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpyglassItem;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -70,7 +66,6 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -127,7 +122,7 @@ public class BigBrainEvents {
         if (event.getLookingEntity()instanceof LivingEntity living) {
             if (living.hasEffect(MobEffects.BLINDNESS))
                 event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
-            if (living.isUsingItem() && living.getUseItem().getItem() instanceof SpyglassItem) {
+            if (living.getUseItem().getItem() instanceof SpyglassItem) {
                 event.modifyVisibility(living.getAttributeValue(Attributes.FOLLOW_RANGE) * 2.0D);
             }
         }
@@ -161,11 +156,6 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onLivingTick(LivingUpdateEvent event) {
-        if (event.getEntity() instanceof Pillager pillager) {
-            if (pillager.isPatrolling() && pillager.getNavigation().isDone() && pillager.getTarget() != null) {
-                pillager.getNavigation().moveTo(pillager.getTarget(), 1.0D);
-            }
-        } 
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(),
@@ -247,7 +237,7 @@ public class BigBrainEvents {
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
             if (BigBrainConfig.PillagerCover)
                 pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
-            pillager.goalSelector.addGoal(1, new ZoomInAtRandomGoal(pillager));
+            pillager.goalSelector.addGoal(3, new ZoomInAtRandomGoal(pillager));
         }
 
         if (entity instanceof Enemy && BigBrainConfig.MobsAttackAllVillagers
@@ -304,8 +294,27 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onTargetSet(LivingSetAttackTargetEvent event) {
-        if (event.getEntity() instanceof Creeper creeper && event.getTarget() instanceof Ocelot ocelot)
+        if (event.getEntity()instanceof Creeper creeper && event.getTarget()instanceof Ocelot ocelot)
             creeper.setTarget(null);
+        if (event.getEntity()instanceof Pillager pillager) {
+            if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling()) {
+                pillager.setAggressive(true); // This needs to be done as pillagers patrolling stare at the player from
+                                              // afar when spotted, and we want pillagers with spyglasses to immediately
+                                              // target the player, the patrol goal is executed with a pillager isn't
+                                              // aggressive.
+                if (pillager.getNavigation().isDone())
+                    pillager.getNavigation().moveTo(event.getTarget(), 1.0D);
+
+                for (Raider raider : pillager.level.getNearbyEntities(Raider.class,
+                        TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(),
+                        pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
+                    if (raider != null) {
+                        raider.setAggressive(true);
+                        raider.setTarget(event.getTarget());
+                    }
+                }
+            }
+        }
     }
 
     @SubscribeEvent
