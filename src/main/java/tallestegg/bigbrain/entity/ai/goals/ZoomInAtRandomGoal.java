@@ -1,7 +1,5 @@
 package tallestegg.bigbrain.entity.ai.goals;
 
-import java.util.EnumSet;
-
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Pillager;
@@ -13,7 +11,6 @@ public class ZoomInAtRandomGoal extends Goal {
 
     public ZoomInAtRandomGoal(Pillager pillager) {
         this.pillager = pillager;
-        this.setFlags(EnumSet.of(Goal.Flag.LOOK));
     }
 
     @Override

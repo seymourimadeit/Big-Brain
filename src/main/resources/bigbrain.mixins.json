@@ -13,7 +13,8 @@
     "PiglinBruteMixin",
     "PlayerEntityMixin",
     "RangedCrossbowAttackGoalMixin",
-    "PillagerMixin"
+    "PillagerMixin",
+    "MeleeAttackTaskMixin"
   ],
   "client": [
     "MouseHelperMixin",

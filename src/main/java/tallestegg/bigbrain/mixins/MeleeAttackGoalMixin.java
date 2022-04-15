@@ -6,10 +6,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import tallestegg.bigbrain.BigBrainConfig;
+import tallestegg.bigbrain.entity.IBucklerUser;
 
 @Mixin(MeleeAttackGoal.class)
 public class MeleeAttackGoalMixin {
@@ -34,5 +36,11 @@ public class MeleeAttackGoalMixin {
             }
             info.cancel();
         }
+    }
+    
+    @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canUse")
+    public void canUse(CallbackInfoReturnable<Boolean> info) {
+        if (((IBucklerUser)mob).isBucklerDashing()) 
+            info.setReturnValue(false);
     }
 }
