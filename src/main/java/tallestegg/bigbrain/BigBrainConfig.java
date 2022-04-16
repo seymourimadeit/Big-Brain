@@ -45,6 +45,7 @@ public class BigBrainConfig {
     public static Boolean ocelotPhantom;
     public static Boolean ocelotCreeper;
     public static Boolean sheepRunAway;
+    public static float spyGlassPillagerChance;
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
     public static Integer BucklerRunTime;
@@ -82,6 +83,7 @@ public class BigBrainConfig {
         ocelotParrot = COMMON.ocelotParrot.get();
         ocelotPhantom = COMMON.ocelotPhantom.get();
         sheepRunAway = COMMON.sheepRunAway.get();
+        spyGlassPillagerChance = COMMON.pillagerSpyGlass.get().floatValue();
     }
 
     public static void bakeClientConfig() {
@@ -113,6 +115,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue ocelotPhantom;
         public final ForgeConfigSpec.BooleanValue ocelotCreeper;
         public final ForgeConfigSpec.BooleanValue sheepRunAway;
+        public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
         public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
@@ -144,6 +147,7 @@ public class BigBrainConfig {
             builder.push("pillager");
             PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
             PillagerMultishot = builder.translation(BigBrain.MODID + ".config.pillagerMultishot").define("Have pillagers go closer to you if they have a multishot crossbow?", true);
+            pillagerSpyGlass = builder.defineInRange("Chance of a pillager patrol leader getting a spyglass", 0.50F, 0.0F, 900.0F);
             builder.pop();
             builder.push("animals");
             AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf", "minecraft:turtle", "minecraft:polar_bear", "minecraft:axolotl"));
