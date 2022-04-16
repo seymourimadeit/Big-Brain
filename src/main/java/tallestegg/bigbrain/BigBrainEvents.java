@@ -175,7 +175,7 @@ public class BigBrainEvents {
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
                 ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
                 BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
-                if (turningLevel == 0 && !entity.level.isClientSide()) 
+                if (turningLevel == 0 && !entity.level.isClientSide())
                     BigBrainEvents.bucklerBash(entity);
                 if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
                     InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem
@@ -292,9 +292,10 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onTargetSet(LivingSetAttackTargetEvent event) {
-        if (event.getEntity()instanceof Creeper creeper && event.getTarget()instanceof Ocelot ocelot)
+        if (event.getEntity() instanceof Creeper creeper && event.getTarget()instanceof Ocelot ocelot
+                && event.getTarget() != null)
             creeper.setTarget(null);
-        if (event.getEntity()instanceof Pillager pillager) {
+        if (event.getEntity() instanceof Pillager pillager) {
             if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling()) {
                 pillager.setAggressive(true); // This needs to be done as pillagers patrolling stare at the player from
                                               // afar when spotted, and we want pillagers with spyglasses to immediately
@@ -302,12 +303,12 @@ public class BigBrainEvents {
                                               // aggressive.
                 if (pillager.getNavigation().isDone())
                     pillager.getNavigation().moveTo(event.getTarget(), 1.0D);
-
                 for (Raider raider : pillager.level.getNearbyEntities(Raider.class,
                         TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(),
                         pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
                     raider.setAggressive(true);
-                    raider.setTarget(event.getTarget());
+                    if (!(raider.getUseItem().getItem() instanceof SpyglassItem) && !raider.isPatrolling())
+                        raider.setTarget(event.getTarget());
                 }
             }
         }
