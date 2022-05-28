@@ -1,12 +1,8 @@
 package tallestegg.bigbrain;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.LocalPlayer;
@@ -31,6 +27,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.items.BucklerItem;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
 public class BigBrainClientEvents {
@@ -67,8 +66,8 @@ public class BigBrainClientEvents {
             }
             mStack.pushPose();
             int i = rightHanded ? 1 : -1;
-            mStack.translate((double) ((float) i * 0.56F), (double) (-0.52F + event.getEquipProgress() * -0.6F),
-                    (double) -0.72F);
+            mStack.translate((float) i * 0.56F, -0.52F + event.getEquipProgress() * -0.6F,
+                    -0.72F);
             mStack.translate(f11 * 0.2D, 0.0D, f11 * 0.2D);
             ItemTransforms.TransformType transform = !rightHanded ? ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND
                     : ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND;
@@ -81,7 +80,7 @@ public class BigBrainClientEvents {
 
     @SubscribeEvent
     public static void onEntityRenderPre(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
-        LivingEntity entityIn = (LivingEntity) event.getEntity();
+        LivingEntity entityIn = event.getEntity();
         LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> renderer = event.getRenderer();
         EntityModel<LivingEntity> model = renderer.getModel();
         PoseStack stack = event.getPoseStack();
@@ -99,8 +98,7 @@ public class BigBrainClientEvents {
                     float f = Mth.rotLerp(event.getPartialTick(), entityIn.yBodyRotO, entityIn.yBodyRot);
                     float f1 = Mth.rotLerp(event.getPartialTick(), entityIn.yHeadRotO, entityIn.yHeadRot);
                     float f2 = f1 - f;
-                    if (shouldSit && entityIn.getVehicle() instanceof LivingEntity) {
-                        LivingEntity livingentity = (LivingEntity) entityIn.getVehicle();
+                    if (shouldSit && entityIn.getVehicle() instanceof LivingEntity livingentity) {
                         f = Mth.rotLerp(event.getPartialTick(), livingentity.yBodyRotO, livingentity.yBodyRot);
                         f2 = f1 - f;
                         float f3 = Mth.wrapDegrees(f2);
@@ -110,9 +108,11 @@ public class BigBrainClientEvents {
 
                         if (f3 >= 85.0F) {
                             f3 = 85.0F;
+                            f = f1 - f3;
+                        } else {
+                            f = f1 - f3;
                         }
 
-                        f = f1 - f3;
                         if (f3 * f3 > 2500.0F) {
                             f += f3 * 0.2F;
                         }
@@ -125,8 +125,8 @@ public class BigBrainClientEvents {
                         Direction direction = entityIn.getBedOrientation();
                         if (direction != null) {
                             float f4 = entityIn.getEyeHeight(Pose.STANDING) - 0.1F;
-                            stack.translate((double) ((float) (-direction.getStepX()) * f4), 0.0D,
-                                    (double) ((float) (-direction.getStepZ()) * f4));
+                            stack.translate((float) (-direction.getStepX()) * f4, 0.0D,
+                                    (float) (-direction.getStepZ()) * f4);
                         }
                     }
                     float f7 = (float) entityIn.tickCount + event.getPartialTick();
@@ -138,7 +138,7 @@ public class BigBrainClientEvents {
                     }
                     stack.scale(-1.0F, -1.0F, 1.0F);
                     double motionZ = Math.abs(entityIn.getDeltaMovement().z());
-                    stack.translate(0.0D, (double) -1.501F,
+                    stack.translate(0.0D, -1.501F,
                             i * motionZ * 4 / ((IBucklerUser) entityIn).getBucklerUseTimer());
                     float f8 = 0.0F;
                     float f5 = 0.0F;
@@ -182,8 +182,7 @@ public class BigBrainClientEvents {
         }
     }
 
-    public static RenderType getRenderType(LivingEntity p_230496_1_, LivingEntityRenderer<LivingEntity, ?> renderer,
-            EntityModel<?> model, boolean p_230496_2_, boolean p_230496_3_, boolean p_230496_4_) {
+    public static RenderType getRenderType(LivingEntity p_230496_1_, LivingEntityRenderer<LivingEntity, ?> renderer, EntityModel<?> model, boolean p_230496_2_, boolean p_230496_3_, boolean p_230496_4_) {
         ResourceLocation resourcelocation = renderer.getTextureLocation(p_230496_1_);
         if (p_230496_3_) {
             return RenderType.itemEntityTranslucentCull(resourcelocation);

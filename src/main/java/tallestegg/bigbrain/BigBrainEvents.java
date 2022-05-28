@@ -1,10 +1,5 @@
 package tallestegg.bigbrain;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.function.Predicate;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -18,30 +13,16 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.animal.AbstractFish;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.FlyingAnimal;
-import net.minecraft.world.entity.animal.Ocelot;
-import net.minecraft.world.entity.animal.Parrot;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.PolarBear;
-import net.minecraft.world.entity.animal.Sheep;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.Phantom;
-import net.minecraft.world.entity.monster.Pillager;
-import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -79,13 +60,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.entity.IBucklerUser;
 import tallestegg.bigbrain.entity.IOneCriticalAfterCharge;
-import tallestegg.bigbrain.entity.ai.goals.FindShelterGoal;
-import tallestegg.bigbrain.entity.ai.goals.PressureEntityWithMultishotCrossbowGoal;
-import tallestegg.bigbrain.entity.ai.goals.RestrictSunAnimalGoal;
-import tallestegg.bigbrain.entity.ai.goals.RunWhileChargingGoal;
-import tallestegg.bigbrain.entity.ai.goals.UseBucklerGoal;
-import tallestegg.bigbrain.entity.ai.goals.ZoomInAtRandomGoal;
+import tallestegg.bigbrain.entity.ai.goals.*;
 import tallestegg.bigbrain.items.BucklerItem;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
@@ -119,7 +100,7 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
-        if (event.getLookingEntity()instanceof LivingEntity living) {
+        if (event.getLookingEntity() instanceof LivingEntity living) {
             if (living.hasEffect(MobEffects.BLINDNESS))
                 event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
             if (living.getUseItem().getItem() instanceof SpyglassItem)
@@ -247,7 +228,7 @@ public class BigBrainEvents {
         if (entity instanceof AbstractVillager villager && BigBrainConfig.MobsAttackAllVillagers) {
             villager.goalSelector.addGoal(2,
                     new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> {
-                        return !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId());
+                        return !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId()) && avoidTarget instanceof Enemy;
                     }));
         }
 
@@ -292,15 +273,15 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onTargetSet(LivingSetAttackTargetEvent event) {
-        if (event.getEntity() instanceof Creeper creeper && event.getTarget()instanceof Ocelot ocelot
+        if (event.getEntity() instanceof Creeper creeper && event.getTarget() instanceof Ocelot ocelot
                 && event.getTarget() != null)
             creeper.setTarget(null);
         if (event.getEntity() instanceof Pillager pillager) {
             if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling()) {
                 pillager.setAggressive(true); // This needs to be done as pillagers patrolling stare at the player from
-                                              // afar when spotted, and we want pillagers with spyglasses to immediately
-                                              // target the player, the patrol goal is executed with a pillager isn't
-                                              // aggressive.
+                // afar when spotted, and we want pillagers with spyglasses to immediately
+                // target the player, the patrol goal is executed with a pillager isn't
+                // aggressive.
                 if (pillager.getNavigation().isDone())
                     pillager.getNavigation().moveTo(event.getTarget(), 1.0D);
                 for (Raider raider : pillager.level.getNearbyEntities(Raider.class,
