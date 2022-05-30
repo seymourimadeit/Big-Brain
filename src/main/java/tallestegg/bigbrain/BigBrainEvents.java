@@ -10,16 +10,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.*;
@@ -232,9 +233,22 @@ public class BigBrainEvents {
                     }));
         }
 
-        if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId())
-                && entity instanceof PathfinderMob creature)
-            creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
+        if (entity instanceof PathfinderMob creature) {
+            if (GoalUtils.hasGroundPathNavigation(creature) && ((GroundPathNavigation) creature.getNavigation()).canOpenDoors()) {
+                if (creature instanceof Raider) {
+                    creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, false) {
+                        @Override
+                        public boolean canUse() {
+                            return ((Raider) creature).hasActiveRaid() && super.canUse();
+                        }
+                    });
+                } else {
+                    creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, true));
+                }
+            }
+            if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId()))
+                creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
+        }
 
         if (entity instanceof PolarBear polar) {
             if (BigBrainConfig.PolarBearFish)
