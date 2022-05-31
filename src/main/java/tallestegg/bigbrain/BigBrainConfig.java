@@ -45,6 +45,7 @@ public class BigBrainConfig {
     public static Boolean ocelotPhantom;
     public static Boolean ocelotCreeper;
     public static Boolean sheepRunAway;
+    public static Boolean openFenceGate;
     public static float spyGlassPillagerChance;
     public static Integer BucklerCooldown;
     public static Integer BucklerTurningRunTime;
@@ -57,6 +58,7 @@ public class BigBrainConfig {
     public static List<String> NightAnimalBlackList;
     public static List<String> RainAnimalBlackList;
     public static List<String> EntitiesThatCanAlsoUseTheBuckler;
+    public static List<String> cantOpenFenceGates;
 
     public static void bakeCommonConfig() {
         PillagerCover = COMMON.PillagerCover.get();
@@ -84,6 +86,8 @@ public class BigBrainConfig {
         ocelotPhantom = COMMON.ocelotPhantom.get();
         sheepRunAway = COMMON.sheepRunAway.get();
         spyGlassPillagerChance = COMMON.pillagerSpyGlass.get().floatValue();
+        openFenceGate = COMMON.openFenceGates.get();
+        cantOpenFenceGates = COMMON.fenceGateBlacklist.get();
     }
 
     public static void bakeClientConfig() {
@@ -115,6 +119,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue ocelotPhantom;
         public final ForgeConfigSpec.BooleanValue ocelotCreeper;
         public final ForgeConfigSpec.BooleanValue sheepRunAway;
+        public final ForgeConfigSpec.BooleanValue openFenceGates;
         public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
@@ -127,6 +132,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> EntitiesThatCanAlsoUseTheBuckler;
+        public final ForgeConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             builder.push("all mobs");
@@ -136,6 +142,8 @@ public class BigBrainConfig {
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
             EntitiesThatCanAlsoUseTheBuckler = builder.translation(BigBrain.MODID + ".config.mobBucklerWhiteList").comment("Any mob id input in this list will be able to use the buckler").define("Mobs that can also use the buckler", Lists.newArrayList("guardvillagers:guard"));
+            openFenceGates = builder.define("Allow mobs to open fence gates if they are already able to open doors", true);
+            fenceGateBlacklist = builder.comment("Any mob id input in this list will not open fence gates if they're already able to open doors").define("Fence Gate Opening Blacklist", Lists.newArrayList("minecraft:husk", "minecraft:zombie", "minecraft:vindicator", "minecraft:drowned"));
             builder.pop();
             builder.push("buckler");
             BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);

@@ -234,7 +234,7 @@ public class BigBrainEvents {
         }
 
         if (entity instanceof PathfinderMob creature) {
-            if (GoalUtils.hasGroundPathNavigation(creature) && ((GroundPathNavigation) creature.getNavigation()).canOpenDoors()) {
+            if (GoalUtils.hasGroundPathNavigation(creature) && ((GroundPathNavigation) creature.getNavigation()).canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
                 if (creature instanceof Raider) {
                     creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, false) {
                         @Override
