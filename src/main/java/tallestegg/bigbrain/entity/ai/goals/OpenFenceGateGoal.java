@@ -18,12 +18,6 @@ public class OpenFenceGateGoal extends FenceGateInteractGoal {
     }
 
     @Override
-    public boolean canUse() {
-     //   System.out.println(super.canUse());
-        return super.canUse();
-    }
-
-    @Override
     public void start() {
         this.forgetTime = 20;
         this.setOpen(true);

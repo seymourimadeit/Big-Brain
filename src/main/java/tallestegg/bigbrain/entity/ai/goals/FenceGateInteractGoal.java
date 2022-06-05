@@ -63,7 +63,7 @@ public abstract class FenceGateInteractGoal extends Goal {
         } else {
             GroundPathNavigation groundpathnavigation = (GroundPathNavigation) this.mob.getNavigation();
             Path path = groundpathnavigation.getPath();
-            if (path != null) {
+            if (path != null && ((GroundPathNavigation) this.mob.getNavigation()).getNodeEvaluator().canOpenDoors()) {
                 for (int i = 0; i < Math.min(path.getNextNodeIndex() + 2, path.getNodeCount()); ++i) {
                     Node node = path.getNode(i);
                     this.gatePos = new BlockPos(node.x + 1, node.y, node.z+ 1);
