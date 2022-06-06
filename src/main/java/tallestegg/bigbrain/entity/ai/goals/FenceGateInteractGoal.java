@@ -66,7 +66,8 @@ public abstract class FenceGateInteractGoal extends Goal {
             if (path != null && ((GroundPathNavigation) this.mob.getNavigation()).getNodeEvaluator().canOpenDoors()) {
                 for (int i = 0; i < Math.min(path.getNextNodeIndex() + 2, path.getNodeCount()); ++i) {
                     Node node = path.getNode(i);
-                    this.gatePos = new BlockPos(node.x + 1, node.y, node.z+ 1);
+                    this.gatePos = new BlockPos(node.x + 1, node.y, node.z); //needed as normally pathfinding ignores closed fence gates
+                    // and we need the mobs to recognize that a fence gate exists so it can be opened/closed
                     if (this.mob.distanceToSqr((double) this.gatePos.getX(), this.gatePos.getY(), (double) this.gatePos.getZ()) < 2.25D) {
                         this.hasGate = this.mob.level.getBlockState(this.gatePos).getBlock() instanceof FenceGateBlock;
                         return this.hasGate;
