@@ -3,7 +3,6 @@ package tallestegg.bigbrain.entity.ai.goals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.player.Player;
@@ -66,7 +65,7 @@ public abstract class FenceGateInteractGoal extends Goal {
             if (path != null && ((GroundPathNavigation) this.mob.getNavigation()).getNodeEvaluator().canOpenDoors()) {
                 for (int i = 0; i < Math.min(path.getNextNodeIndex() + 2, path.getNodeCount()); ++i) {
                     Node node = path.getNode(i);
-                    this.gatePos = new BlockPos(node.x + 1, node.y, node.z); //needed as normally pathfinding ignores closed fence gates
+                    this.gatePos = new BlockPos(node.x + mob.getRandom().nextInt(4) - 2, node.y, node.z + mob.getRandom().nextInt(4) - 2); //needed as normally pathfinding ignores closed fence gates
                     // and we need the mobs to recognize that a fence gate exists so it can be opened/closed
                     if (this.mob.distanceToSqr((double) this.gatePos.getX(), this.gatePos.getY(), (double) this.gatePos.getZ()) < 2.25D) {
                         this.hasGate = this.mob.level.getBlockState(this.gatePos).getBlock() instanceof FenceGateBlock;
