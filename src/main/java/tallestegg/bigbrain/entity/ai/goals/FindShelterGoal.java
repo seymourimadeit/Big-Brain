@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.FleeSunGoal;
@@ -27,7 +28,7 @@ public class FindShelterGoal extends FleeSunGoal {
     @Override
     @Nullable
     protected Vec3 getHidePos() {
-        Random random = this.mob.getRandom();
+        RandomSource random = this.mob.getRandom();
         BlockPos blockpos = this.mob.blockPosition();
         for (int i = 0; i < 10; ++i) {
             BlockPos blockpos1 = blockpos.offset(random.nextInt(20) - 10, random.nextInt(6) - 3, random.nextInt(20) - 10);

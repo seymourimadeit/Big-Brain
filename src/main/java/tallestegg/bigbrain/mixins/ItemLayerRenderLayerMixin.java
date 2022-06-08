@@ -52,7 +52,7 @@ public abstract class ItemLayerRenderLayerMixin<T extends LivingEntity, M extend
         CustomHeadLayer.translateToHead(p_174521_, false);
         boolean flag = p_174520_ == HumanoidArm.LEFT;
         p_174521_.translate((double) ((flag ? -2.5F : 2.5F) / 16.0F), -0.0625D, 0.0D);
-        Minecraft.getInstance().getItemInHandRenderer().renderItem(p_174518_, p_174519_,
+        Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(p_174518_, p_174519_,
                 ItemTransforms.TransformType.HEAD, false, p_174521_, p_174522_, p_174523_);
         p_174521_.popPose();
     }

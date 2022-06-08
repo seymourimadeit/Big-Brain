@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.util.RandomSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,13 +40,13 @@ public abstract class PiglinBruteMixin extends AbstractPiglin implements IBuckle
     }
 
     @Inject(at = @At("TAIL"), method = "finalizeSpawn(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/DifficultyInstance;Lnet/minecraft/world/entity/MobSpawnType;Lnet/minecraft/world/entity/SpawnGroupData;Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/world/entity/SpawnGroupData;")
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor p_35058_, DifficultyInstance p_35059_, MobSpawnType p_35060_, @Nullable SpawnGroupData p_35061_, @Nullable CompoundTag p_35062_, CallbackInfoReturnable<SpawnGroupData> info) {
-        this.populateDefaultEquipmentEnchantments(p_35059_);
-        return super.finalizeSpawn(p_35058_, p_35059_, p_35060_, p_35061_, p_35062_);
+    public void finalizeSpawn(ServerLevelAccessor level, DifficultyInstance p_35059_, MobSpawnType p_35060_, @Nullable SpawnGroupData p_35061_, @Nullable CompoundTag p_35062_, CallbackInfoReturnable<SpawnGroupData> info) {
+        RandomSource randomsource = level.getRandom();
+        this.populateDefaultEquipmentEnchantments(randomsource, p_35059_);
     }
 
     @Inject(at = @At(value = "TAIL"), method = "populateDefaultEquipmentSlots")
-    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty, CallbackInfo info) {
+    protected void setEquipmentBasedOnDifficulty(RandomSource rSource, DifficultyInstance difficulty, CallbackInfo info) {
         if (!BigBrainConfig.BruteSpawningWithBuckler)
             return;
         this.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
@@ -53,8 +54,8 @@ public abstract class PiglinBruteMixin extends AbstractPiglin implements IBuckle
     }
 
     @Override
-    protected void enchantSpawnedWeapon(float p_241844_1_) {
-        if (this.random.nextInt(300) == 0) {
+    protected void enchantSpawnedWeapon(RandomSource rSource, float p_241844_1_) {
+        if (rSource.nextInt(300) == 0) {
             ItemStack itemstack = this.getOffhandItem();
             if (itemstack.getItem() instanceof BucklerItem) {
                 Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
@@ -63,7 +64,7 @@ public abstract class PiglinBruteMixin extends AbstractPiglin implements IBuckle
                 this.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
             }
         }
-        if (this.random.nextInt(500) == 0) {
+        if (rSource.nextInt(500) == 0) {
             ItemStack itemstack = this.getOffhandItem();
             if (itemstack.getItem() instanceof BucklerItem) {
                 Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);

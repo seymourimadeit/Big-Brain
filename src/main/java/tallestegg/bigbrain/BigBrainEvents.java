@@ -5,12 +5,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
@@ -313,9 +312,9 @@ public class BigBrainEvents {
     public static void onToolTipLoad(ItemTooltipEvent event) {
         if (event.getItemStack().getItem() == Items.SNOWBALL) {
             event.getToolTip()
-                    .add((new TranslatableComponent("item.bigbrain.snowball.desc.hit")).withStyle(ChatFormatting.GRAY));
+                    .add((Component.translatable("item.bigbrain.snowball.desc.hit")).withStyle(ChatFormatting.GRAY));
             event.getToolTip().add(
-                    (new TranslatableComponent("item.bigbrain.snowball.desc.freeze")).withStyle(ChatFormatting.BLUE));
+                    (Component.translatable("item.bigbrain.snowball.desc.freeze")).withStyle(ChatFormatting.BLUE));
         }
     }
 

@@ -52,7 +52,7 @@ public class BigBrainClientEvents {
         ItemStack stack = event.getItemStack();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        float partialTicks = event.getPartialTicks();
+        float partialTicks = event.getPartialTick();
         if (stack.getItem() instanceof BucklerItem && (player.isUsingItem() && player.getUseItem() == stack
                 || ((IBucklerUser) player).isBucklerDashing() && BucklerItem.isReady(stack))) {
             boolean mainHand = event.getHand() == InteractionHand.MAIN_HAND;
@@ -71,7 +71,7 @@ public class BigBrainClientEvents {
             mStack.translate(f11 * 0.2D, 0.0D, f11 * 0.2D);
             ItemTransforms.TransformType transform = !rightHanded ? ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND
                     : ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND;
-            Minecraft.getInstance().getItemInHandRenderer().renderItem(player, stack, transform, !rightHanded, mStack,
+            Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, stack, transform, !rightHanded, mStack,
                     event.getMultiBufferSource(), event.getPackedLight());
             mStack.popPose();
             event.setCanceled(true);

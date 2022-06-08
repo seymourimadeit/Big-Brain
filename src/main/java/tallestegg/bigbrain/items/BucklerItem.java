@@ -1,16 +1,10 @@
 package tallestegg.bigbrain.items;
 
-import java.util.List;
-import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -34,6 +28,10 @@ import tallestegg.bigbrain.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
 import tallestegg.bigbrain.entity.IBucklerUser;
 
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.function.Consumer;
+
 public class BucklerItem extends ShieldItem {
     public BucklerItem(Properties p_i48470_1_) {
         super(p_i48470_1_);
@@ -42,25 +40,25 @@ public class BucklerItem extends ShieldItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> list, TooltipFlag tooltip) {
-        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.charge")).withStyle(ChatFormatting.BLUE));
-        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.while")).withStyle(ChatFormatting.GRAY));
-        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.forward")).withStyle(ChatFormatting.BLUE));
-        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.speed")).withStyle(ChatFormatting.BLUE));
+        list.add((Component.translatable("item.bigbrain.buckler.desc.charge")).withStyle(ChatFormatting.BLUE));
+        list.add((Component.translatable("item.bigbrain.buckler.desc.while")).withStyle(ChatFormatting.GRAY));
+        list.add((Component.translatable("item.bigbrain.buckler.desc.forward")).withStyle(ChatFormatting.BLUE));
+        list.add((Component.translatable("item.bigbrain.buckler.desc.speed")).withStyle(ChatFormatting.BLUE));
         if (EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0
                 && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0)
-            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.bash")).withStyle(ChatFormatting.BLUE));
+            list.add((Component.translatable("item.bigbrain.buckler.desc.bash")).withStyle(ChatFormatting.BLUE));
         if (EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) > 0)
             list.add(
-                    (new TranslatableComponent("item.bigbrain.buckler.desc.explosion")).withStyle(ChatFormatting.BLUE));
-        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.knockback")).withStyle(ChatFormatting.BLUE));
+                    (Component.translatable("item.bigbrain.buckler.desc.explosion")).withStyle(ChatFormatting.BLUE));
+        list.add((Component.translatable("item.bigbrain.buckler.desc.knockback")).withStyle(ChatFormatting.BLUE));
         if (EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.BANG.get(), stack) == 0
                 && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), stack) == 0) {
-            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.critical")).withStyle(ChatFormatting.BLUE));
-            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.critSwing")).withStyle(ChatFormatting.RED));
-            list.add((new TranslatableComponent("item.bigbrain.buckler.desc.turnSpeed")).withStyle(ChatFormatting.RED));
+            list.add((Component.translatable("item.bigbrain.buckler.desc.critical")).withStyle(ChatFormatting.BLUE));
+            list.add((Component.translatable("item.bigbrain.buckler.desc.critSwing")).withStyle(ChatFormatting.RED));
+            list.add((Component.translatable("item.bigbrain.buckler.desc.turnSpeed")).withStyle(ChatFormatting.RED));
         }
-        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.noJumping")).withStyle(ChatFormatting.RED));
-        list.add((new TranslatableComponent("item.bigbrain.buckler.desc.water")).withStyle(ChatFormatting.RED));
+        list.add((Component.translatable("item.bigbrain.buckler.desc.noJumping")).withStyle(ChatFormatting.RED));
+        list.add((Component.translatable("item.bigbrain.buckler.desc.water")).withStyle(ChatFormatting.RED));
     }
 
     @Override
