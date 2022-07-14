@@ -19,7 +19,7 @@
 "enchantment.bigbrain.turning.desc": "Даёт полный контроль движения при рывке, ценой потери возможности врезаться в существ.",
 "enchantment.bigbrain.bang.desc": "При столкновении с существом создаёт взрыва. Этот взрыва наносит урон существам и использующему.",
 "bigbrain.advancements.nether.obtain_buckler.title": "Штурмовой щит",
-"bigbrain.advancements.nether.obtain_buckler.description": "Заполучите баклер."
+"bigbrain.advancements.nether.obtain_buckler.description": "Заполучите баклер.",
 "item.bigbrain.snowball.desc.hit": "При попадании:",
 "item.bigbrain.snowball.desc.freeze": "  +5 секунд заморозки"
 }

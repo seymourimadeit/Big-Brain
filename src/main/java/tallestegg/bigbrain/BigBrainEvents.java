@@ -44,12 +44,11 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -125,7 +124,7 @@ public class BigBrainEvents {
     public static void onPlayerRightClick(PlayerInteractEvent.RightClickItem event) {
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
-        Player player = (Player) event.getPlayer();
+        Player player = (Player) event.getEntity();
         if (BigBrainConfig.snowGolemSlow) {
             if (item == Items.SNOWBALL) {
                 player.swing(event.getHand(), true);
@@ -135,7 +134,7 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void onLivingTick(LivingUpdateEvent event) {
+    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         if (event.getEntity() instanceof IBucklerUser) {
             LivingEntity entity = (LivingEntity) event.getEntity();
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(),
@@ -187,13 +186,13 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onPlayerAttack(CriticalHitEvent event) {
-        if (((IOneCriticalAfterCharge) event.getPlayer()).isCritical()) {
+        if (((IOneCriticalAfterCharge) event.getEntity()).isCritical()) {
             event.setResult(Result.ALLOW);
             event.setDamageModifier(1.5F);
-            event.getPlayer().level.playSound((Player) null, event.getPlayer().getX(), event.getPlayer().getY(),
-                    event.getPlayer().getZ(), SoundEvents.PLAYER_ATTACK_CRIT, event.getPlayer().getSoundSource(), 1.0F,
+            event.getEntity().level.playSound((Player) null, event.getEntity().getX(), event.getEntity().getY(),
+                    event.getEntity().getZ(), SoundEvents.PLAYER_ATTACK_CRIT, event.getEntity().getSoundSource(), 1.0F,
                     1.0F);
-            ((IOneCriticalAfterCharge) event.getPlayer()).setCritical(false);
+            ((IOneCriticalAfterCharge) event.getEntity()).setCritical(false);
         }
     }
 
@@ -209,7 +208,7 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityJoin(EntityJoinWorldEvent event) {
+    public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof Pillager pillager) {
             if (BigBrainConfig.PillagerMultishot)
