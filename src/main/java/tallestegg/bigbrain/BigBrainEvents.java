@@ -124,7 +124,7 @@ public class BigBrainEvents {
     public static void onPlayerRightClick(PlayerInteractEvent.RightClickItem event) {
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
-        Player player = (Player) event.getEntity();
+        Player player = event.getEntity();
         if (BigBrainConfig.snowGolemSlow) {
             if (item == Items.SNOWBALL) {
                 player.swing(event.getHand(), true);
@@ -193,17 +193,6 @@ public class BigBrainEvents {
                     event.getEntity().getZ(), SoundEvents.PLAYER_ATTACK_CRIT, event.getEntity().getSoundSource(), 1.0F,
                     1.0F);
             ((IOneCriticalAfterCharge) event.getEntity()).setCritical(false);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onSetAttackTarget(LivingSetAttackTargetEvent event) {
-        if (event.getEntity() instanceof AbstractPiglin) {
-            try {
-                setTargetPiglin.invoke(PiglinAi.class, event.getEntity(), event.getTarget());
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                new RuntimeException("Big Brain has failed to invoke maybeRetaliate");
-            }
         }
     }
 
@@ -285,6 +274,13 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onTargetSet(LivingSetAttackTargetEvent event) {
+        if (event.getEntity() instanceof AbstractPiglin) {
+            try {
+                setTargetPiglin.invoke(PiglinAi.class, event.getEntity(), event.getTarget());
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                new RuntimeException("Big Brain has failed to invoke maybeRetaliate");
+            }
+        }
         if (event.getEntity() instanceof Creeper creeper && event.getTarget() instanceof Ocelot ocelot
                 && event.getTarget() != null)
             creeper.setTarget(null);
