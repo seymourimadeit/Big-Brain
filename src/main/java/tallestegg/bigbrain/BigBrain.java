@@ -3,9 +3,11 @@ package tallestegg.bigbrain;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -23,11 +25,8 @@ public class BigBrain {
     public static final String MODID = "bigbrain";
 
     public BigBrain() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::attributeChange);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addCreativeTabs);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, BigBrainConfig.COMMON_SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, BigBrainConfig.CLIENT_SPEC);
         BigBrainItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -39,28 +38,13 @@ public class BigBrain {
     private void setup(final FMLCommonSetupEvent event) {
     }
 
+    private void addCreativeTabs(final CreativeModeTabEvent.BuildContents event) {
+        if (event.getTab() == CreativeModeTabs.COMBAT)
+            event.accept(BigBrainItems.BUCKLER.get());
+    }
+
     private void doClientStuff(final FMLClientSetupEvent event) {
         MinecraftForge.EVENT_BUS.register(new ItemModelHandler());
-    }
-
-    private void enqueueIMC(final InterModEnqueueEvent event) {
-    }
-
-    private void processIMC(final InterModProcessEvent event) {
-    }
-
-    private void attributeChange(final EntityAttributeModificationEvent event) {
-    }
-
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class TextureHandler {
-        @SuppressWarnings("deprecation")
-        @SubscribeEvent
-        public static void onStitch(TextureStitchEvent.Pre event) {
-            if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
-                event.addSprite(BucklerTexture.BUCKLER_TEXTURE.texture());
-            }
-        }
     }
 
     public static class ItemModelHandler {

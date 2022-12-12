@@ -33,7 +33,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpyglassItem;
-import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -47,9 +47,9 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -102,7 +102,7 @@ public class BigBrainEvents {
         if (event.getLookingEntity() instanceof LivingEntity living) {
             if (living.hasEffect(MobEffects.BLINDNESS))
                 event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
-            if (living.getUseItem().getItem() instanceof SpyglassItem)
+            if (living.getUseItem().getItem() instanceof SpyglassItem && living.getAttribute(Attributes.FOLLOW_RANGE) != null)
                 event.modifyVisibility(living.getAttributeValue(Attributes.FOLLOW_RANGE) * 2.0D);
         }
     }
@@ -273,16 +273,16 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void onTargetSet(LivingSetAttackTargetEvent event) {
+    public static void onTargetSet(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof AbstractPiglin) {
             try {
-                setTargetPiglin.invoke(PiglinAi.class, event.getEntity(), event.getTarget());
+                setTargetPiglin.invoke(PiglinAi.class, event.getEntity(), event.getOriginalTarget());
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 new RuntimeException("Big Brain has failed to invoke maybeRetaliate");
             }
         }
-        if (event.getEntity() instanceof Creeper creeper && event.getTarget() instanceof Ocelot ocelot
-                && event.getTarget() != null)
+        if (event.getEntity() instanceof Creeper creeper && event.getOriginalTarget() instanceof Ocelot ocelot
+                && event.getOriginalTarget() != null)
             creeper.setTarget(null);
         if (event.getEntity() instanceof Pillager pillager) {
             if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling()) {
@@ -291,13 +291,13 @@ public class BigBrainEvents {
                 // target the player, the patrol goal is executed with a pillager isn't
                 // aggressive.
                 if (pillager.getNavigation().isDone())
-                    pillager.getNavigation().moveTo(event.getTarget(), 1.0D);
+                    pillager.getNavigation().moveTo(event.getOriginalTarget(), 1.0D);
                 for (Raider raider : pillager.level.getNearbyEntities(Raider.class,
                         TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(),
                         pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
                     raider.setAggressive(true);
                     if (!(raider.getUseItem().getItem() instanceof SpyglassItem) && !raider.isPatrolling())
-                        raider.setTarget(event.getTarget());
+                        raider.setTarget(event.getOriginalTarget());
                 }
             }
         }
@@ -357,8 +357,8 @@ public class BigBrainEvents {
                     if (entity instanceof Player)
                         ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(), hand);
                 });
-                Explosion.BlockInteraction mode = BigBrainConfig.BangBlockDestruction ? Explosion.BlockInteraction.BREAK
-                        : Explosion.BlockInteraction.NONE;
+                Level.ExplosionInteraction mode = BigBrainConfig.BangBlockDestruction ? Level.ExplosionInteraction.TNT
+                        : Level.ExplosionInteraction.NONE;
                 entity.level.explode((Entity) null, entity.getX(), entity.getY(), entity.getZ(),
                         (float) bangLevel * 1.0F, mode);
                 ((IBucklerUser) entity).setBucklerDashing(false);

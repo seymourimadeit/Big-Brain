@@ -1,0 +1,5 @@
+{
+  "sources": [
+    {"type": "single", "resource": "bigbrain:entity/buckler/golden_buckler" }
+  ]
+}
