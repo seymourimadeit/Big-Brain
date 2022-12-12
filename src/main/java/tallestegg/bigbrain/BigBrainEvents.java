@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
@@ -33,6 +34,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpyglassItem;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,10 +78,16 @@ public class BigBrainEvents {
     public static void onBreed(BabyEntitySpawnEvent event) {
         if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
             Pig pig = (Pig) event.getParentA();
+            Level level = pig.getLevel();
+            RandomSource randomSource = level.getRandom();
             for (int i = 0; i < BigBrainConfig.minPigBabiesBred
-                    + pig.level.random.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
+                    + randomSource.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
                 Pig baby = EntityType.PIG.create(event.getChild().level);
                 baby.copyPosition(pig);
+                baby.setPersistenceRequired();
+                if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+                    level.addFreshEntity(new ExperienceOrb(level, pig.getX(), pig.getY(), pig.getZ(), pig.getRandom().nextInt(7) + 1));
+                }
                 baby.setBaby(true);
                 pig.getCommandSenderWorld().addFreshEntity(baby);
             }
@@ -90,11 +98,9 @@ public class BigBrainEvents {
     public static void onJump(LivingJumpEvent event) {
         if (event.getEntity() instanceof IBucklerUser) {
             if (((IBucklerUser) event.getEntity()).isBucklerDashing()) {
-                event.getEntity().setDeltaMovement(event.getEntity().getDeltaMovement().x(), 0.0D,
-                        event.getEntity().getDeltaMovement().z());
+                event.getEntity().setDeltaMovement(event.getEntity().getDeltaMovement().x(), 0.0D, event.getEntity().getDeltaMovement().z());
             }
         }
-
     }
 
     @SubscribeEvent
@@ -168,9 +174,8 @@ public class BigBrainEvents {
                     BucklerItem.setReady(stack, false);
                     entity.stopUsingItem();
                 }
-                if (((IBucklerUser) entity).getCooldown() <= 0) {
+                if (((IBucklerUser) entity).getCooldown() <= 0)
                     ((IBucklerUser) entity).setCooldown(0);
-                }
             }
         }
     }
@@ -306,10 +311,8 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onToolTipLoad(ItemTooltipEvent event) {
         if (event.getItemStack().getItem() == Items.SNOWBALL) {
-            event.getToolTip()
-                    .add((Component.translatable("item.bigbrain.snowball.desc.hit")).withStyle(ChatFormatting.GRAY));
-            event.getToolTip().add(
-                    (Component.translatable("item.bigbrain.snowball.desc.freeze")).withStyle(ChatFormatting.BLUE));
+            event.getToolTip().add(Component.translatable("item.bigbrain.snowball.desc.hit").withStyle(ChatFormatting.GRAY));
+            event.getToolTip().add(Component.translatable("item.bigbrain.snowball.desc.freeze").withStyle(ChatFormatting.BLUE));
         }
     }
 
