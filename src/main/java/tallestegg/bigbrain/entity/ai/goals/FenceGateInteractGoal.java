@@ -1,6 +1,8 @@
 package tallestegg.bigbrain.entity.ai.goals;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -48,8 +50,8 @@ public abstract class FenceGateInteractGoal extends Goal {
             if (blockstate.getBlock() instanceof FenceGateBlock) {
                 this.mob.level.setBlock(this.gatePos, blockstate.setValue(FenceGateBlock.OPEN, Boolean.valueOf(open)),
                         10);
+                this.mob.level.playSound((Player)null, this.gatePos, open ? SoundEvents.FENCE_GATE_OPEN : SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0F, this.mob.level.getRandom().nextFloat() * 0.1F + 0.9F);
                 this.mob.level.gameEvent(mob, open ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, gatePos);
-                this.mob.level.levelEvent((Player) null, open ? 1008 : 1014, gatePos, 0);
             }
         }
 
@@ -104,6 +106,5 @@ public abstract class FenceGateInteractGoal extends Goal {
         if (f2 < 0.0F) {
             this.passed = true;
         }
-
     }
 }

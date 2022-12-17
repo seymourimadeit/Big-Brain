@@ -362,7 +362,7 @@ public class BigBrainEvents {
                 });
                 Level.ExplosionInteraction mode = BigBrainConfig.BangBlockDestruction ? Level.ExplosionInteraction.TNT
                         : Level.ExplosionInteraction.NONE;
-                entity.level.explode((Entity) null, entity.getX(), entity.getY(), entity.getZ(),
+                entity.level.explode(null, entity.getX(), entity.getY(), entity.getZ(),
                         (float) bangLevel * 1.0F, mode);
                 ((IBucklerUser) entity).setBucklerDashing(false);
             }
