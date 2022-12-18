@@ -114,6 +114,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue PolarBearFish;
         public final ForgeConfigSpec.BooleanValue snowGolemSlow;
         public final ForgeConfigSpec.BooleanValue animalShelter;
+        public final ForgeConfigSpec.BooleanValue animalPanic;
         public final ForgeConfigSpec.BooleanValue meleeFix;
         public final ForgeConfigSpec.BooleanValue ocelotParrot;
         public final ForgeConfigSpec.BooleanValue ocelotPhantom;
@@ -158,6 +159,7 @@ public class BigBrainConfig {
             pillagerSpyGlass = builder.defineInRange("Chance of a pillager patrol leader getting a spyglass", 0.50F, 0.0F, 900.0F);
             builder.pop();
             builder.push("animals");
+            animalPanic = builder.define("Have animals alert their kin to panic if hurt?", true);
             AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf", "minecraft:turtle", "minecraft:polar_bear", "minecraft:axolotl"));
             NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").define("Animal Night BlackList", Lists.newArrayList("minecraft:cat"));
             RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalRainBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());

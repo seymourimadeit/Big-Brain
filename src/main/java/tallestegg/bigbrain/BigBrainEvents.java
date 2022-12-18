@@ -52,6 +52,7 @@ import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -221,9 +222,7 @@ public class BigBrainEvents {
 
         if (entity instanceof AbstractVillager villager && BigBrainConfig.MobsAttackAllVillagers) {
             villager.goalSelector.addGoal(2,
-                    new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> {
-                        return !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId()) && avoidTarget instanceof Enemy;
-                    }));
+                    new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId()) && avoidTarget instanceof Enemy));
         }
 
         if (entity instanceof PathfinderMob creature) {
@@ -276,6 +275,16 @@ public class BigBrainEvents {
         if (entity instanceof Parrot parrot)
             if (BigBrainConfig.ocelotParrot)
                 parrot.goalSelector.addGoal(2, new AvoidEntityGoal<>(parrot, Ocelot.class, 8.0F, 1.0D, 5.0D));
+    }
+
+    @SubscribeEvent
+    public static void onHit(LivingHurtEvent event) {
+        if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
+            for (Animal nearbyEntities : animal.getLevel().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
+                if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().isNoAggro())
+                    nearbyEntities.setLastHurtByMob((LivingEntity) event.getSource().getEntity());
+            }
+        }
     }
 
     @SubscribeEvent
