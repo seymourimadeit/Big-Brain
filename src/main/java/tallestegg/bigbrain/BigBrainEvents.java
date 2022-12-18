@@ -89,6 +89,7 @@ public class BigBrainEvents {
                     level.addFreshEntity(new ExperienceOrb(level, pig.getX(), pig.getY(), pig.getZ(), pig.getRandom().nextInt(7) + 1));
                 }
                 baby.setBaby(true);
+                baby.setPersistenceRequired();
                 pig.getCommandSenderWorld().addFreshEntity(baby);
             }
         }

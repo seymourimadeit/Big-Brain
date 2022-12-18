@@ -3,11 +3,11 @@
 		"sounds": [
 			{
 				"name": "bigbrain:mobs/piglin_brute/charge/charge1",
-				"volume": 0.9
+				"volume": 0.9,
 				"name": "bigbrain:mobs/piglin_brute/charge/charge2",
-				"volume": 0.9
+				"volume": 0.9,
 				"name": "bigbrain:mobs/piglin_brute/charge/charge3",
-				"volume": 0.9
+				"volume": 0.9,
 				"name": "bigbrain:mobs/piglin_brute/charge/charge4",
 				"volume": 0.9
 			}

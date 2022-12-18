@@ -29,21 +29,6 @@ public abstract class FenceGateInteractGoal extends Goal {
         }
     }
 
-    protected boolean isOpen() {
-        if (!this.hasGate) {
-            return false;
-        } else {
-            BlockState blockstate = this.mob.level.getBlockState(this.gatePos);
-            if (!(blockstate.getBlock() instanceof FenceGateBlock)) {
-                this.hasGate = false;
-                return false;
-            } else {
-                return blockstate.getValue(FenceGateBlock.OPEN);
-            }
-        }
-    }
-
-
     protected void setOpen(boolean open) {
         if (this.hasGate) {
             BlockState blockstate = this.mob.level.getBlockState(this.gatePos);
@@ -66,10 +51,10 @@ public abstract class FenceGateInteractGoal extends Goal {
             Path path = groundpathnavigation.getPath();
             if (path != null && ((GroundPathNavigation) this.mob.getNavigation()).getNodeEvaluator().canOpenDoors()) {
                 for (int i = 0; i < Math.min(path.getNextNodeIndex() + 2, path.getNodeCount()); ++i) {
-                    Node node = path.getNode(i);
+                        Node node = path.getNode(i);
                     this.gatePos = new BlockPos(node.x + mob.getRandom().nextInt(4) - 2, node.y, node.z + mob.getRandom().nextInt(4) - 2); //needed as normally pathfinding ignores closed fence gates
                     // and we need the mobs to recognize that a fence gate exists so it can be opened/closed
-                    if (this.mob.distanceToSqr((double) this.gatePos.getX(), this.gatePos.getY(), (double) this.gatePos.getZ()) < 2.25D) {
+                    if (this.mob.distanceToSqr(this.gatePos.getX(), this.gatePos.getY(), this.gatePos.getZ()) < 2.25D) {
                         this.hasGate = this.mob.level.getBlockState(this.gatePos).getBlock() instanceof FenceGateBlock;
                         return this.hasGate;
                     }
@@ -103,8 +88,7 @@ public abstract class FenceGateInteractGoal extends Goal {
         float f = (float) ((double) this.gatePos.getX() + 0.5D - this.mob.getX());
         float f1 = (float) ((double) this.gatePos.getZ() + 0.5D - this.mob.getZ());
         float f2 = this.doorOpenDirX * f + this.doorOpenDirZ * f1;
-        if (f2 < 0.0F) {
+        if (f2 < 0.0F)
             this.passed = true;
-        }
     }
 }
