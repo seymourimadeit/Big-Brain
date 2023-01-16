@@ -1,22 +1,17 @@
 package tallestegg.bigbrain;
 
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CreativeModeTabEvent;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import tallestegg.bigbrain.items.BucklerItem;
 
@@ -57,5 +52,11 @@ public class BigBrain {
                         return livingEntity != null && active ? 1.0F : 0.0F;
                     });
         }
+    }
+
+    public static void doBeeAnimation(float ageInTicks, ModelPart bone) {
+        float f1 = Mth.cos(ageInTicks * 0.18F);
+        bone.y = bone.y + (Mth.cos(ageInTicks) * 3.6F) / 24F;
+        bone.yRot = 0.1F + f1 * (float) Math.PI * 0.095F;
     }
 }

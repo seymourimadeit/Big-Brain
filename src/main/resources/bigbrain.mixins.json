@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "tallestegg.bigbrain.mixins",
-  "compatibilityLevel": "JAVA_16",
+  "compatibilityLevel": "JAVA_17",
   "refmap": "bigbrain.refmap.json",
   "mixins": [
     "BruteBrainMixin",
@@ -20,7 +20,8 @@
     "MouseHelperMixin",
     "PlayerModelMixin",
     "IllagerModelMixin",
-    "ItemLayerRenderLayerMixin"
+    "ItemLayerRenderLayerMixin",
+    "BeeModelMixin"
   ],
   "minVersion": "0.8.4"
 }

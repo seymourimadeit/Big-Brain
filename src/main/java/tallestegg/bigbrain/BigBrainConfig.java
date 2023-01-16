@@ -121,6 +121,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue ocelotCreeper;
         public final ForgeConfigSpec.BooleanValue sheepRunAway;
         public final ForgeConfigSpec.BooleanValue openFenceGates;
+        public final ForgeConfigSpec.BooleanValue beeAnimation;
         public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
@@ -167,6 +168,9 @@ public class BigBrainConfig {
             builder.push("pigs");
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            builder.pop();
+            builder.push("bees");
+            beeAnimation = builder.define("Have bees do their bedrock animation?", true);
             builder.pop();
             builder.pop();
             builder.push("polar bears");
