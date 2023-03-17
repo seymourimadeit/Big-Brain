@@ -1,11 +1,10 @@
-package tallestegg.bigbrain.enchantments;
+package tallestegg.bigbrain.common.enchantments;
 
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.entity.EquipmentSlot;
-import tallestegg.bigbrain.BigBrainEnchantments;
 
-public class BangEnchantment extends Enchantment {
-    public BangEnchantment(Enchantment.Rarity rarity, EquipmentSlot... slots) {
+public class TurningEnchantment extends Enchantment {
+    public TurningEnchantment(Enchantment.Rarity rarity, EquipmentSlot... slots) {
         super(rarity, BigBrainEnchantments.BUCKLER, slots);
     }
 
@@ -16,7 +15,7 @@ public class BangEnchantment extends Enchantment {
 
     @Override
     public int getMaxCost(int enchantmentLevel) {
-        return 50;
+        return 15;
     }
 
     @Override
@@ -36,11 +35,11 @@ public class BangEnchantment extends Enchantment {
 
     @Override
     public int getMaxLevel() {
-        return 3;
+        return 1;
     }
-
+    
     @Override
     public boolean checkCompatibility(Enchantment ench) {
-        return ench instanceof TurningEnchantment ? false : super.checkCompatibility(ench);
+        return ench instanceof BangEnchantment ? false : super.checkCompatibility(ench);
     }
 }

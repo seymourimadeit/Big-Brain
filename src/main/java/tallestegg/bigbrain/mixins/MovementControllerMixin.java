@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import tallestegg.bigbrain.BigBrainEnchantments;
-import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
 
 @Mixin(MoveControl.class)
 public abstract class MovementControllerMixin {

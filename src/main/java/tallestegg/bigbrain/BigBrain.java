@@ -13,7 +13,10 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import tallestegg.bigbrain.items.BucklerItem;
+import tallestegg.bigbrain.client.BigBrainSounds;
+import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
+import tallestegg.bigbrain.common.items.BigBrainItems;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mod(BigBrain.MODID)
 public class BigBrain {

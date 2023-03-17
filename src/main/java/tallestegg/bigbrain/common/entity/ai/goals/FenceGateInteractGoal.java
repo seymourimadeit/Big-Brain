@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.entity.ai.goals;
+package tallestegg.bigbrain.common.enchantments.entity.ai.goals;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;

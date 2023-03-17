@@ -26,10 +26,10 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.BigBrainEnchantments;
-import tallestegg.bigbrain.BigBrainItems;
-import tallestegg.bigbrain.entity.IBucklerUser;
-import tallestegg.bigbrain.items.BucklerItem;
+import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
+import tallestegg.bigbrain.common.items.BigBrainItems;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 //This is where the magic happens, and by magic, I mean mechanically automated goring into commodities!
 @Mixin(PiglinBrute.class)

@@ -1,8 +1,9 @@
-package tallestegg.bigbrain;
+package tallestegg.bigbrain.client;
 
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
+import tallestegg.bigbrain.BigBrain;
 
 public class BucklerTexture {
     @SuppressWarnings("deprecation")
