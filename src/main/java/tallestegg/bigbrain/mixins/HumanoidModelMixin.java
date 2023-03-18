@@ -19,7 +19,7 @@ import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mixin(HumanoidModel.class)
-public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableListModel<T> {
+public abstract class HumanoidModelMixin<T extends LivingEntity> extends AgeableListModel<T> {
     @Shadow
     @Final
     public ModelPart leftArm;

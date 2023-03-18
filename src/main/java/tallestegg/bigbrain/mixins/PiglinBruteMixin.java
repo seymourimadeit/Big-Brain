@@ -86,7 +86,6 @@ public abstract class PiglinBruteMixin extends AbstractPiglin implements IBuckle
                 if (!flag && itemstack.isDamageableItem()) {
                     itemstack.setDamageValue(this.random.nextInt(this.random.nextInt(itemstack.getMaxDamage() / 2)));
                 }
-
                 this.spawnAtLocation(itemstack);
                 this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
             }
