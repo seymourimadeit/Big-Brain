@@ -27,7 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 // TODO convert this into a capability when i port to 1.20

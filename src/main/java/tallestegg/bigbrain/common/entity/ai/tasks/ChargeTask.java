@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.common.enchantments.entity.ai.tasks;
+package tallestegg.bigbrain.common.entity.ai.tasks;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -13,7 +13,7 @@ import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {

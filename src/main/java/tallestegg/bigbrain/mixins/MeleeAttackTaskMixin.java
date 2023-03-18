@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
 
 @Mixin(MeleeAttack.class)
 public class MeleeAttackTaskMixin {

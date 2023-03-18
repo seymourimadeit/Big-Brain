@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
 
 @Mixin(MouseHandler.class)
 public class MouseHelperMixin {

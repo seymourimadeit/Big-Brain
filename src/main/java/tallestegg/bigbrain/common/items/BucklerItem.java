@@ -26,7 +26,7 @@ import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
 
 import javax.annotation.Nullable;
 import java.util.List;

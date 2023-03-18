@@ -62,9 +62,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
-import tallestegg.bigbrain.common.enchantments.entity.IOneCriticalAfterCharge;
-import tallestegg.bigbrain.common.enchantments.entity.ai.goals.*;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 import java.lang.reflect.InvocationTargetException;

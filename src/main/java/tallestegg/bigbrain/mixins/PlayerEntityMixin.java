@@ -14,7 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import tallestegg.bigbrain.common.enchantments.entity.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.common.entity.IOneCriticalAfterCharge;
 
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements IOneCriticalAfterCharge {

@@ -28,7 +28,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.items.BigBrainItems;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 //This is where the magic happens, and by magic, I mean mechanically automated goring into commodities!

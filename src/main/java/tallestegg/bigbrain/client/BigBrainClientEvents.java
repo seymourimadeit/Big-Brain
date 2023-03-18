@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 import java.lang.reflect.InvocationTargetException;

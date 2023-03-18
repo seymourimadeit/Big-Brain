@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.common.enchantments.entity.ai.goals;
+package tallestegg.bigbrain.common.entity.ai.goals;
 
 import javax.annotation.Nullable;
 
