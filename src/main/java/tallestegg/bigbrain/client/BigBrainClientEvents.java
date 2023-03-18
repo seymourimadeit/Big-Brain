@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
@@ -71,8 +72,8 @@ public class BigBrainClientEvents {
             mStack.translate((float) i * 0.56F, -0.52F + event.getEquipProgress() * -0.6F,
                     -0.72F);
             mStack.translate(f11 * 0.2D, 0.0D, f11 * 0.2D);
-            ItemTransforms.TransformType transform = !rightHanded ? ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND
-                    : ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND;
+            ItemDisplayContext transform = !rightHanded ? ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                    : ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
             Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, stack, transform, !rightHanded, mStack,
                     event.getMultiBufferSource(), event.getPackedLight());
             mStack.popPose();
@@ -145,8 +146,8 @@ public class BigBrainClientEvents {
                     float f8 = 0.0F;
                     float f5 = 0.0F;
                     if (!shouldSit && entityIn.isAlive()) {
-                        f8 = Mth.lerp(event.getPartialTick(), entityIn.animationSpeedOld, entityIn.animationSpeed);
-                        f5 = entityIn.animationPosition - entityIn.animationSpeed * (1.0F - event.getPartialTick());
+                        f8 = entityIn.walkAnimation.speed(event.getPartialTick());
+                        f5 = entityIn.walkAnimation.position(event.getPartialTick());
                         if (entityIn.isBaby()) {
                             f5 *= 3.0F;
                         }

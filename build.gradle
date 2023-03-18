@@ -23,7 +23,8 @@ mixin {
     add sourceSets.main, "bigbrain.refmap.json"
 }
 
-version = '1.6.2'
+
+version = '1.19.4-1.6.4'
 group = 'tallestegg.bigbrain' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'bigbrain'
 
@@ -31,7 +32,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'parchment', version: "1.19.2-2022.11.27-1.19.3"
+    mappings channel: 'parchment', version: "1.19.3-2023.03.12-1.19.4"
     
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -97,10 +98,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.19.3-44.0.11'
+    minecraft 'net.minecraftforge:forge:1.19.4-45.0.9'
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 }
 

@@ -1,5 +1,6 @@
 package tallestegg.bigbrain.mixins;
 
+import net.minecraft.world.item.ItemDisplayContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,7 +34,7 @@ public abstract class ItemLayerRenderLayerMixin<T extends LivingEntity, M extend
     }
 
     @Inject(at = @At("HEAD"), method = "renderArmWithItem", cancellable = true)
-    public void renderArmWithItem(LivingEntity entity, ItemStack stack, ItemTransforms.TransformType p_174527_,
+    public void renderArmWithItem(LivingEntity entity, ItemStack stack, ItemDisplayContext p_174527_,
             HumanoidArm p_174528_, PoseStack p_174529_, MultiBufferSource p_174530_, int p_174531_, CallbackInfo info) {
         if (entity.getUseItem().getItem() instanceof SpyglassItem && entity.getUseItem() == stack) {
             this.renderArmWithSpyglass(entity, stack, p_174528_, p_174529_, p_174530_, p_174531_);
@@ -53,7 +54,7 @@ public abstract class ItemLayerRenderLayerMixin<T extends LivingEntity, M extend
         boolean flag = p_174520_ == HumanoidArm.LEFT;
         p_174521_.translate((double) ((flag ? -2.5F : 2.5F) / 16.0F), -0.0625D, 0.0D);
         Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(p_174518_, p_174519_,
-                ItemTransforms.TransformType.HEAD, false, p_174521_, p_174522_, p_174523_);
+                ItemDisplayContext.HEAD, false, p_174521_, p_174522_, p_174523_);
         p_174521_.popPose();
     }
 }

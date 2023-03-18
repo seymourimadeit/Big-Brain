@@ -1,20 +1,10 @@
 package tallestegg.bigbrain.mixins;
 
-import java.util.UUID;
-import java.util.function.Predicate;
-
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -27,8 +17,18 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BucklerItem;
+
+import java.util.UUID;
+import java.util.function.Predicate;
 
 // TODO convert this into a capability when i port to 1.20
 @Mixin(LivingEntity.class)
@@ -55,7 +55,7 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
     @Inject(at = @At(value = "RETURN"), cancellable = true, method = "isDamageSourceBlocked")
     public void isDamageSourceBlocked(DamageSource damageSourceIn, CallbackInfoReturnable<Boolean> info) {
         boolean flag = false;
-        if (!damageSourceIn.isBypassArmor() && this.isBlocking() && !flag && this.useItem.getItem() instanceof BucklerItem)
+        if (!damageSourceIn.is(DamageTypeTags.BYPASSES_SHIELD) && this.isBlocking() && !flag && this.useItem.getItem() instanceof BucklerItem)
             info.setReturnValue(false);
 
     }

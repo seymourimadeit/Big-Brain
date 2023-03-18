@@ -13,6 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -283,7 +284,7 @@ public class BigBrainEvents {
     public static void onHit(LivingHurtEvent event) {
         if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
             for (Animal nearbyEntities : animal.getLevel().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
-                if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().isNoAggro())
+                if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO))
                     nearbyEntities.setLastHurtByMob((LivingEntity) event.getSource().getEntity());
             }
         }
@@ -349,7 +350,7 @@ public class BigBrainEvents {
                         entity.getRandomZ(1.0D), 1, d0, d1, d2, 1.0D);
             }
             if (bangLevel == 0) {
-                if (entityHit.hurt(DamageSource.mobAttack(entity), damage)) {
+                if (entityHit.hurt(entity.damageSources().mobAttack(entity), damage)) {
                     entityHit.knockback((double) (knockbackStrength),
                             (double) Mth.sin(entity.getYRot() * ((float) Math.PI / 180F)),
                             (double) (-Mth.cos(entity.getYRot() * ((float) Math.PI / 180F))));

@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import tallestegg.bigbrain.client.BBModelLayers;
 import tallestegg.bigbrain.common.items.BigBrainItems;
@@ -26,8 +27,8 @@ public class BucklerRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemTransforms.TransformType p_239207_2_, PoseStack matrixStack,
-            MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void renderByItem(ItemStack stack, ItemDisplayContext p_239207_2_, PoseStack matrixStack,
+                             MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         Item item = stack.getItem();
         if (item == BigBrainItems.BUCKLER.get()) {
             matrixStack.pushPose();
