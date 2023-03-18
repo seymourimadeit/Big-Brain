@@ -1,9 +1,7 @@
 package tallestegg.bigbrain;
 
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CreativeModeTabEvent;
@@ -13,7 +11,10 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import tallestegg.bigbrain.items.BucklerItem;
+import tallestegg.bigbrain.client.BigBrainSounds;
+import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
+import tallestegg.bigbrain.common.items.BigBrainItems;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mod(BigBrain.MODID)
 public class BigBrain {
@@ -52,11 +53,5 @@ public class BigBrain {
                         return livingEntity != null && active ? 1.0F : 0.0F;
                     });
         }
-    }
-
-    public static void doBeeAnimation(float ageInTicks, ModelPart bone) {
-        float f1 = Mth.cos(ageInTicks * 0.18F);
-        bone.y = bone.y + (Mth.cos(ageInTicks) * 3.6F) / 24F;
-        bone.yRot = 0.1F + f1 * (float) Math.PI * 0.095F;
     }
 }

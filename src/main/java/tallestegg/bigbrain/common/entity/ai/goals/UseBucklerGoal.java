@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.entity.ai.goals;
+package tallestegg.bigbrain.common.enchantments.entity.ai.goals;
 
 import java.util.EnumSet;
 
@@ -8,9 +8,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.InteractionHand;
 import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.BigBrainEnchantments;
-import tallestegg.bigbrain.entity.IBucklerUser;
-import tallestegg.bigbrain.items.BucklerItem;
+import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 //So Guards can use the buckler if the player puts it on their offhand.
 public class UseBucklerGoal<T extends PathfinderMob> extends Goal {

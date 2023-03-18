@@ -12,9 +12,9 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import tallestegg.bigbrain.BBModelLayers;
-import tallestegg.bigbrain.BigBrainItems;
-import tallestegg.bigbrain.BucklerTexture;
+import tallestegg.bigbrain.client.BBModelLayers;
+import tallestegg.bigbrain.common.items.BigBrainItems;
+import tallestegg.bigbrain.client.BucklerTexture;
 import tallestegg.bigbrain.client.model.ModelGoldenBuckler;
 
 public class BucklerRenderer extends BlockEntityWithoutLevelRenderer {

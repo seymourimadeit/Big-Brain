@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.items;
+package tallestegg.bigbrain.common.items;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -23,10 +23,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.Tags.Items;
 import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.BigBrainEnchantments;
-import tallestegg.bigbrain.BigBrainSounds;
+import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
+import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
-import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
 
 import javax.annotation.Nullable;
 import java.util.List;

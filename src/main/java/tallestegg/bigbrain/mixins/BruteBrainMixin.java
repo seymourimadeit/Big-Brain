@@ -12,7 +12,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.monster.piglin.PiglinBruteAi;
 import net.minecraft.world.entity.schedule.Activity;
-import tallestegg.bigbrain.entity.ai.tasks.ChargeTask;
+import tallestegg.bigbrain.common.enchantments.entity.ai.tasks.ChargeTask;
 
 //This is also where the M.A.G.I.C happens.
 //I'm probably using way too many mixins.

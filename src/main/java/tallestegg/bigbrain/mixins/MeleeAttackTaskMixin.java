@@ -1,6 +1,5 @@
 package tallestegg.bigbrain.mixins;
 
-import net.minecraft.world.entity.ai.behavior.OneShot;
 import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
-import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
 
 @Mixin(MeleeAttack.class)
 public class MeleeAttackTaskMixin {

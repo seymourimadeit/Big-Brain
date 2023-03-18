@@ -10,22 +10,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import tallestegg.bigbrain.BigBrainEnchantments;
-import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
 
 @Mixin(MoveControl.class)
 public abstract class MovementControllerMixin {
-
     @Shadow
     @Final
     protected Mob mob;
 
-    /**
-     * TODO PR a MovementController and LookController event so we don't have to mixin into these classes.
-     */
     @Inject(at = @At(value = "HEAD"), method = "tick", cancellable = true)
     public void tick(CallbackInfo info) {
-        if (EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), mob.getOffhandItem()) == 0 && ((IBucklerUser) mob).isBucklerDashing())
+        if (mob.getOffhandItem().getEnchantmentLevel(BigBrainEnchantments.TURNING.get()) == 0 && ((IBucklerUser) mob).isBucklerDashing())
             info.cancel();
     }
 }

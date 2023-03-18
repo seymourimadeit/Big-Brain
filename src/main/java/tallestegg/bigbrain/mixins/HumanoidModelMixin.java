@@ -15,11 +15,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import tallestegg.bigbrain.entity.IBucklerUser;
-import tallestegg.bigbrain.items.BucklerItem;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mixin(HumanoidModel.class)
-public abstract class PlayerModelMixin<T extends LivingEntity> extends AgeableListModel<T> {
+public abstract class HumanoidModelMixin<T extends LivingEntity> extends AgeableListModel<T> {
     @Shadow
     @Final
     public ModelPart leftArm;

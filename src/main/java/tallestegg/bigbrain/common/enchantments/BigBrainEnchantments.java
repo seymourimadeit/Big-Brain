@@ -1,4 +1,4 @@
-package tallestegg.bigbrain;
+package tallestegg.bigbrain.common.enchantments;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -11,9 +11,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import tallestegg.bigbrain.enchantments.BangEnchantment;
-import tallestegg.bigbrain.enchantments.TurningEnchantment;
-import tallestegg.bigbrain.items.BucklerItem;
+import tallestegg.bigbrain.BigBrain;
+import tallestegg.bigbrain.common.enchantments.BangEnchantment;
+import tallestegg.bigbrain.common.enchantments.TurningEnchantment;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BigBrainEnchantments {

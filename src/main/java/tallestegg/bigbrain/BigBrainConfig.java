@@ -121,7 +121,6 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue ocelotCreeper;
         public final ForgeConfigSpec.BooleanValue sheepRunAway;
         public final ForgeConfigSpec.BooleanValue openFenceGates;
-        public final ForgeConfigSpec.BooleanValue beeAnimation;
         public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
@@ -169,9 +168,6 @@ public class BigBrainConfig {
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
             builder.pop();
-            builder.push("bees");
-            beeAnimation = builder.define("Have bees do their bedrock animation?", true);
-            builder.pop();
             builder.pop();
             builder.push("polar bears");
             PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
@@ -193,11 +189,17 @@ public class BigBrainConfig {
     public static class ClientConfig {
         public final ForgeConfigSpec.BooleanValue RenderAfterImage;
         public final ForgeConfigSpec.BooleanValue RenderEntityLayersDuringAfterImage;
+        public final ForgeConfigSpec.BooleanValue bedrockBeeAnim;
+        public final ForgeConfigSpec.BooleanValue drownedGlow;
 
         public ClientConfig(ForgeConfigSpec.Builder builder) {
             builder.push("after image");
             RenderAfterImage = builder.translation(BigBrain.MODID + ".config.afterImage").define("Render an after image while an entity is charging with a buckler?", true);
             RenderEntityLayersDuringAfterImage = builder.translation(BigBrain.MODID + ".config.entityLayers").comment("Keep in mind this won't affect their opacity due to technical reasons.").define("Render entity layers while rendering the after image?", false);
+            builder.pop();
+            builder.push("bedrock animations");
+            bedrockBeeAnim = builder.define("Allow bees to have a idle animation akin to bedrock", true);
+            drownedGlow = builder.define("Allow drowned to render glowing spots, like in bedrock", true);
             builder.pop();
         }
     }

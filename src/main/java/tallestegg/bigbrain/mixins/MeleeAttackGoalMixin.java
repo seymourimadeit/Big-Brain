@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.entity.IBucklerUser;
+import tallestegg.bigbrain.common.enchantments.entity.IBucklerUser;
 
 @Mixin(MeleeAttackGoal.class)
 public class MeleeAttackGoalMixin {
