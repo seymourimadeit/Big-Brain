@@ -2,7 +2,7 @@ package tallestegg.bigbrain.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.LocalPlayer;
@@ -132,7 +132,7 @@ public class BigBrainClientEvents {
                         }
                     }
                     float f7 = (float) entityIn.tickCount + event.getPartialTick();
-                    stack.mulPose(Axis.YP.rotationDegrees(180.0F - f));
+                    stack.mulPose(Vector3f.YP.rotationDegrees(180.0F - f));
                     try {
                         preRenderCallback.invoke(renderer, entityIn, stack, event.getPartialTick());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

@@ -34,6 +34,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpyglassItem;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
@@ -372,8 +373,8 @@ public class BigBrainEvents {
                     if (entity instanceof Player)
                         ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(), hand);
                 });
-                Level.ExplosionInteraction mode = BigBrainConfig.BangBlockDestruction ? Level.ExplosionInteraction.TNT
-                        : Level.ExplosionInteraction.NONE;
+                Explosion.BlockInteraction mode = BigBrainConfig.BangBlockDestruction ? Explosion.BlockInteraction.DESTROY
+                        : Explosion.BlockInteraction.NONE;
                 entity.level.explode(null, entity.getX(), entity.getY(), entity.getZ(),
                         (float) bangLevel * 1.0F, mode);
                 ((IBucklerUser) entity).setBucklerDashing(false);

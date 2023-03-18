@@ -1,10 +1,12 @@
 package tallestegg.bigbrain;
 
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -12,6 +14,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import tallestegg.bigbrain.client.BigBrainSounds;
+import tallestegg.bigbrain.client.BucklerTexture;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
@@ -22,7 +25,6 @@ public class BigBrain {
 
     public BigBrain() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::addCreativeTabs);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, BigBrainConfig.COMMON_SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, BigBrainConfig.CLIENT_SPEC);
         BigBrainItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -32,11 +34,6 @@ public class BigBrain {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-    }
-
-    private void addCreativeTabs(final CreativeModeTabEvent.BuildContents event) {
-        if (event.getTab() == CreativeModeTabs.COMBAT)
-            event.accept(BigBrainItems.BUCKLER.get());
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -52,6 +49,17 @@ public class BigBrain {
                                 || livingEntity != null && BucklerItem.isReady(stack);
                         return livingEntity != null && active ? 1.0F : 0.0F;
                     });
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class TextureHandler {
+        @SuppressWarnings("deprecation")
+        @SubscribeEvent
+        public static void onStitch(TextureStitchEvent.Pre event) {
+            if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
+                event.addSprite(BucklerTexture.BUCKLER_TEXTURE.texture());
+            }
         }
     }
 }
