@@ -14,8 +14,8 @@ public class BigBrainRendererEvents {
     @SubscribeEvent
     public static void addRenderLayers(EntityRenderersEvent.AddLayers event) {
         if (BigBrainConfig.CLIENT.drownedGlow.get()) {
-            DrownedRenderer renderer = event.getRenderer(EntityType.DROWNED);
-            renderer.addLayer(new DrownedGlowLayer<>(renderer));
+            if (event.getRenderer(EntityType.DROWNED) instanceof DrownedRenderer renderer)
+                renderer.addLayer(new DrownedGlowLayer<>(renderer));
         }
     }
 }
