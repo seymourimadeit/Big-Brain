@@ -1,5 +1,6 @@
 package tallestegg.bigbrain.client;
 
+import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.DrownedRenderer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,7 +15,7 @@ public class BigBrainRendererEvents {
     @SubscribeEvent
     public static void addRenderLayers(EntityRenderersEvent.AddLayers event) {
         if (BigBrainConfig.CLIENT.drownedGlow.get()) {
-            if (event.getRenderer(EntityType.DROWNED) instanceof DrownedRenderer renderer)
+            if (event.getRenderer(EntityType.DROWNED) instanceof AbstractZombieRenderer renderer)
                 renderer.addLayer(new DrownedGlowLayer<>(renderer));
         }
     }
