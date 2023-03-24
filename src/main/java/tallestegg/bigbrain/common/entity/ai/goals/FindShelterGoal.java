@@ -1,9 +1,5 @@
 package tallestegg.bigbrain.common.entity.ai.goals;
 
-import java.util.Random;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
@@ -12,6 +8,8 @@ import net.minecraft.world.entity.ai.goal.FleeSunGoal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.phys.Vec3;
 import tallestegg.bigbrain.BigBrainConfig;
+
+import javax.annotation.Nullable;
 
 public class FindShelterGoal extends FleeSunGoal {
     public FindShelterGoal(PathfinderMob entity) {

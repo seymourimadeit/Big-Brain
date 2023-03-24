@@ -98,7 +98,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.0.9'
+    minecraft 'net.minecraftforge:forge:1.19.4-45.0.23'
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 }
 

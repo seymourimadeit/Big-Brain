@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -27,6 +26,7 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Snowball;
@@ -35,6 +35,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpyglassItem;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
@@ -49,11 +51,8 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -66,11 +65,13 @@ import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
+import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
@@ -383,6 +384,60 @@ public class BigBrainEvents {
             if (entity instanceof IOneCriticalAfterCharge)
                 ((IOneCriticalAfterCharge) entity).setCritical(
                         BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity) == 0);
+        }
+    }
+
+    @SubscribeEvent
+    public static void finalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
+        MobSpawnType spawnType = event.getSpawnType();
+        RandomSource rSource = event.getLevel().getRandom();
+        if (event.getEntity() instanceof Pillager pillager) {
+            if (spawnType == MobSpawnType.PATROL) {
+                float chance = BigBrainConfig.spyGlassPillagerChance;
+                if (pillager.isPatrolLeader() && rSource.nextFloat() < chance)
+                    pillager.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SPYGLASS));
+            }
+        }
+        if (event.getEntity() instanceof PiglinBrute piglinBrute) {
+            if (!BigBrainConfig.BruteSpawningWithBuckler)
+                return;
+            piglinBrute.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
+            ((IBucklerUser) piglinBrute).setCooldown(240);
+            ItemStack itemstack = piglinBrute.getOffhandItem();
+            if (rSource.nextInt(300) == 0) {
+                if (itemstack.getItem() instanceof BucklerItem) {
+                    Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
+                    map.putIfAbsent(BigBrainEnchantments.TURNING.get(), 1);
+                    EnchantmentHelper.setEnchantments(map, itemstack);
+                    piglinBrute.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
+                }
+            }
+            if (rSource.nextInt(500) == 0) {
+                if (itemstack.getItem() instanceof BucklerItem) {
+                    Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
+                    map.putIfAbsent(BigBrainEnchantments.BANG.get(), 1);
+                    EnchantmentHelper.setEnchantments(map, itemstack);
+                    piglinBrute.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void dropLoot(LivingDropsEvent event) {
+        if (event.getEntity() instanceof PiglinBrute brute) {
+            ItemStack itemstack = brute.getOffhandItem();
+            if (itemstack.getItem() instanceof BucklerItem) {
+                float f = 0.10F;
+                boolean flag = f > 1.0F;
+                if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack) && (event.isRecentlyHit() || flag) && Math.max(brute.getRandom().nextFloat() - (float) event.getLootingLevel() * 0.01F, 0.0F) < f) {
+                    if (itemstack.isDamageableItem()) {
+                        itemstack.setDamageValue(brute.getRandom().nextInt(brute.getRandom().nextInt(itemstack.getMaxDamage() / 2)));
+                    }
+                    brute.spawnAtLocation(itemstack);
+                    brute.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+                }
+            }
         }
     }
 

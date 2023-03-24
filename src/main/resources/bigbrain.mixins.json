@@ -10,10 +10,8 @@
     "MeleeAttackGoalMixin",
     "MovementControllerMixin",
     "PiglinBrainMixin",
-    "PiglinBruteMixin",
     "PlayerEntityMixin",
     "RangedCrossbowAttackGoalMixin",
-    "PillagerMixin",
     "MeleeAttackTaskMixin"
   ],
   "client": [
