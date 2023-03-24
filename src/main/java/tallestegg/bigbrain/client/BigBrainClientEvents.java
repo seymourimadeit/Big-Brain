@@ -70,9 +70,9 @@ public class BigBrainClientEvents {
             int i = rightHanded ? 1 : -1;
             mStack.translate((float) i * 0.56F, -0.52F + event.getEquipProgress() * -0.6F,
                     -0.72F);
-            mStack.translate(f11 * 0.2D, 0.0D, f11 * 0.2D);
-            ItemTransforms.TransformType transform = !rightHanded ? ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND
-                    : ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND;
+            mStack.translate(f11 * (!rightHanded? 0.2D : -0.2D), 0.0D, f11 * (!rightHanded? 0.2D : -0.2D));
+            ItemTransforms.TransformType transform = rightHanded ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND
+                    : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND;
             Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, stack, transform, !rightHanded, mStack,
                     event.getMultiBufferSource(), event.getPackedLight());
             mStack.popPose();
