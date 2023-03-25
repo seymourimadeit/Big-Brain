@@ -11,12 +11,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BigBrainItems;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mixin(MeleeAttack.class)
 public class MeleeAttackTaskMixin {
     @Inject(at = @At(value = "RETURN"), cancellable = true, method = "lambda$create$0")
     private static void checkExtraStartConditions(BehaviorBuilder.Instance p_258533_, MemoryAccessor p_258534_, MemoryAccessor p_258535_, MemoryAccessor p_258536_, MemoryAccessor p_258537_, int p_258538_, ServerLevel p_258539_, Mob p_258540_, long p_258541_, CallbackInfoReturnable<Boolean> cir) {
-        if (((IBucklerUser)p_258540_).isBucklerDashing())
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(p_258540_)) > 0)
             cir.setReturnValue(false);
     }
 }

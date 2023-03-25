@@ -14,6 +14,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
@@ -44,7 +45,7 @@ public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
     @Override
     protected void tick(ServerLevel worldIn, T entityIn, long gameTime) {
         LivingEntity livingEntity = this.getAttackTarget(entityIn);
-        if (((IBucklerUser) entityIn).isBucklerDashing() && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), entityIn.getOffhandItem()) > 0 || !((IBucklerUser) entityIn).isBucklerDashing()) {
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0 && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), entityIn.getOffhandItem()) > 0 || BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) < 0) {
             entityIn.lookAt(livingEntity, 30.0F, 30.0F);
         }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && entityIn.distanceTo(livingEntity) >= 4.0D && entityIn.distanceTo(livingEntity) <= 10.0D) {

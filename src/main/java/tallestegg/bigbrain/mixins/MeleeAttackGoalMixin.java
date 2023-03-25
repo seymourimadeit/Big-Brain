@@ -12,6 +12,8 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BigBrainItems;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mixin(MeleeAttackGoal.class)
 public class MeleeAttackGoalMixin {
@@ -40,7 +42,7 @@ public class MeleeAttackGoalMixin {
     
     @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canUse")
     public void canUse(CallbackInfoReturnable<Boolean> info) {
-        if (((IBucklerUser)mob).isBucklerDashing()) 
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
             info.setReturnValue(false);
     }
 }

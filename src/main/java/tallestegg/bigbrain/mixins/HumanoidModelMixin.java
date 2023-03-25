@@ -16,6 +16,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mixin(HumanoidModel.class)
@@ -48,7 +49,7 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
             this.leftArm.xRot = Mth.lerp(result, leftArm.xRot, this.leftArm.xRot * 0.1F - 1.5F);
         }
         if (entityIn instanceof IBucklerUser)
-            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getItemInHand(hand))) {
+            if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0 && BucklerItem.isReady(entityIn.getItemInHand(hand))) {
                 ItemStack handItems = hand == InteractionHand.MAIN_HAND ? entityIn.getOffhandItem() : entityIn.getMainHandItem();
                 if (!handItems.isEmpty()) {
                     this.rightArm.xRot = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;
@@ -68,7 +69,7 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
             this.rightArm.xRot = Mth.lerp(result, rightArm.xRot, this.rightArm.xRot * 0.1F - 1.5F);
         }
         if (entityIn instanceof IBucklerUser) {
-            if (((IBucklerUser) entityIn).isBucklerDashing() && BucklerItem.isReady(entityIn.getItemInHand(hand))) {
+            if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0 && BucklerItem.isReady(entityIn.getItemInHand(hand))) {
                 ItemStack handItems = hand == InteractionHand.MAIN_HAND ? entityIn.getOffhandItem() : entityIn.getMainHandItem();
                 if (!handItems.isEmpty()) {
                     this.leftArm.xRot = 0.5F - (float) Math.PI * 0.5F - 0.9424779F;

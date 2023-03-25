@@ -11,6 +11,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BigBrainItems;
+import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mixin(MoveControl.class)
 public abstract class MovementControllerMixin {
@@ -20,7 +22,7 @@ public abstract class MovementControllerMixin {
 
     @Inject(at = @At(value = "HEAD"), method = "tick", cancellable = true)
     public void tick(CallbackInfo info) {
-        if (mob.getOffhandItem().getEnchantmentLevel(BigBrainEnchantments.TURNING.get()) == 0 && ((IBucklerUser) mob).isBucklerDashing())
+        if (mob.getOffhandItem().getEnchantmentLevel(BigBrainEnchantments.TURNING.get()) == 0 && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
             info.cancel();
     }
 }

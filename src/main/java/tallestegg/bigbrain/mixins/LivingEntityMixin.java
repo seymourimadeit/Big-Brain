@@ -62,21 +62,12 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
 
     @Inject(at = @At(value = "TAIL"), method = "addAdditionalSaveData")
     public void writeAdditional(CompoundTag compound, CallbackInfo info) {
-        compound.putBoolean("BucklerDashing", this.isBucklerDashing());
         compound.putInt("ChargeCooldown", this.getCooldown());
-        compound.putInt("BucklerUseTimer", this.getBucklerUseTimer());
     }
 
     @Inject(at = @At(value = "TAIL"), method = "readAdditionalSaveData")
     public void readAdditional(CompoundTag compound, CallbackInfo info) {
-        this.setBucklerDashing(compound.getBoolean("BucklerDashing"));
         this.setCooldown(compound.getInt("ChargeCooldown"));
-        this.setBucklerUseTimer(compound.getInt("BucklerUseTimer"));
-    }
-
-    @Inject(at = @At(value = "TAIL"), method = "defineSynchedData")
-    protected void defineSynchedData(CallbackInfo info) {
-        this.entityData.define(DASHING, false);
     }
 
     public int getCooldown() {
@@ -85,48 +76,6 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
 
     public void setCooldown(int cooldown) {
         this.cooldown = cooldown;
-    }
-
-    public void setBucklerDashing(boolean dashing) {
-        if (!dashing) {
-            AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            AttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-            if (speed == null || knockback == null) {
-                return;
-            }
-            knockback.removeModifier(KNOCKBACK_RESISTANCE);
-            if ((LivingEntity) (Object) this instanceof Player)
-                speed.removeModifier(CHARGE_SPEED_BOOST);
-            this.setBucklerUseTimer(0);
-        }
-        if (dashing) {
-            AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            AttributeInstance knockback = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-            if (speed == null || knockback == null) {
-                return;
-            }
-            knockback.removeModifier(KNOCKBACK_RESISTANCE);
-            knockback.addTransientModifier(KNOCKBACK_RESISTANCE);
-            if ((LivingEntity) (Object) this instanceof Player) {
-                speed.removeModifier(CHARGE_SPEED_BOOST);
-                speed.addTransientModifier(CHARGE_SPEED_BOOST);
-            }
-        }
-        this.entityData.set(DASHING, dashing);
-    }
-
-    public boolean isBucklerDashing() {
-        return this.entityData.get(DASHING);
-    }
-
-    @Override
-    public int getBucklerUseTimer() {
-        return this.bucklerUseTimer;
-    }
-
-    @Override
-    public void setBucklerUseTimer(int bucklerUseTimer) {
-        this.bucklerUseTimer = bucklerUseTimer;
     }
 
     @Shadow

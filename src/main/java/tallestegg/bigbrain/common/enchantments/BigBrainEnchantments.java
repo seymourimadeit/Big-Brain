@@ -31,6 +31,6 @@ public class BigBrainEnchantments {
     public static int getBucklerEnchantsOnHands(Enchantment enchantment, LivingEntity player) {
         InteractionHand hand = player.getMainHandItem().getItem() instanceof BucklerItem ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         ItemStack stack = player.getItemInHand(hand);
-        return EnchantmentHelper.getItemEnchantmentLevel(enchantment, stack);
+        return stack.getEnchantmentLevel(enchantment);
     }
 }

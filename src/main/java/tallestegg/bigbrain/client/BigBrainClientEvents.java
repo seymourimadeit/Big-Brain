@@ -29,6 +29,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 import java.lang.reflect.InvocationTargetException;
@@ -43,7 +44,7 @@ public class BigBrainClientEvents {
     public static void onMovementKeyPressed(MovementInputUpdateEvent event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (((IBucklerUser) player).isBucklerDashing()) {
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(player)) > 0) {
             event.getInput().jumping = false;
             event.getInput().leftImpulse = 0;
         }
@@ -57,7 +58,7 @@ public class BigBrainClientEvents {
         LocalPlayer player = mc.player;
         float partialTicks = event.getPartialTick();
         if (stack.getItem() instanceof BucklerItem && (player.isUsingItem() && player.getUseItem() == stack
-                || ((IBucklerUser) player).isBucklerDashing() && BucklerItem.isReady(stack))) {
+                || BucklerItem.getChargeTicks(stack) > 0 && BucklerItem.isReady(stack))) {
             boolean mainHand = event.getHand() == InteractionHand.MAIN_HAND;
             HumanoidArm handside = mainHand ? player.getMainArm() : player.getMainArm().getOpposite();
             boolean rightHanded = handside == HumanoidArm.RIGHT;
@@ -87,7 +88,7 @@ public class BigBrainClientEvents {
         LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> renderer = event.getRenderer();
         EntityModel<LivingEntity> model = renderer.getModel();
         PoseStack stack = event.getPoseStack();
-        if (((IBucklerUser) entityIn).isBucklerDashing()) {
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0) {
             if (!BigBrainConfig.RenderAfterImage)
                 return;
             for (int i = 0; i < 5; i++) {
@@ -142,7 +143,7 @@ public class BigBrainClientEvents {
                     stack.scale(-1.0F, -1.0F, 1.0F);
                     double motionZ = Math.abs(entityIn.getDeltaMovement().z());
                     stack.translate(0.0D, -1.501F,
-                            i * motionZ * 4 / ((IBucklerUser) entityIn).getBucklerUseTimer());
+                            i * motionZ * 4 / BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)));
                     float f8 = 0.0F;
                     float f5 = 0.0F;
                     if (!shouldSit && entityIn.isAlive()) {

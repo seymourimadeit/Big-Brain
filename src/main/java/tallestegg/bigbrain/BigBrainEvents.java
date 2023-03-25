@@ -15,6 +15,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -72,11 +74,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
     private static final Method setTargetPiglin = ObfuscationReflectionHelper.findMethod(PiglinAi.class, "m_34826_", AbstractPiglin.class, LivingEntity.class);
+    private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");
+    private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
+    private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 1.0D, AttributeModifier.Operation.ADDITION);
 
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
@@ -100,10 +107,8 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onJump(LivingJumpEvent event) {
-        if (event.getEntity() instanceof IBucklerUser) {
-            if (((IBucklerUser) event.getEntity()).isBucklerDashing()) {
-                event.getEntity().setDeltaMovement(event.getEntity().getDeltaMovement().x(), 0.0D, event.getEntity().getDeltaMovement().z());
-            }
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(event.getEntity())) > 0) {
+            event.getEntity().setDeltaMovement(event.getEntity().getDeltaMovement().x(), 0.0D, event.getEntity().getDeltaMovement().z());
         }
     }
 
@@ -143,35 +148,35 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        if (event.getEntity() instanceof IBucklerUser) {
-            LivingEntity entity = (LivingEntity) event.getEntity();
-            int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
-            if (!((IBucklerUser) entity).isBucklerDashing()) {
-                ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() + 1);
-                int configValue = turningLevel == 0 ? BigBrainConfig.BucklerRunTime : BigBrainConfig.BucklerTurningRunTime;
-                if (((IBucklerUser) entity).getBucklerUseTimer() > configValue)
-                    ((IBucklerUser) entity).setBucklerUseTimer(configValue);
-                ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
-                if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
-                    ((IBucklerUser) entity).setCooldown(BigBrainConfig.BucklerCooldown);
-            }
-
-            if (((IBucklerUser) entity).isBucklerDashing()) {
+        LivingEntity entity = event.getEntity();
+        ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
+        if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
+            ((IBucklerUser) entity).setCooldown(BigBrainConfig.BucklerCooldown);
+        if (((IBucklerUser) entity).getCooldown() <= 0)
+            ((IBucklerUser) entity).setCooldown(0);
+        int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
+        ItemStack bucklerItemStack = BigBrainItems.checkEachHandForBuckler(entity);
+        boolean bucklerReadyToCharge = BucklerItem.isReady(bucklerItemStack);
+        int bucklerChargeTicks = BucklerItem.getChargeTicks(bucklerItemStack);
+        if (bucklerReadyToCharge) {
+            BucklerItem.setChargeTicks(bucklerItemStack, bucklerChargeTicks - 1);
+            if (bucklerChargeTicks > 0) {
+                ((IBucklerUser) entity).setCooldown(0);
                 BucklerItem.moveFowards(entity);
-                ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
-                ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() - 1);
                 BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
                 if (turningLevel == 0 && !entity.level.isClientSide()) BigBrainEvents.bucklerBash(entity);
-                if (((IBucklerUser) entity).getBucklerUseTimer() <= 0) {
-                    InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-                    ItemStack stack = entity.getItemInHand(hand);
-                    ((IBucklerUser) entity).setBucklerDashing(false);
-                    ((IBucklerUser) entity).setBucklerUseTimer(0);
-                    ((IBucklerUser) entity).setCooldown(0);
-                    BucklerItem.setReady(stack, false);
-                    entity.stopUsingItem();
+            }
+            if (bucklerChargeTicks <= 0) {
+                entity.stopUsingItem();
+                BucklerItem.setChargeTicks(bucklerItemStack, 0);
+                BucklerItem.setReady(bucklerItemStack, false);
+                AttributeInstance speed = entity.getAttribute(Attributes.MOVEMENT_SPEED);
+                AttributeInstance knockback = entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+                if (speed == null || knockback == null) {
+                    return;
                 }
-                if (((IBucklerUser) entity).getCooldown() <= 0) ((IBucklerUser) entity).setCooldown(0);
+                knockback.removeModifier(KNOCKBACK_RESISTANCE);
+                speed.removeModifier(CHARGE_SPEED_BOOST);
             }
         }
     }
@@ -339,7 +344,7 @@ public class BigBrainEvents {
                 });
                 Level.ExplosionInteraction mode = BigBrainConfig.BangBlockDestruction ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE;
                 entity.level.explode(null, entity.getX(), entity.getY(), entity.getZ(), (float) bangLevel * 1.0F, mode);
-                ((IBucklerUser) entity).setBucklerDashing(false);
+                BucklerItem.setChargeTicks(stack, 0);
             }
             entity.setLastHurtMob(entityHit);
             if (entity instanceof IOneCriticalAfterCharge)

@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
+import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 //So Guards can use the buckler if the player puts it on their offhand.
@@ -39,7 +40,7 @@ public class UseBucklerGoal<T extends PathfinderMob> extends Goal {
         LivingEntity livingEntity = owner.getTarget();
         if (livingEntity == null)
             return;
-        if (((IBucklerUser) owner).isBucklerDashing() && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getOffhandItem()) > 0 || !((IBucklerUser) owner).isBucklerDashing())
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(owner)) > 0 && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getOffhandItem()) > 0 || BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(owner)) <= 0)
             owner.lookAt(livingEntity, 30.0F, 30.0F);
         if (owner.distanceTo(livingEntity) >= 10.0D) {
             owner.getNavigation().moveTo(livingEntity, 1.0D);
