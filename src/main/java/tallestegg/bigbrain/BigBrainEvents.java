@@ -242,8 +242,8 @@ public class BigBrainEvents {
         }
 
         if (BigBrainConfig.animalShelter && entity instanceof Animal animal && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
-            animal.goalSelector.addGoal(2, new RestrictSunAnimalGoal(animal));
-            animal.goalSelector.addGoal(3, new FindShelterGoal(animal));
+            animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
+            animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
         }
 
         if (entity instanceof Sheep sheep) {

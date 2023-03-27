@@ -49,7 +49,7 @@ public abstract class FenceGateInteractGoal extends Goal {
         } else {
             GroundPathNavigation groundpathnavigation = (GroundPathNavigation) this.mob.getNavigation();
             Path path = groundpathnavigation.getPath();
-            if (path != null && ((GroundPathNavigation) this.mob.getNavigation()).getNodeEvaluator().canOpenDoors()) {
+            if (path != null && this.mob.getNavigation().getNodeEvaluator().canOpenDoors()) {
                 for (int i = 0; i < Math.min(path.getNextNodeIndex() + 2, path.getNodeCount()); ++i) {
                         Node node = path.getNode(i);
                     this.gatePos = new BlockPos(node.x + mob.getRandom().nextInt(4) - 2, node.y, node.z + mob.getRandom().nextInt(4) - 2); //needed as normally pathfinding ignores closed fence gates

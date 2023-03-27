@@ -1,15 +1,14 @@
 package tallestegg.bigbrain.common.entity.ai.goals;
 
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.entity.monster.CrossbowAttackMob;
-import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.ai.goal.RangedCrossbowAttackGoal;
+import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.enchantment.Enchantments;
 
-public class PressureEntityWithMultishotCrossbowGoal<T extends Monster & RangedAttackMob & CrossbowAttackMob>
-        extends RangedCrossbowAttackGoal<T> {
+public class PressureEntityWithMultishotCrossbowGoal<T extends Monster & RangedAttackMob & CrossbowAttackMob> extends RangedCrossbowAttackGoal<T> {
     private final T mob;
 
     public PressureEntityWithMultishotCrossbowGoal(T shooter, double speed, float p_i50322_4_) {
@@ -23,8 +22,7 @@ public class PressureEntityWithMultishotCrossbowGoal<T extends Monster & RangedA
     }
 
     private boolean isHoldingCrossbow() {
-        return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, this.mob.getMainHandItem()) > 0
-                && this.mob.isHolding(is -> is.getItem() instanceof CrossbowItem);
+        return this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(mob, item -> item instanceof CrossbowItem)).getEnchantmentLevel(Enchantments.MULTISHOT) > 0 && this.mob.isHolding(is -> is.getItem() instanceof CrossbowItem);
     }
 
     private boolean isValidTarget() {

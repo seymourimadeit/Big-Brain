@@ -23,7 +23,6 @@ public class RestrictSunAnimalGoal extends RestrictSunGoal {
                         && mob.getCommandSenderWorld().isRainingAt(mob.blockPosition());
         boolean isTamed = mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame()
                 || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
-        return GoalUtils.hasGroundPathNavigation(this.mob) && raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null
-                && !this.mob.getCommandSenderWorld().canSeeSky(mob.blockPosition());
+        return GoalUtils.hasGroundPathNavigation(this.mob) && raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null;
     }
 }

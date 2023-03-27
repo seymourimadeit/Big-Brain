@@ -21,9 +21,9 @@ public class RunWhileChargingGoal extends RandomStrollGoal {
 
     @Override
     public boolean canUse() {
-        return ((Pillager) mob).isUsingItem() && mob.getUseItem().getItem() instanceof CrossbowItem
+        return mob.isUsingItem() && mob.getUseItem().getItem() instanceof CrossbowItem
                 && mob.getTarget() != null && !CrossbowItem.isCharged(mob.getUseItem())
-                && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, this.mob.getMainHandItem()) == 0
+                && mob.getUseItem().getEnchantmentLevel(Enchantments.MULTISHOT) == 0
                 && this.findPosition();
     }
 
@@ -69,7 +69,7 @@ public class RunWhileChargingGoal extends RandomStrollGoal {
 
     @Override
     public boolean canContinueToUse() {
-        return !CrossbowItem.isCharged(mob.getUseItem()) && ((Pillager) mob).isUsingItem()
+        return !CrossbowItem.isCharged(mob.getUseItem()) && mob.isUsingItem()
                 && mob.getUseItem().getItem() instanceof CrossbowItem && !this.mob.isVehicle();
     }
 
