@@ -49,11 +49,8 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -254,8 +251,8 @@ public class BigBrainEvents {
         if (BigBrainConfig.animalShelter && entity instanceof Animal animal
                 && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId())
                 && !(entity instanceof FlyingAnimal)) {
-            animal.goalSelector.addGoal(2, new RestrictSunAnimalGoal(animal));
-            animal.goalSelector.addGoal(3, new FindShelterGoal(animal));
+            animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
+            animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
         }
 
         if (entity instanceof Sheep sheep) {
@@ -288,6 +285,12 @@ public class BigBrainEvents {
                     nearbyEntities.setLastHurtByMob((LivingEntity) event.getSource().getEntity());
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onShieldBlock(ShieldBlockEvent event) {
+        if (event.getEntity().getUseItem().getItem() instanceof BucklerItem)
+            event.setCanceled(true);
     }
 
     @SubscribeEvent
