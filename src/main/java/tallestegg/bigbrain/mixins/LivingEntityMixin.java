@@ -52,14 +52,6 @@ public abstract class LivingEntityMixin extends Entity implements IBucklerUser {
         super(entityTypeIn, worldIn);
     }
 
-    @Inject(at = @At(value = "RETURN"), cancellable = true, method = "isDamageSourceBlocked")
-    public void isDamageSourceBlocked(DamageSource damageSourceIn, CallbackInfoReturnable<Boolean> info) {
-        boolean flag = false;
-        if (!damageSourceIn.is(DamageTypeTags.BYPASSES_SHIELD) && this.isBlocking() && !flag && this.useItem.getItem() instanceof BucklerItem)
-            info.setReturnValue(false);
-
-    }
-
     @Inject(at = @At(value = "TAIL"), method = "addAdditionalSaveData")
     public void writeAdditional(CompoundTag compound, CallbackInfo info) {
         compound.putInt("ChargeCooldown", this.getCooldown());

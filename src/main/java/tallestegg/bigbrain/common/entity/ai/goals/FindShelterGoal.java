@@ -19,7 +19,6 @@ public class FindShelterGoal extends Goal {
     private double wantedX;
     private double wantedY;
     private double wantedZ;
-    private double speed = 1.35D;
 
     public FindShelterGoal(PathfinderMob entity) {
         this.mob = entity;

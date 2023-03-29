@@ -275,6 +275,12 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    public static void onShieldBlock(ShieldBlockEvent event) {
+        if (event.getEntity().getUseItem().getItem() instanceof BucklerItem)
+            event.setCanceled(true);
+    }
+
+    @SubscribeEvent
     public static void onTargetSet(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof AbstractPiglin) {
             try {

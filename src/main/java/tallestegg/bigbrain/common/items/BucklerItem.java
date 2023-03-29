@@ -49,8 +49,14 @@ public class BucklerItem extends ShieldItem {
         if (entity.isAlive()) {
             Vec3 look = entity.getViewVector(1.0F);
             Vec3 motion = entity.getDeltaMovement();
-            entity.setDeltaMovement(look.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y,
-                    look.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            if (entity instanceof Player) {
+                entity.setDeltaMovement(look.x * entity.getAttributeValue(Attributes.MOVEMENT_SPEED), motion.y,
+                        look.z * entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            } else {
+                // This is the only way to make the piglin brute go faster without having it
+                // spazz out.
+                entity.setDeltaMovement(look.x * 1.0D, motion.y, look.z * 1.0D);
+            }
         }
     }
 
