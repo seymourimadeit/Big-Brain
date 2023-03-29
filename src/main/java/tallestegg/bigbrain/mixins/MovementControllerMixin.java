@@ -22,7 +22,7 @@ public abstract class MovementControllerMixin {
 
     @Inject(at = @At(value = "HEAD"), method = "tick", cancellable = true)
     public void tick(CallbackInfo info) {
-        if (mob.getOffhandItem().getEnchantmentLevel(BigBrainEnchantments.TURNING.get()) == 0 && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
+        if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), mob) >= 0 && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
             info.cancel();
     }
 }

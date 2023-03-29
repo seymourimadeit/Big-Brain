@@ -40,7 +40,7 @@ public class UseBucklerGoal<T extends PathfinderMob> extends Goal {
         LivingEntity livingEntity = owner.getTarget();
         if (livingEntity == null)
             return;
-        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(owner)) > 0 && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), owner.getOffhandItem()) > 0 || BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(owner)) <= 0)
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(owner)) > 0 && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), owner) > 0 || BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(owner)) <= 0)
             owner.lookAt(livingEntity, 30.0F, 30.0F);
         if (owner.distanceTo(livingEntity) >= 10.0D) {
             owner.getNavigation().moveTo(livingEntity, 1.0D);

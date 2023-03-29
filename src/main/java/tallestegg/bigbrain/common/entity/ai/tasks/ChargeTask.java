@@ -11,6 +11,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
@@ -45,9 +46,6 @@ public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
     @Override
     protected void tick(ServerLevel worldIn, T entityIn, long gameTime) {
         LivingEntity livingEntity = this.getAttackTarget(entityIn);
-        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0 && EnchantmentHelper.getItemEnchantmentLevel(BigBrainEnchantments.TURNING.get(), entityIn.getOffhandItem()) > 0 || BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) < 0) {
-            entityIn.lookAt(livingEntity, 30.0F, 30.0F);
-        }
         if (chargePhase == ChargePhases.STRAFE && strafeTicks > 0 && entityIn.distanceTo(livingEntity) >= 4.0D && entityIn.distanceTo(livingEntity) <= 10.0D) {
             entityIn.getMoveControl().strafe(-2.0F, 0.0F);
             strafeTicks--;
@@ -60,6 +58,8 @@ public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
             if (entityIn.getTicksUsingItem() >= entityIn.getUseItem().getUseDuration())
                 chargePhase = ChargePhases.FINISH;
         }
+        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0 && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entityIn) > 0 || BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) <= 0)
+            entityIn.lookAt(livingEntity, 30.0F, 30.0F);
     }
 
     @Override

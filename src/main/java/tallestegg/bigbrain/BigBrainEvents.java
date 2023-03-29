@@ -49,6 +49,8 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -57,15 +59,17 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.client.BigBrainSounds;
+import tallestegg.bigbrain.common.capabilities.GuranteedCritProvider;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
-import tallestegg.bigbrain.common.entity.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.common.capabilities.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
@@ -167,9 +171,6 @@ public class BigBrainEvents {
                 if (turningLevel == 0 && !entity.level.isClientSide()) BigBrainEvents.bucklerBash(entity);
             }
             if (bucklerChargeTicks <= 0) {
-                entity.stopUsingItem();
-                BucklerItem.setChargeTicks(bucklerItemStack, 0);
-                BucklerItem.setReady(bucklerItemStack, false);
                 AttributeInstance speed = entity.getAttribute(Attributes.MOVEMENT_SPEED);
                 AttributeInstance knockback = entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
                 if (speed == null || knockback == null) {
@@ -177,6 +178,9 @@ public class BigBrainEvents {
                 }
                 knockback.removeModifier(KNOCKBACK_RESISTANCE);
                 speed.removeModifier(CHARGE_SPEED_BOOST);
+                entity.stopUsingItem();
+                BucklerItem.setChargeTicks(bucklerItemStack, 0);
+                BucklerItem.setReady(bucklerItemStack, false);
             }
         }
     }
@@ -191,11 +195,13 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onPlayerAttack(CriticalHitEvent event) {
-        if (((IOneCriticalAfterCharge) event.getEntity()).isCritical()) {
+        Player player = event.getEntity();
+        IOneCriticalAfterCharge criticalAfterCharge = BigBrainEvents.getGuranteedCritical(player);
+        if (criticalAfterCharge.isCritical()) {
             event.setResult(Result.ALLOW);
             event.setDamageModifier(1.5F);
             event.getEntity().level.playSound((Player) null, event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ(), SoundEvents.PLAYER_ATTACK_CRIT, event.getEntity().getSoundSource(), 1.0F, 1.0F);
-            ((IOneCriticalAfterCharge) event.getEntity()).setCritical(false);
+            criticalAfterCharge.setCritical(false);
         }
     }
 
@@ -275,6 +281,22 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    public static void attach(AttachCapabilitiesEvent<Entity> event) {
+        final GuranteedCritProvider critProvider = new GuranteedCritProvider();
+        if (event.getObject() instanceof Player) {
+            event.addCapability(GuranteedCritProvider.IDENTIFIER, critProvider);
+            event.addListener(critProvider::invalidate);
+        }
+    }
+
+    /*@SubscribeEvent
+    public static void clonePlayer(PlayerEvent.Clone event) {
+        if (event.isWasDeath()) {
+            BigBrainEvents.getGuranteedCritical(event.getOriginal()).
+        }
+    }*/
+
+    @SubscribeEvent
     public static void onShieldBlock(ShieldBlockEvent event) {
         if (event.getEntity().getUseItem().getItem() instanceof BucklerItem)
             event.setCanceled(true);
@@ -316,7 +338,7 @@ public class BigBrainEvents {
     }
 
     public static void bucklerBash(LivingEntity entity) {
-        List<LivingEntity> list = entity.level.getNearbyEntities(LivingEntity.class, TargetingConditions.forCombat(), entity, entity.getBoundingBox());
+        List<LivingEntity> list = entity.level.getNearbyEntities(LivingEntity.class, TargetingConditions.forCombat(), entity, entity.getBoundingBox().inflate(1.5D));
         if (!list.isEmpty()) {
             LivingEntity entityHit = list.get(0);
             entityHit.push(entity);
@@ -353,8 +375,10 @@ public class BigBrainEvents {
                 BucklerItem.setChargeTicks(stack, 0);
             }
             entity.setLastHurtMob(entityHit);
-            if (entity instanceof IOneCriticalAfterCharge)
-                ((IOneCriticalAfterCharge) entity).setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity) == 0);
+            if (entity instanceof Player) {
+                IOneCriticalAfterCharge criticalAfterCharge = BigBrainEvents.getGuranteedCritical(entity);
+                criticalAfterCharge.setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity) == 0);
+            }
         }
     }
 
@@ -420,5 +444,12 @@ public class BigBrainEvents {
                 Vec3 vec3 = entity.getDeltaMovement();
                 entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getX() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).height, entity.getY() + 0.1D, entity.getZ() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).width, vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
             }
+    }
+
+    public static IOneCriticalAfterCharge getGuranteedCritical(LivingEntity entity) {
+        LazyOptional<IOneCriticalAfterCharge> listener = entity.getCapability(BigBrainCapabilities.GURANTEED_CRIT_TRACKER);
+        if (listener.isPresent())
+            return listener.orElseThrow(() -> new IllegalStateException("Capability not found! Report this to the Big Brain github!"));
+        return null;
     }
 }

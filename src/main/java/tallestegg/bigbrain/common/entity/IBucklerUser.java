@@ -5,4 +5,5 @@ public interface IBucklerUser {
     int getCooldown();
 
     void setCooldown(int cooldown);
+
 }
