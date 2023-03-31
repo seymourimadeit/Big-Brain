@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.SkeletonModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -17,6 +19,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -83,7 +86,7 @@ public class BigBrainClientEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityRenderPre(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
+    public static void onEntityRenderPost(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = event.getEntity();
         LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> renderer = event.getRenderer();
         EntityModel<LivingEntity> model = renderer.getModel();
@@ -181,6 +184,15 @@ public class BigBrainClientEvents {
                         }
                     }
                     stack.popPose();
+                }
+            }
+        }
+        if (event.getEntity() instanceof Skeleton skeleton) {
+            SkeletonModel skeleModel = (SkeletonModel) event.getRenderer().getModel();
+            if (skeleModel.rightArmPose ==  HumanoidModel.ArmPose.BOW_AND_ARROW || skeleModel.leftArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW) {
+                if (skeleton.getDeltaMovement().y() > 0 || skeleton.getDeltaMovement().x() > 0 || skeleton.getDeltaMovement().z() > 0) {
+                    skeleModel.rightArmPose = HumanoidModel.ArmPose.EMPTY;
+                    skeleModel.leftArmPose = HumanoidModel.ArmPose.EMPTY;
                 }
             }
         }

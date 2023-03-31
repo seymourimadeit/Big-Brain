@@ -19,6 +19,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -99,9 +102,8 @@ public class BigBrainEvents {
                 Pig baby = EntityType.PIG.create(event.getChild().level);
                 baby.copyPosition(pig);
                 baby.setPersistenceRequired();
-                if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+                if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))
                     level.addFreshEntity(new ExperienceOrb(level, pig.getX(), pig.getY(), pig.getZ(), pig.getRandom().nextInt(7) + 1));
-                }
                 baby.setBaby(true);
                 baby.setPersistenceRequired();
                 pig.getCommandSenderWorld().addFreshEntity(baby);
@@ -182,9 +184,11 @@ public class BigBrainEvents {
                 BucklerItem.setChargeTicks(bucklerItemStack, 0);
                 BucklerItem.setReady(bucklerItemStack, false);
             }
+            IOneCriticalAfterCharge criticalAfterCharge = getGuranteedCritical(entity);
+            if (entity.swingTime > 0 && criticalAfterCharge.isCritical())
+                criticalAfterCharge.setCritical(false);
         }
     }
-
     @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().toString().contains("minecraft:chests/bastion")) {
@@ -208,6 +212,10 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
+        if (entity instanceof AbstractSkeleton skeleton) {
+            skeleton.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
+            skeleton.goalSelector.addGoal(3, new NewBowAttackGoal<>(skeleton, 1.55D, 20, 15.0F));
+        }
         if (entity instanceof Pillager pillager) {
             if (BigBrainConfig.PillagerMultishot)
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
@@ -226,7 +234,7 @@ public class BigBrainEvents {
         }
 
         if (entity instanceof PathfinderMob creature) {
-            if (GoalUtils.hasGroundPathNavigation(creature) && ((GroundPathNavigation) creature.getNavigation()).getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
+            if (GoalUtils.hasGroundPathNavigation(creature) && creature.getNavigation().getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
                 if (creature instanceof Raider) {
                     creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, false) {
                         @Override
