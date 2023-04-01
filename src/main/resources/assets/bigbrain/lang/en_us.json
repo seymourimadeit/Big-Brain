@@ -21,5 +21,7 @@
 "bigbrain.advancements.nether.obtain_buckler.title": "Chargin' Targe",
 "bigbrain.advancements.nether.obtain_buckler.description": "Obtain a buckler from a bastion chest or from a slain piglin brute.",
 "item.bigbrain.snowball.desc.hit": "On hit:",
-"item.bigbrain.snowball.desc.freeze": "  +5s Freezing"
+"item.bigbrain.snowball.desc.freeze": "  +5s Freezing",
+"subtitles.entity.criticalCharge.activate": "Critical attack activated!",
+"subtitles.entity.criticalCharge.deactivate": "Critical attack deactivated"
 }

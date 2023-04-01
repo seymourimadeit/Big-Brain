@@ -1,30 +1,31 @@
 {
 	"entity.piglin_brute.charge": {
 		"sounds": [
-			{
-				"name": "bigbrain:mobs/piglin_brute/charge/charge1",
-				"volume": 0.9,
-				"name": "bigbrain:mobs/piglin_brute/charge/charge2",
-				"volume": 0.9,
-				"name": "bigbrain:mobs/piglin_brute/charge/charge3",
-				"volume": 0.9,
-				"name": "bigbrain:mobs/piglin_brute/charge/charge4",
-				"volume": 0.9
-			}
+				"bigbrain:mobs/piglin_brute/charge/charge1",
+				"bigbrain:mobs/piglin_brute/charge/charge2",
+				"bigbrain:mobs/piglin_brute/charge/charge3",
+				"bigbrain:mobs/piglin_brute/charge/charge4"
 		],
 		"subtitle": "subtitles.entity.piglin_brute.charge"
 	},
 	"item.buckler.bash": {
 		"sounds": [
-			{
-				"name": "bigbrain:buckler/bash1",
-				"volume": 0.9,
-				"name": "bigbrain:buckler/bash2",
-				"volume": 0.9,
-				"name": "bigbrain:buckler/bash3",
-				"volume": 0.9
-			}
+				"bigbrain:buckler/bash1",
+				"bigbrain:buckler/bash2",
+				"bigbrain:buckler/bash3"
 		],
 		"subtitle": "subtitles.item.buckler.bash"
+	},
+	"entity.criticalcharge.activate": {
+		"sounds": [
+			"block/beacon/activate"
+		],
+		"subtitle": "subtitles.entity.criticalCharge.activate"
+	},
+	"entity.criticalcharge.deactivate": {
+		"sounds": [
+			"block/beacon/deactivate"
+		],
+		"subtitle": "subtitles.entity.criticalCharge.deactivate"
 	}
 }

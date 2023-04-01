@@ -3,8 +3,14 @@ package tallestegg.bigbrain.common.items;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -12,21 +18,29 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.Tags.Items;
+import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.event.ForgeEventFactory;
+import tallestegg.bigbrain.BigBrainCapabilities;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
+import tallestegg.bigbrain.common.capabilities.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 
 import javax.annotation.Nullable;
@@ -81,6 +95,65 @@ public class BucklerItem extends ShieldItem {
     public static void setReady(ItemStack stack, boolean ready) {
         CompoundTag compoundnbt = stack.getOrCreateTag();
         compoundnbt.putBoolean("Ready", ready);
+    }
+
+    public static void bucklerBash(LivingEntity entity) {
+        List<LivingEntity> list = entity.level.getNearbyEntities(LivingEntity.class, TargetingConditions.forCombat(), entity, entity.getBoundingBox().inflate(1.5D));
+        if (!list.isEmpty()) {
+            LivingEntity entityHit = list.get(0);
+            entityHit.push(entity);
+            int bangLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), entity);
+            float damage = 6.0F + ((float) entity.getRandom().nextInt(3));
+            float knockbackStrength = 3.0F;
+            for (int duration = 0; duration < 10; ++duration) {
+                double d0 = entity.getRandom().nextGaussian() * 0.02D;
+                double d1 = entity.getRandom().nextGaussian() * 0.02D;
+                double d2 = entity.getRandom().nextGaussian() * 0.02D;
+                SimpleParticleType type = entityHit instanceof WitherBoss || entityHit instanceof WitherSkeleton ? ParticleTypes.SMOKE : ParticleTypes.CLOUD;
+                // Collision is done on the server side, so a server side method must be used.
+                ((ServerLevel) entity.level).sendParticles(type, entity.getRandomX(1.0D), entity.getRandomY() + 1.0D, entity.getRandomZ(1.0D), 1, d0, d1, d2, 1.0D);
+            }
+            if (bangLevel == 0) {
+                if (entityHit.hurt(entity.damageSources().mobAttack(entity), damage)) {
+                    entityHit.knockback(knockbackStrength, (double) Mth.sin(entity.getYRot() * ((float) Math.PI / 180F)), (double) (-Mth.cos(entity.getYRot() * ((float) Math.PI / 180F))));
+                    entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
+                }
+                if (!entity.isSilent())
+                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), BigBrainSounds.SHIELD_BASH.get(), entity.getSoundSource(), 0.5F, 0.8F + entity.getRandom().nextFloat() * 0.4F);
+                if (entityHit instanceof Player && entityHit.getUseItem().canPerformAction(ToolActions.SHIELD_BLOCK))
+                    ((Player) entityHit).disableShield(true);
+            } else {
+                InteractionHand hand = entity.getMainHandItem().getItem() instanceof BucklerItem ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+                ItemStack stack = entity.getItemInHand(hand);
+                stack.hurtAndBreak(5 * bangLevel, entity, (player1) -> {
+                    player1.broadcastBreakEvent(hand);
+                    if (entity instanceof Player)
+                        ForgeEventFactory.onPlayerDestroyItem((Player) entity, entity.getUseItem(), hand);
+                });
+                Level.ExplosionInteraction mode = BigBrainConfig.BangBlockDestruction ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE;
+                entity.level.explode(null, entity.getX(), entity.getY(), entity.getZ(), (float) bangLevel * 1.0F, mode);
+                setChargeTicks(stack, 0);
+            }
+            entity.setLastHurtMob(entityHit);
+            if (entity instanceof Player player) {
+                IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuranteedCritical(player);
+                player.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), BigBrainSounds.CRITICAL_ACTIVATE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                criticalAfterCharge.setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), player) == 0);
+            }
+        }
+    }
+
+    public static void spawnRunningEffectsWhileCharging(LivingEntity entity) {
+        int i = Mth.floor(entity.getX());
+        int j = Mth.floor(entity.getY() - (double) 0.2F);
+        int k = Mth.floor(entity.getZ());
+        BlockPos blockpos = new BlockPos(i, j, k);
+        BlockState blockstate = entity.level.getBlockState(blockpos);
+        if (!blockstate.addRunningEffects(entity.level, blockpos, entity))
+            if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
+                Vec3 vec3 = entity.getDeltaMovement();
+                entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getX() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).height, entity.getY() + 0.1D, entity.getZ() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).width, vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
+            }
     }
 
     @Override
