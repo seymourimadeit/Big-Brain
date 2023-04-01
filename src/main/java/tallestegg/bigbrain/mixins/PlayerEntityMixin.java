@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.common.entity.IOneCriticalAfterCharge;
 
 @Mixin(Player.class)
@@ -51,6 +52,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements IOneCrit
     }
 
     public void setCritical(boolean critical) {
+        if (!critical)
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), BigBrainSounds.CRITICAL_DEACTIVATE.get(), this.getSoundSource(), 1.0F, 0.8F + this.getRandom().nextFloat() * 0.4F);
+        else
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), BigBrainSounds.CRITICAL_ACTIVATE.get(), this.getSoundSource(), 1.0F, 0.8F + this.getRandom().nextFloat() * 0.4F);
         this.entityData.set(CRITICAL, critical);
     }
 }

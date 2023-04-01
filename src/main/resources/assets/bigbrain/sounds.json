@@ -26,5 +26,17 @@
 			}
 		],
 		"subtitle": "subtitles.item.buckler.bash"
+	},
+	"entity.criticalcharge.activate": {
+		"sounds": [
+			"block/beacon/activate"
+		],
+		"subtitle": "subtitles.entity.criticalCharge.activate"
+	},
+	"entity.criticalcharge.deactivate": {
+		"sounds": [
+			"block/beacon/deactivate"
+		],
+		"subtitle": "subtitles.entity.criticalCharge.deactivate"
 	}
 }

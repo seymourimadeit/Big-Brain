@@ -143,8 +143,8 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        if (event.getEntity() instanceof IBucklerUser) {
-            LivingEntity entity = (LivingEntity) event.getEntity();
+        LivingEntity entity = event.getEntity();
+        if (entity instanceof IBucklerUser) {
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(),
                     entity);
             if (!((IBucklerUser) entity).isBucklerDashing()) {
@@ -157,7 +157,6 @@ public class BigBrainEvents {
                 if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
                     ((IBucklerUser) entity).setCooldown(BigBrainConfig.BucklerCooldown);
             }
-
             if (((IBucklerUser) entity).isBucklerDashing()) {
                 BucklerItem.moveFowards(entity);
                 ((IBucklerUser) entity).setBucklerUseTimer(((IBucklerUser) entity).getBucklerUseTimer() - 1);
@@ -178,6 +177,13 @@ public class BigBrainEvents {
                 }
                 if (((IBucklerUser) entity).getCooldown() <= 0)
                     ((IBucklerUser) entity).setCooldown(0);
+            }
+        }
+        if (entity instanceof IOneCriticalAfterCharge) {
+            if (((IOneCriticalAfterCharge) entity).isCritical()) {
+                for (int i = 0; i < 2; ++i) {
+                    entity.level.addParticle(ParticleTypes.CRIT, entity.getRandomX(0.5D), entity.getRandomY(), entity.getRandomZ(0.5D), 0.0D, 0.0D, 0.0D);
+                }
             }
         }
     }
@@ -334,7 +340,7 @@ public class BigBrainEvents {
 
     public static void bucklerBash(LivingEntity entity) {
         List<LivingEntity> list = entity.level.getNearbyEntities(LivingEntity.class, TargetingConditions.forCombat(),
-                entity, entity.getBoundingBox());
+                entity, entity.getBoundingBox().inflate(1.5D));
         if (!list.isEmpty()) {
             LivingEntity entityHit = list.get(0);
             entityHit.push(entity);
