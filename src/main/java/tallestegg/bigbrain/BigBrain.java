@@ -3,6 +3,8 @@ package tallestegg.bigbrain;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -15,6 +17,7 @@ import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
+import tallestegg.bigbrain.networking.BigBrainNetworking;
 
 @Mod(BigBrain.MODID)
 public class BigBrain {

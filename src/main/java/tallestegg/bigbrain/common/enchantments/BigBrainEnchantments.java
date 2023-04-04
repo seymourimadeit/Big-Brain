@@ -24,10 +24,6 @@ public class BigBrainEnchantments {
 
     public static final EnchantmentCategory BUCKLER = EnchantmentCategory.create("buckler", (item) -> (item instanceof BucklerItem));
 
-    public static int getTurning(LivingEntity player) {
-        return EnchantmentHelper.getEnchantmentLevel(TURNING.get(), player);
-    }
-
     public static int getBucklerEnchantsOnHands(Enchantment enchantment, LivingEntity player) {
         InteractionHand hand = player.getMainHandItem().getItem() instanceof BucklerItem ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         ItemStack stack = player.getItemInHand(hand);

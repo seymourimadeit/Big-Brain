@@ -36,7 +36,7 @@ import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.Tags.Items;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.ForgeEventFactory;
-import tallestegg.bigbrain.BigBrainCapabilities;
+import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
@@ -136,7 +136,7 @@ public class BucklerItem extends ShieldItem {
             }
             entity.setLastHurtMob(entityHit);
             if (entity instanceof Player player) {
-                IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuranteedCritical(player);
+                IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(player);
                 player.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), BigBrainSounds.CRITICAL_ACTIVATE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                 criticalAfterCharge.setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), player) == 0);
             }

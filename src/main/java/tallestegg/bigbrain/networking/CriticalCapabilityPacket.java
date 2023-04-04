@@ -2,7 +2,6 @@ package tallestegg.bigbrain.networking;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
-import tallestegg.bigbrain.BigBrainNetworking;
 
 import java.util.function.Supplier;
 

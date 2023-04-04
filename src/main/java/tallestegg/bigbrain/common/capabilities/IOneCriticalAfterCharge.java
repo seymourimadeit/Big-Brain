@@ -3,13 +3,12 @@ package tallestegg.bigbrain.common.capabilities;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-//TODO convert this into a capability when i port to 1.20
 public interface IOneCriticalAfterCharge extends INBTSerializable<CompoundTag> {
     boolean isCritical();
 
     void setCritical(boolean critical);
 
-    class GurantedCriticalHit implements IOneCriticalAfterCharge {
+    class GuaranteedCriticalHit implements IOneCriticalAfterCharge {
         private boolean isCritical;
 
         @Override

@@ -31,10 +31,6 @@ public class RangedCrossbowAttackGoalMixin<T extends Monster & RangedAttackMob &
 
     @Final
     @Shadow
-    private double speedModifier;
-
-    @Final
-    @Shadow
     private float attackRadiusSqr;
 
     @Shadow

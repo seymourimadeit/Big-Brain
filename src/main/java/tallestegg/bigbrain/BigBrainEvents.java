@@ -6,7 +6,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
@@ -55,13 +54,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import tallestegg.bigbrain.client.BigBrainSounds;
-import tallestegg.bigbrain.common.capabilities.GuranteedCritProvider;
-import tallestegg.bigbrain.common.capabilities.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.common.capabilities.*;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
+import tallestegg.bigbrain.networking.BigBrainNetworking;
 import tallestegg.bigbrain.networking.CriticalCapabilityPacket;
 
 import java.lang.reflect.InvocationTargetException;
@@ -171,7 +170,7 @@ public class BigBrainEvents {
                 BucklerItem.setReady(bucklerItemStack, false);
             }
         }
-        IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuranteedCritical(entity);
+        IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(entity);
         if (criticalAfterCharge != null) {
             if (criticalAfterCharge.isCritical()) {
                 if (entity.swingTime > 0) {
@@ -198,7 +197,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onPlayerAttack(CriticalHitEvent event) {
         Player player = event.getEntity();
-        IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuranteedCritical(player);
+        IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(player);
         if (criticalAfterCharge.isCritical()) {
             event.setResult(Result.ALLOW);
             event.setDamageModifier(1.5F);
@@ -272,8 +271,9 @@ public class BigBrainEvents {
                 ocelot.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(ocelot, Parrot.class, 10, true, true, (Predicate<LivingEntity>) null));
         }
 
-        if (entity instanceof Parrot parrot) if (BigBrainConfig.ocelotParrot)
-            parrot.goalSelector.addGoal(2, new AvoidEntityGoal<>(parrot, Ocelot.class, 8.0F, 1.0D, 5.0D));
+        if (entity instanceof Parrot parrot)
+            if (BigBrainConfig.ocelotParrot)
+                parrot.goalSelector.addGoal(2, new AvoidEntityGoal<>(parrot, Ocelot.class, 8.0F, 1.0D, 5.0D));
     }
 
     @SubscribeEvent
@@ -285,7 +285,6 @@ public class BigBrainEvents {
             }
         }
     }
-
     @SubscribeEvent
     public static void attach(AttachCapabilitiesEvent<Entity> event) {
         final GuranteedCritProvider critProvider = new GuranteedCritProvider();
@@ -310,7 +309,7 @@ public class BigBrainEvents {
                 new RuntimeException("Big Brain has failed to invoke maybeRetaliate");
             }
         }
-        if (event.getEntity() instanceof Creeper creeper && event.getOriginalTarget() instanceof Ocelot ocelot && event.getOriginalTarget() != null)
+        if (event.getEntity() instanceof Creeper creeper && event.getOriginalTarget() instanceof Ocelot && event.getOriginalTarget() != null)
             creeper.setTarget(null);
         if (event.getEntity() instanceof Pillager pillager) {
             if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling()) {
@@ -386,5 +385,4 @@ public class BigBrainEvents {
             }
         }
     }
-
 }

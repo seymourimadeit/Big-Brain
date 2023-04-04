@@ -1,4 +1,4 @@
-package tallestegg.bigbrain;
+package tallestegg.bigbrain.networking;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -6,6 +6,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import tallestegg.bigbrain.BigBrain;
+import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.capabilities.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.networking.CriticalCapabilityPacket;
 
@@ -16,7 +18,7 @@ public class BigBrainNetworking {
     public static void syncCritical(CriticalCapabilityPacket msg) {
         Entity entity = Minecraft.getInstance().level.getEntity(msg.getEntityId());
         if (entity != null && entity instanceof LivingEntity living) {
-            IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuranteedCritical(living);
+            IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(living);
             criticalAfterCharge.setCritical(msg.getCrit());
         }
     }

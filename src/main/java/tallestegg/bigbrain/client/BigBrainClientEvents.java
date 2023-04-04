@@ -9,7 +9,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.SkeletonModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.core.Direction;
@@ -19,11 +18,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -31,10 +30,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.BigBrain;
-import tallestegg.bigbrain.BigBrainCapabilities;
 import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.common.capabilities.IOneCriticalAfterCharge;
-import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
@@ -43,8 +39,7 @@ import java.lang.reflect.Method;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
 public class BigBrainClientEvents {
-    public static final Method preRenderCallback = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class,
-            "m_7546_", LivingEntity.class, PoseStack.class, float.class);
+    public static final Method preRenderCallback = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_7546_", LivingEntity.class, PoseStack.class, float.class);
 
     @SubscribeEvent
     public static void onMovementKeyPressed(MovementInputUpdateEvent event) {
@@ -63,26 +58,21 @@ public class BigBrainClientEvents {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         float partialTicks = event.getPartialTick();
-        if (stack.getItem() instanceof BucklerItem && (player.isUsingItem() && player.getUseItem() == stack
-                || BucklerItem.getChargeTicks(stack) > 0 && BucklerItem.isReady(stack))) {
+        if (stack.getItem() instanceof BucklerItem && (player.isUsingItem() && player.getUseItem() == stack || BucklerItem.getChargeTicks(stack) > 0 && BucklerItem.isReady(stack))) {
             boolean mainHand = event.getHand() == InteractionHand.MAIN_HAND;
             HumanoidArm handside = mainHand ? player.getMainArm() : player.getMainArm().getOpposite();
             boolean rightHanded = handside == HumanoidArm.RIGHT;
-            float f7 = (float) stack.getUseDuration()
-                    - ((float) player.getUseItemRemainingTicks() - partialTicks + 1.0F);
+            float f7 = (float) stack.getUseDuration() - ((float) player.getUseItemRemainingTicks() - partialTicks + 1.0F);
             float f11 = f7 / 10.0F;
             if (f11 > 1.0F) {
                 f11 = 1.0F;
             }
             mStack.pushPose();
             int i = rightHanded ? 1 : -1;
-            mStack.translate((float) i * 0.56F, -0.52F + event.getEquipProgress() * -0.6F,
-                    -0.72F);
-            mStack.translate(f11 * (!rightHanded? 0.2D : -0.2D), 0.0D, f11 * (!rightHanded? 0.2D : -0.2D));
-            ItemDisplayContext transform = rightHanded ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
-                    : ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
-            Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, stack, transform, !rightHanded, mStack,
-                    event.getMultiBufferSource(), event.getPackedLight());
+            mStack.translate((float) i * 0.56F, -0.52F + event.getEquipProgress() * -0.6F, -0.72F);
+            mStack.translate(f11 * (!rightHanded ? 0.2D : -0.2D), 0.0D, f11 * (!rightHanded ? 0.2D : -0.2D));
+            ItemDisplayContext transform = rightHanded ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
+            Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, stack, transform, !rightHanded, mStack, event.getMultiBufferSource(), event.getPackedLight());
             mStack.popPose();
             event.setCanceled(true);
         }
@@ -95,14 +85,12 @@ public class BigBrainClientEvents {
         EntityModel<LivingEntity> model = renderer.getModel();
         PoseStack stack = event.getPoseStack();
         if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0) {
-            if (!BigBrainConfig.RenderAfterImage)
-                return;
+            if (!BigBrainConfig.RenderAfterImage) return;
             for (int i = 0; i < 5; i++) {
                 if (i != 0) {
                     stack.pushPose();
                     model.attackTime = entityIn.getAttackAnim(event.getPartialTick());
-                    boolean shouldSit = entityIn.isPassenger()
-                            && (entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit());
+                    boolean shouldSit = entityIn.isPassenger() && (entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit());
                     model.riding = shouldSit;
                     model.young = entityIn.isBaby();
                     float f = Mth.rotLerp(event.getPartialTick(), entityIn.yBodyRotO, entityIn.yBodyRot);
@@ -135,8 +123,7 @@ public class BigBrainClientEvents {
                         Direction direction = entityIn.getBedOrientation();
                         if (direction != null) {
                             float f4 = entityIn.getEyeHeight(Pose.STANDING) - 0.1F;
-                            stack.translate((float) (-direction.getStepX()) * f4, 0.0D,
-                                    (float) (-direction.getStepZ()) * f4);
+                            stack.translate((float) (-direction.getStepX()) * f4, 0.0D, (float) (-direction.getStepZ()) * f4);
                         }
                     }
                     float f7 = (float) entityIn.tickCount + event.getPartialTick();
@@ -148,8 +135,7 @@ public class BigBrainClientEvents {
                     }
                     stack.scale(-1.0F, -1.0F, 1.0F);
                     double motionZ = Math.abs(entityIn.getDeltaMovement().z());
-                    stack.translate(0.0D, -1.501F,
-                            i * motionZ * 4 / BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)));
+                    stack.translate(0.0D, -1.501F, i * motionZ * 4 / BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)));
                     float f8 = 0.0F;
                     float f5 = 0.0F;
                     if (!shouldSit && entityIn.isAlive()) {
@@ -170,19 +156,16 @@ public class BigBrainClientEvents {
                     boolean flag = !entityIn.isInvisible();
                     boolean flag1 = !flag && !entityIn.isInvisibleTo(minecraft.player);
                     boolean flag2 = minecraft.shouldEntityAppearGlowing(entityIn);
-                    RenderType rendertype = BigBrainClientEvents.getRenderType(entityIn, renderer, model, flag, flag1,
-                            flag2);
+                    RenderType rendertype = BigBrainClientEvents.getRenderType(entityIn, renderer, model, flag, flag1, flag2);
                     if (rendertype != null) {
                         VertexConsumer ivertexbuilder = event.getMultiBufferSource().getBuffer(rendertype);
                         int overlay = LivingEntityRenderer.getOverlayCoords(entityIn, 0.0F);
-                        model.renderToBuffer(stack, ivertexbuilder, event.getPackedLight(), overlay, 1.0F, 1.0F, 1.0F,
-                                0.3F / i + 1.0F);
+                        model.renderToBuffer(stack, ivertexbuilder, event.getPackedLight(), overlay, 1.0F, 1.0F, 1.0F, 0.3F / i + 1.0F);
                     }
                     if (!entityIn.isSpectator()) {
                         if (BigBrainConfig.RenderEntityLayersDuringAfterImage) {
                             for (RenderLayer<LivingEntity, EntityModel<LivingEntity>> layerrenderer : renderer.layers) {
-                                layerrenderer.render(stack, event.getMultiBufferSource(), event.getPackedLight(),
-                                        entityIn, f5, f8, event.getPartialTick(), f7, f2, f6);
+                                layerrenderer.render(stack, event.getMultiBufferSource(), event.getPackedLight(), entityIn, f5, f8, event.getPartialTick(), f7, f2, f6);
                             }
                         }
                     }
@@ -192,8 +175,8 @@ public class BigBrainClientEvents {
         }
         if (event.getEntity() instanceof Skeleton skeleton) {
             SkeletonModel skeleModel = (SkeletonModel) event.getRenderer().getModel();
-            if (skeleModel.rightArmPose ==  HumanoidModel.ArmPose.BOW_AND_ARROW || skeleModel.leftArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW) {
-                if (skeleton.getDeltaMovement().y() > 0 || skeleton.getDeltaMovement().x() > 0 || skeleton.getDeltaMovement().z() > 0) {
+            if (skeleModel.rightArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW || skeleModel.leftArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW) {
+                if (skeleton.getDeltaMovement().y() > 0 && skeleton.getDeltaMovement().x() > 0 && skeleton.getDeltaMovement().z() > 0) {
                     skeleModel.rightArmPose = HumanoidModel.ArmPose.EMPTY;
                     skeleModel.leftArmPose = HumanoidModel.ArmPose.EMPTY;
                 }
