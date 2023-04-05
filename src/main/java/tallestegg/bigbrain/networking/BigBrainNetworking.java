@@ -8,8 +8,8 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
-import tallestegg.bigbrain.common.capabilities.IOneCriticalAfterCharge;
-import tallestegg.bigbrain.networking.CriticalCapabilityPacket;
+import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
+import tallestegg.bigbrain.common.capabilities.implementations.IOneCriticalAfterCharge;
 
 public class BigBrainNetworking {
     private static final String PROTOCOL_VERSION = "1";
@@ -23,8 +23,17 @@ public class BigBrainNetworking {
         }
     }
 
+    public static void syncBurrow(BurrowingCapabilityPacket msg) {
+        Entity entity = Minecraft.getInstance().level.getEntity(msg.getEntityId());
+        if (entity != null && entity instanceof LivingEntity living) {
+            BurrowCapability burrow = BigBrainCapabilities.getBurrowing(living);
+            burrow.setBurrowing(msg.getBurrow());
+        }
+    }
+
     public static void registerPackets() {
         int id = 0;
         INSTANCE.registerMessage(id++, CriticalCapabilityPacket.class, CriticalCapabilityPacket::encode, CriticalCapabilityPacket::decode, CriticalCapabilityPacket::handle);
+        INSTANCE.registerMessage(id++, BurrowingCapabilityPacket.class, BurrowingCapabilityPacket::encode, BurrowingCapabilityPacket::decode, BurrowingCapabilityPacket::handle);
     }
 }

@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.common.capabilities;
+package tallestegg.bigbrain.common.capabilities.implementations;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;

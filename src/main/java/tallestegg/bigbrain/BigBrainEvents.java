@@ -47,6 +47,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -54,13 +55,18 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import tallestegg.bigbrain.client.BigBrainSounds;
-import tallestegg.bigbrain.common.capabilities.*;
+import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
+import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
+import tallestegg.bigbrain.common.capabilities.implementations.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.common.capabilities.providers.BurrowingProvider;
+import tallestegg.bigbrain.common.capabilities.providers.GuranteedCritProvider;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 import tallestegg.bigbrain.networking.BigBrainNetworking;
+import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
 import tallestegg.bigbrain.networking.CriticalCapabilityPacket;
 
 import java.lang.reflect.InvocationTargetException;
@@ -140,6 +146,15 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
+        if (event.getEntity() instanceof Husk husk) {
+            BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
+            if (burrow != null) {
+                if (!husk.level.isClientSide)
+                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
+            }
+            if (burrow.isBurrowing())
+                BucklerItem.spawnRunningEffectsWhileCharging(entity);
+        }
         ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
         if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
             ((IBucklerUser) entity).setCooldown(BigBrainConfig.BucklerCooldown);
@@ -207,8 +222,22 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    public static void startTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof Husk husk) {
+            if (!event.getTarget().level.isClientSide) {
+                BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
+                if (burrow != null)
+                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
+        if (entity instanceof Husk husk) {
+            husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
+        }
         if (entity instanceof AbstractSkeleton skeleton) {
             skeleton.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
             skeleton.goalSelector.addGoal(3, new NewBowAttackGoal<>(skeleton, 1.55D, 20, 15.0F));
@@ -285,12 +314,18 @@ public class BigBrainEvents {
             }
         }
     }
+
     @SubscribeEvent
     public static void attach(AttachCapabilitiesEvent<Entity> event) {
         final GuranteedCritProvider critProvider = new GuranteedCritProvider();
+        final BurrowingProvider burrowingProvider = new BurrowingProvider();
         if (event.getObject() instanceof Player) {
             event.addCapability(GuranteedCritProvider.IDENTIFIER, critProvider);
             event.addListener(critProvider::invalidate);
+        }
+        if (event.getObject() instanceof Husk) {
+            event.addCapability(BurrowingProvider.IDENTIFIER, burrowingProvider);
+            event.addListener(burrowingProvider::invalidate);
         }
     }
 

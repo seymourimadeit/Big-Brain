@@ -1,4 +1,4 @@
-package tallestegg.bigbrain.common.capabilities;
+package tallestegg.bigbrain.common.capabilities.providers;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -11,20 +11,23 @@ import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tallestegg.bigbrain.BigBrain;
+import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
+import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
+import tallestegg.bigbrain.common.capabilities.implementations.IOneCriticalAfterCharge;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
-public class GuranteedCritProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(BigBrain.MODID, "guranteed_crit");
-    private final IOneCriticalAfterCharge.GuaranteedCriticalHit backend = new IOneCriticalAfterCharge.GuaranteedCriticalHit();
-    private final LazyOptional<IOneCriticalAfterCharge> optionalData = LazyOptional.of(() -> backend);
+public class BurrowingProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
+    public static final ResourceLocation IDENTIFIER = new ResourceLocation(BigBrain.MODID, "burrowing");
+    private final BurrowCapability.BurrowingImplementation backend = new BurrowCapability.BurrowingImplementation();
+    private final LazyOptional<BurrowCapability> optionalData = LazyOptional.of(() -> backend);
 
-    public GuranteedCritProvider() {
+    public BurrowingProvider() {
     }
 
     @NotNull
     @Override
     public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        return BigBrainCapabilities.GUARANTEED_CRIT_TRACKER.orEmpty(cap, this.optionalData);
+        return BigBrainCapabilities.BURROW_TRACKER.orEmpty(cap, this.optionalData);
     }
 
     public void invalidate() {

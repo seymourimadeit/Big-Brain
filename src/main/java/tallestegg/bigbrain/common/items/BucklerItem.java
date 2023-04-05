@@ -40,7 +40,7 @@ import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.client.renderers.BucklerRenderer;
-import tallestegg.bigbrain.common.capabilities.IOneCriticalAfterCharge;
+import tallestegg.bigbrain.common.capabilities.implementations.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 
 import javax.annotation.Nullable;

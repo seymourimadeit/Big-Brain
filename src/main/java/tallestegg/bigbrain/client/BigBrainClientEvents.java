@@ -31,6 +31,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.BigBrainConfig;
+import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
@@ -182,6 +183,13 @@ public class BigBrainClientEvents {
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onEntityRenderPre(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
+        LivingEntity entityIn = event.getEntity();
+        if (BigBrainCapabilities.getBurrowing(entityIn) != null && BigBrainCapabilities.getBurrowing(entityIn).isBurrowing())
+            event.setCanceled(true);
     }
 
     public static RenderType getRenderType(LivingEntity p_230496_1_, LivingEntityRenderer<LivingEntity, ?> renderer, EntityModel<?> model, boolean p_230496_2_, boolean p_230496_3_, boolean p_230496_4_) {
