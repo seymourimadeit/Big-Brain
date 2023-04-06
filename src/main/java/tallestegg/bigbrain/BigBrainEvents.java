@@ -41,6 +41,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
@@ -144,6 +145,16 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
+    public static void entityHitbox(EntityEvent.Size event) {
+        if (event.getEntity() instanceof Husk husk) {
+            if (husk.hasPose(Pose.SWIMMING)) {
+                event.setNewSize(EntityDimensions.scalable(1.0F, 1.0F), true);
+            }
+        }
+    }
+
+
+    @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (event.getEntity() instanceof Husk husk) {
@@ -210,7 +221,7 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerAttack(CriticalHitEvent event) {
+    public static void onCriticalHit(CriticalHitEvent event) {
         Player player = event.getEntity();
         IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(player);
         if (criticalAfterCharge.isCritical()) {

@@ -183,13 +183,31 @@ public class BigBrainClientEvents {
                 }
             }
         }
+        if (entityIn instanceof Husk husk) {
+            if (husk.getSwimAmount(event.getPartialTick()) > 0.0F && !event.isCanceled()) {
+                event.getPoseStack().popPose();
+            }
+        }
     }
 
     @SubscribeEvent
     public static void onEntityRenderPre(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = event.getEntity();
-        if (BigBrainCapabilities.getBurrowing(entityIn) != null && BigBrainCapabilities.getBurrowing(entityIn).isBurrowing())
-            event.setCanceled(true);
+        if (entityIn instanceof Husk husk) {
+            if (BigBrainCapabilities.getBurrowing(entityIn) != null && BigBrainCapabilities.getBurrowing(entityIn).isBurrowing())
+                event.setCanceled(false);
+            if (husk.getSwimAmount(event.getPartialTick()) > 0.0F) {
+                event.getPoseStack().pushPose();
+                float f = Mth.rotLerp(event.getPartialTick(), husk.yBodyRotO, husk.yBodyRot);
+                float f3 = -90.0F - husk.getXRot();
+                float f4 = Mth.lerp(husk.getSwimAmount(event.getPartialTick()), 0.0F, f3);
+                event.getPoseStack().mulPose(Axis.YP.rotationDegrees(180.0F - f));
+                event.getPoseStack().mulPose(Axis.ZP.rotationDegrees(180.0F - f));
+                event.getPoseStack().mulPose(Axis.XP.rotationDegrees(f4));
+                if (husk.isVisuallySwimming())
+                    event.getPoseStack().translate(0.0F, -1.0F, 0.3F);
+            }
+        }
     }
 
     public static RenderType getRenderType(LivingEntity p_230496_1_, LivingEntityRenderer<LivingEntity, ?> renderer, EntityModel<?> model, boolean p_230496_2_, boolean p_230496_3_, boolean p_230496_4_) {

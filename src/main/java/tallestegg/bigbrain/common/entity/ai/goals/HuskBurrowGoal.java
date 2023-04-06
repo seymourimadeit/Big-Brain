@@ -1,6 +1,7 @@
 package tallestegg.bigbrain.common.entity.ai.goals;
 
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.player.Player;
@@ -32,8 +33,7 @@ public class HuskBurrowGoal extends Goal {
     @Override
     public void start() {
         super.start();
-        this.waitUntilDigTime = 20;
-        BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(true);
+        this.waitUntilDigTime = 60;
         this.phase = BurrowPhases.START;
     }
 
@@ -43,23 +43,25 @@ public class HuskBurrowGoal extends Goal {
         LivingEntity target = this.husk.getTarget();
         if (target == null)
             return;
-        this.phase = BurrowPhases.BURROW;
+        if (this.phase == BurrowPhases.START) {
+            this.husk.setPose(Pose.SWIMMING);
+            BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(true);
+            this.phase = BurrowPhases.BURROW;
+        }
         if (this.phase == BurrowPhases.BURROW) {
-            this.husk.getNavigation().moveTo(target, 2.0D);
+            this.husk.getNavigation().moveTo(target, 1.5D);
             if (husk.isWithinMeleeAttackRange(target)) {
+                this.husk.setPose(Pose.STANDING);
                 BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
                 this.phase = BurrowPhases.GRAB;
             }
         }
         if (this.phase == BurrowPhases.GRAB) {
             target.startRiding(this.husk, true);
-            husk.lookAt(target, 30.F, 30.0F);
             husk.getLookControl().setLookAt(target, 30.0F, 30.0F);
             this.phase = BurrowPhases.SINK;
         }
         if (this.phase == BurrowPhases.SINK) {
-            husk.lookAt(target, 30.F, 30.0F);
-            husk.getLookControl().setLookAt(target, 30.0F, 30.0F);
             this.waitUntilDigTime--;
             if (this.waitUntilDigTime <= 0) {
                 target.stopRiding();
@@ -67,15 +69,15 @@ public class HuskBurrowGoal extends Goal {
                 this.phase = BurrowPhases.END;
             }
         }
-        if (this.phase == BurrowPhases.END) {
+        if (this.phase == BurrowPhases.END || husk.lastHurt >= (husk.getHealth() / 2))
             this.phase = BurrowPhases.STOP;
-        }
     }
 
     @Override
     public void stop() {
         super.stop();
-      //  this.husk.setTarget(null);
+        BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
+        this.husk.setPose(Pose.STANDING);
     }
 
     @Override
@@ -84,6 +86,6 @@ public class HuskBurrowGoal extends Goal {
     }
 
     public enum BurrowPhases {
-        START, BURROW, GRAB, SINK, END, STOP;
+        START, BURROW, GRAB, SINK, END, STOP
     }
 }
