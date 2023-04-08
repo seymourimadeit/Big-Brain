@@ -17,6 +17,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -45,25 +46,35 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.PacketDistributor;
 import tallestegg.bigbrain.client.BigBrainSounds;
+import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
+import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
+import tallestegg.bigbrain.common.capabilities.providers.BurrowingProvider;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.entity.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.common.items.BucklerItem;
+import tallestegg.bigbrain.networking.BigBrainNetworking;
+import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -140,10 +151,37 @@ public class BigBrainEvents {
             }
         }
     }
+    @SubscribeEvent
+    public static void entityHitbox(EntityEvent.Size event) {
+        if (event.getEntity() instanceof Husk husk) {
+            if (husk.hasPose(Pose.SWIMMING)) {
+                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F), true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMount(EntityMountEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && !player.getAbilities().flying && player.isAlive() && husk.isAggressive() && husk.getTarget() == player) {
+                if (event.isDismounting())
+                    event.setCanceled(true);
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
+        if (event.getEntity() instanceof Husk husk) {
+            BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
+            if (burrow != null) {
+                if (!husk.level.isClientSide)
+                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
+                if (burrow.isBurrowing())
+                    BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
+            }
+        }
         if (entity instanceof IBucklerUser) {
             int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(),
                     entity);
@@ -208,10 +246,22 @@ public class BigBrainEvents {
             ((IOneCriticalAfterCharge) event.getEntity()).setCritical(false);
         }
     }
+    @SubscribeEvent
+    public static void attach(AttachCapabilitiesEvent<Entity> event) {
+        final BurrowingProvider burrowingProvider = new BurrowingProvider();
+        if (event.getObject() instanceof Husk) {
+            event.addCapability(BurrowingProvider.IDENTIFIER, burrowingProvider);
+            event.addListener(burrowingProvider::invalidate);
+        }
+    }
+
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
+        if (entity instanceof Husk husk) {
+            husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
+        }
         if (entity instanceof Pillager pillager) {
             if (BigBrainConfig.PillagerMultishot)
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
@@ -246,6 +296,10 @@ public class BigBrainEvents {
             }
             if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId()))
                 creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
+            if (creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
+                creature.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
+                creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
+            }
         }
 
         if (entity instanceof PolarBear polar) {
@@ -297,6 +351,17 @@ public class BigBrainEvents {
     public static void onShieldBlock(ShieldBlockEvent event) {
         if (event.getEntity().getUseItem().getItem() instanceof BucklerItem)
             event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void startTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof Husk husk) {
+            if (!event.getTarget().level.isClientSide) {
+                BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
+                if (burrow != null)
+                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
+            }
+        }
     }
 
     @SubscribeEvent

@@ -18,6 +18,7 @@ import tallestegg.bigbrain.client.BucklerTexture;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
+import tallestegg.bigbrain.networking.BigBrainNetworking;
 
 @Mod(BigBrain.MODID)
 public class BigBrain {
@@ -30,6 +31,7 @@ public class BigBrain {
         BigBrainItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BigBrainSounds.SOUNDS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BigBrainEnchantments.ENCHANTMENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        BigBrainNetworking.registerPackets();
         MinecraftForge.EVENT_BUS.register(this);
     }
 

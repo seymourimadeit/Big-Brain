@@ -14,7 +14,8 @@
     "PlayerEntityMixin",
     "RangedCrossbowAttackGoalMixin",
     "PillagerMixin",
-    "MeleeAttackTaskMixin"
+    "MeleeAttackTaskMixin",
+    "HuskMixin"
   ],
   "client": [
     "MouseHelperMixin",
