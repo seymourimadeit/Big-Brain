@@ -148,11 +148,10 @@ public class BigBrainEvents {
     public static void entityHitbox(EntityEvent.Size event) {
         if (event.getEntity() instanceof Husk husk) {
             if (husk.hasPose(Pose.SWIMMING)) {
-                event.setNewSize(EntityDimensions.scalable(1.0F, 1.0F), true);
+                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F), true);
             }
         }
     }
-
 
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
@@ -162,9 +161,9 @@ public class BigBrainEvents {
             if (burrow != null) {
                 if (!husk.level.isClientSide)
                     BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
+                if (burrow.isBurrowing())
+                    BucklerItem.spawnRunningEffectsWhileCharging(entity);
             }
-            if (burrow.isBurrowing())
-                BucklerItem.spawnRunningEffectsWhileCharging(entity);
         }
         ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
         if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
@@ -324,6 +323,13 @@ public class BigBrainEvents {
                     nearbyEntities.setLastHurtByMob((LivingEntity) event.getSource().getEntity());
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onDamage(LivingDamageEvent event) {
+        if (event.getEntity() instanceof Husk && event.getSource().is(DamageTypes.IN_WALL))
+            event.setCanceled(true);
+
     }
 
     @SubscribeEvent

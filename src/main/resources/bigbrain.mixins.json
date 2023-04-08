@@ -10,6 +10,7 @@
     "MeleeAttackGoalMixin",
     "MovementControllerMixin",
     "PiglinBrainMixin",
+    "HuskMixin",
     "RangedCrossbowAttackGoalMixin",
     "MeleeAttackTaskMixin"
   ],
