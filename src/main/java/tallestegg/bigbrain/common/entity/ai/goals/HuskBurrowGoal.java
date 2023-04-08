@@ -47,7 +47,7 @@ public class HuskBurrowGoal extends Goal {
     public void start() {
         this.husk.setAggressive(true);
         this.burrowTime = 40;
-        this.waitUntilDigTime = 60;
+        this.waitUntilDigTime = 40;
         this.phase = BurrowPhases.START;
     }
 
