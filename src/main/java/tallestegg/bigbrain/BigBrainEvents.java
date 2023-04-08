@@ -43,6 +43,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
@@ -152,6 +153,17 @@ public class BigBrainEvents {
             }
         }
     }
+
+    @SubscribeEvent
+    public static void onMount(EntityMountEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && !player.getAbilities().flying && player.isAlive()) {
+                if (event.isDismounting())
+                    event.setCanceled(true);
+            }
+        }
+    }
+
 
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {

@@ -64,7 +64,7 @@ public class HuskBurrowGoal extends Goal {
             }
         }
         if (this.phase == BurrowPhases.BURROW)
-            this.burrowTime--;
+            --this.burrowTime;
         if (target != null) {
             boolean canSee = this.husk.getSensing().hasLineOfSight(target);
             if (canSee) {
@@ -79,43 +79,45 @@ public class HuskBurrowGoal extends Goal {
                 BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(true);
                 this.phase = BurrowPhases.BURROW;
             } else if (this.phase == BurrowPhases.BURROW) {
-                    this.husk.getNavigation().moveTo(target, 1.8D);
-                    if (this.husk.isWithinMeleeAttackRange(target)) {
-                        this.husk.getNavigation().stop();
-                        this.husk.setPose(Pose.STANDING);
-                        BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
-                        this.phase = BurrowPhases.GRAB;
-                    }
-                }
-                if (this.phase == BurrowPhases.GRAB) {
-                    target.startRiding(this.husk, true);
-                    this.phase = BurrowPhases.SINK;
+                this.husk.getNavigation().moveTo(target, 1.8D);
+                if (this.husk.isWithinMeleeAttackRange(target)) {
+                    this.husk.getNavigation().stop();
+                    this.husk.setPose(Pose.STANDING);
+                    this.phase = BurrowPhases.GRAB;
                 }
             }
-            if (this.phase == BurrowPhases.SINK) {
-                this.waitUntilDigTime--;
-                if (this.waitUntilDigTime <= 0) {
-                    this.husk.noPhysics = true;
-                    this.husk.setDeltaMovement(0.0D, -3.0D, 0.0D);
-                    this.phase = BurrowPhases.DIG_OUT;
-                }
-            } else if (this.phase == BurrowPhases.DIG_OUT) {
-                if (this.entityInWall(this.husk)) {
-                    this.husk.ejectPassengers();
-                    this.husk.setDeltaMovement(0.0, 1.0D, 0.0D);
-                }
-                this.phase = BurrowPhases.END;
+            if (this.phase == BurrowPhases.GRAB) {
+                target.startRiding(this.husk, true);
+                this.phase = BurrowPhases.SINK;
             }
-            if (this.phase == BurrowPhases.END || this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60)
-                this.phase = BurrowPhases.STOP;
+        }
+        if (this.phase == BurrowPhases.SINK) {
+            this.waitUntilDigTime--;
+            if (this.waitUntilDigTime <= 0) {
+                BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
+                this.husk.noPhysics = true;
+                this.husk.setDeltaMovement(0.0D, -3.0D, 0.0D);
+                this.phase = BurrowPhases.DIG_OUT;
+            }
+        } else if (this.phase == BurrowPhases.DIG_OUT) {
+            if (this.entityInWall(this.husk)) {
+                this.husk.ejectPassengers();
+                this.husk.setDeltaMovement(0.0, 1.0D, 0.0D);
+            }
+            this.phase = BurrowPhases.END;
+        }
+        if (this.phase == BurrowPhases.END || this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60) {
+            BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
+            this.phase = BurrowPhases.STOP;
+        }
     }
 
     @Override
     public void stop() {
-        this.husk.ejectPassengers();
         BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
         this.husk.setPose(Pose.STANDING);
         this.husk.noPhysics = false;
+        this.husk.ejectPassengers();
         this.canUseCheck = this.husk.level.getGameTime();
         this.burrowTime = 0;
         this.waitUntilDigTime = 0;
