@@ -157,13 +157,12 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && !player.getAbilities().flying && player.isAlive()) {
+            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && !player.getAbilities().flying && player.isAlive() && husk.isAggressive() && husk.getTarget() == player) {
                 if (event.isDismounting())
                     event.setCanceled(true);
             }
         }
     }
-
 
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {

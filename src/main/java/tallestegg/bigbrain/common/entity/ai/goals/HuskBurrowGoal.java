@@ -45,6 +45,7 @@ public class HuskBurrowGoal extends Goal {
 
     @Override
     public void start() {
+        this.husk.setAggressive(true);
         this.burrowTime = 40;
         this.waitUntilDigTime = 60;
         this.phase = BurrowPhases.START;
@@ -96,17 +97,18 @@ public class HuskBurrowGoal extends Goal {
             if (this.waitUntilDigTime <= 0) {
                 BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
                 this.husk.noPhysics = true;
-                this.husk.setDeltaMovement(0.0D, -3.0D, 0.0D);
+                this.husk.setDeltaMovement(0.0D, -4.0D, 0.0D);
                 this.phase = BurrowPhases.DIG_OUT;
             }
         } else if (this.phase == BurrowPhases.DIG_OUT) {
             if (this.entityInWall(this.husk)) {
                 this.husk.ejectPassengers();
-                this.husk.setDeltaMovement(0.0, 1.0D, 0.0D);
+                this.husk.setDeltaMovement(0.0, 0.5D, 0.0D);
+            } else {
+                this.phase = BurrowPhases.END;
             }
-            this.phase = BurrowPhases.END;
         }
-        if (this.phase == BurrowPhases.END || this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60) {
+        if (this.phase == BurrowPhases.END || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60) {
             BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
             this.phase = BurrowPhases.STOP;
         }
@@ -121,6 +123,7 @@ public class HuskBurrowGoal extends Goal {
         this.canUseCheck = this.husk.level.getGameTime();
         this.burrowTime = 0;
         this.waitUntilDigTime = 0;
+        this.husk.setAggressive(false);
     }
 
     @Override
