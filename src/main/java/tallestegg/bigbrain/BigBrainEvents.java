@@ -156,6 +156,7 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof Husk husk) {
             if (husk.hasPose(Pose.SWIMMING)) {
                 event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F), true);
+                event.setNewEyeHeight(0.5F);
             }
         }
     }
@@ -178,8 +179,13 @@ public class BigBrainEvents {
             if (burrow != null) {
                 if (!husk.level.isClientSide)
                     BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
-                if (burrow.isBurrowing())
+                if (burrow.isBurrowing()) {
                     BigBrainEvents.spawnRunningEffectsWhileCharging(entity);
+                    if (entity.getRandom().nextInt(10) == 0) {
+                        BlockState onState = husk.getBlockStateOn();
+                        husk.playSound(onState.getSoundType(husk.level, husk.blockPosition(), husk).getBreakSound());
+                    }
+                }
             }
         }
         if (entity instanceof IBucklerUser) {
