@@ -259,7 +259,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof Husk husk) {
+        if (entity instanceof Husk husk && BigBrainConfig.COMMON.huskBurrowing.get()) {
             husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
         }
         if (entity instanceof Pillager pillager) {
@@ -282,7 +282,7 @@ public class BigBrainEvents {
         }
 
         if (entity instanceof PathfinderMob creature) {
-            if (GoalUtils.hasGroundPathNavigation(creature) && ((GroundPathNavigation) creature.getNavigation()).getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
+            if (GoalUtils.hasGroundPathNavigation(creature) && creature.getNavigation().getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
                 if (creature instanceof Raider) {
                     creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, false) {
                         @Override
@@ -296,16 +296,18 @@ public class BigBrainEvents {
             }
             if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId()))
                 creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
-            if (creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
-                creature.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
-                creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
+            if (BigBrainConfig.COMMON.bowAiNew.get()) {
+                if (BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
+                    creature.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
+                    creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
+                }
             }
         }
 
         if (entity instanceof PolarBear polar) {
             if (BigBrainConfig.PolarBearFish)
                 polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true,
-                        true, (Predicate<LivingEntity>) null));
+                        true, null));
         }
 
         if (BigBrainConfig.animalShelter && entity instanceof Animal animal
