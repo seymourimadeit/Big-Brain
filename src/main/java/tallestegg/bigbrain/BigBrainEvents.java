@@ -256,12 +256,8 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof Husk husk) {
+        if (entity instanceof Husk husk && BigBrainConfig.COMMON.huskBurrowing.get()) {
             husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
-        }
-        if (entity instanceof AbstractSkeleton skeleton) {
-            skeleton.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
-            skeleton.goalSelector.addGoal(3, new NewBowAttackGoal<>(skeleton, 1.55D, 20, 15.0F));
         }
         if (entity instanceof Pillager pillager) {
             if (BigBrainConfig.PillagerMultishot)
@@ -295,35 +291,41 @@ public class BigBrainEvents {
             }
             if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId()))
                 creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
-        }
+            if (BigBrainConfig.COMMON.bowAiNew.get()) {
+                if (BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
+                    creature.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
+                    creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
+                }
+            }
 
-        if (entity instanceof PolarBear polar) {
-            if (BigBrainConfig.PolarBearFish)
-                polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, (Predicate<LivingEntity>) null));
-        }
+            if (entity instanceof PolarBear polar) {
+                if (BigBrainConfig.PolarBearFish)
+                    polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, (Predicate<LivingEntity>) null));
+            }
 
-        if (BigBrainConfig.animalShelter && entity instanceof Animal animal && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
-            animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
-            animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
-        }
+            if (BigBrainConfig.animalShelter && entity instanceof Animal animal && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
+                animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
+                animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
+            }
 
-        if (entity instanceof Sheep sheep) {
-            if (BigBrainConfig.sheepRunAway)
-                sheep.goalSelector.addGoal(2, new AvoidEntityGoal<>(sheep, Wolf.class, 8.0F, 1.0D, 1.6D));
-        }
+            if (entity instanceof Sheep sheep) {
+                if (BigBrainConfig.sheepRunAway)
+                    sheep.goalSelector.addGoal(2, new AvoidEntityGoal<>(sheep, Wolf.class, 8.0F, 1.0D, 1.6D));
+            }
 
-        if (entity instanceof Ocelot ocelot) {
-            if (BigBrainConfig.ocelotPhantom)
-                ocelot.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(ocelot, Phantom.class, 10, true, true, (Predicate<LivingEntity>) null));
-            if (BigBrainConfig.ocelotCreeper)
-                ocelot.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(ocelot, Creeper.class, 10, true, true, (Predicate<LivingEntity>) null));
-            if (BigBrainConfig.ocelotParrot)
-                ocelot.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(ocelot, Parrot.class, 10, true, true, (Predicate<LivingEntity>) null));
-        }
+            if (entity instanceof Ocelot ocelot) {
+                if (BigBrainConfig.ocelotPhantom)
+                    ocelot.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(ocelot, Phantom.class, 10, true, true, (Predicate<LivingEntity>) null));
+                if (BigBrainConfig.ocelotCreeper)
+                    ocelot.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(ocelot, Creeper.class, 10, true, true, (Predicate<LivingEntity>) null));
+                if (BigBrainConfig.ocelotParrot)
+                    ocelot.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(ocelot, Parrot.class, 10, true, true, (Predicate<LivingEntity>) null));
+            }
 
-        if (entity instanceof Parrot parrot)
-            if (BigBrainConfig.ocelotParrot)
-                parrot.goalSelector.addGoal(2, new AvoidEntityGoal<>(parrot, Ocelot.class, 8.0F, 1.0D, 5.0D));
+            if (entity instanceof Parrot parrot)
+                if (BigBrainConfig.ocelotParrot)
+                    parrot.goalSelector.addGoal(2, new AvoidEntityGoal<>(parrot, Ocelot.class, 8.0F, 1.0D, 5.0D));
+        }
     }
 
     @SubscribeEvent
@@ -380,7 +382,8 @@ public class BigBrainEvents {
                 // afar when spotted, and we want pillagers with spyglasses to immediately
                 // target the player, the patrol goal is executed with a pillager isn't
                 // aggressive.
-                if (pillager.getNavigation().isDone()) pillager.getNavigation().moveTo(event.getOriginalTarget(), 1.0D);
+                if (pillager.getNavigation().isDone())
+                    pillager.getNavigation().moveTo(event.getOriginalTarget(), 1.0D);
                 for (Raider raider : pillager.level.getNearbyEntities(Raider.class, TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(), pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
                     raider.setAggressive(true);
                     if (!(raider.getUseItem().getItem() instanceof SpyglassItem) && !raider.isPatrolling())

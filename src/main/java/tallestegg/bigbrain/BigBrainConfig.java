@@ -121,6 +121,8 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue ocelotCreeper;
         public final ForgeConfigSpec.BooleanValue sheepRunAway;
         public final ForgeConfigSpec.BooleanValue openFenceGates;
+        public final ForgeConfigSpec.BooleanValue bowAiNew;
+        public final ForgeConfigSpec.BooleanValue huskBurrowing;
         public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
@@ -134,6 +136,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> EntitiesThatCanAlsoUseTheBuckler;
         public final ForgeConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
+        public final ForgeConfigSpec.ConfigValue<List<String>> bowAiBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             builder.push("all mobs");
@@ -145,6 +148,8 @@ public class BigBrainConfig {
             EntitiesThatCanAlsoUseTheBuckler = builder.translation(BigBrain.MODID + ".config.mobBucklerWhiteList").comment("Any mob id input in this list will be able to use the buckler").define("Mobs that can also use the buckler", Lists.newArrayList("guardvillagers:guard"));
             openFenceGates = builder.define("Allow mobs to open fence gates if they are already able to open doors", true);
             fenceGateBlacklist = builder.comment("Any mob id input in this list will not open fence gates if they're already able to open doors").define("Fence Gate Opening Blacklist", Lists.newArrayList("minecraft:husk", "minecraft:zombie", "minecraft:vindicator", "minecraft:drowned"));
+            bowAiNew = builder.define("Enable new bow ai?", true);
+            bowAiBlackList = builder.define("Mobs that have don't have the new bow ai", Lists.newArrayList());
             builder.pop();
             builder.push("buckler");
             BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
@@ -152,6 +157,9 @@ public class BigBrainConfig {
             BucklerCooldown = builder.translation(BigBrain.MODID + ".config.bucklerCoolDown").defineInRange("How long should the buckler's cooldown be in ticks?", 240, Integer.MIN_VALUE, Integer.MAX_VALUE);
             BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE); // Thinking of removing this in 1.17.
             BucklerTurningRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move if you have the turning enchant be in ticks?", 30, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            builder.pop();
+            builder.push("husk");
+            huskBurrowing = builder.define("Enable burrowing attack for husk?", true);
             builder.pop();
             builder.push("pillager");
             PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
