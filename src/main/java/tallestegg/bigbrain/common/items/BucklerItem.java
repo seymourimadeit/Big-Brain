@@ -135,10 +135,10 @@ public class BucklerItem extends ShieldItem {
                 setChargeTicks(stack, 0);
             }
             entity.setLastHurtMob(entityHit);
-            if (entity instanceof Player player) {
+            if (entity instanceof Player player && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), player) == 0) {
                 IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(player);
                 player.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), BigBrainSounds.CRITICAL_ACTIVATE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                criticalAfterCharge.setCritical(BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.BANG.get(), player) == 0);
+                criticalAfterCharge.setCritical(true);
             }
         }
     }
