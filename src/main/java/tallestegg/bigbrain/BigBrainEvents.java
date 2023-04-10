@@ -150,6 +150,7 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof Husk husk) {
             if (husk.hasPose(Pose.SWIMMING)) {
                 event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F), true);
+                event.setNewEyeHeight(0.5F);
             }
         }
     }

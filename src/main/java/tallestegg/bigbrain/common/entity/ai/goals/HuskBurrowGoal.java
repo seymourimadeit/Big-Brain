@@ -108,7 +108,7 @@ public class HuskBurrowGoal extends Goal {
                 this.phase = BurrowPhases.END;
             }
         }
-        if (this.phase == BurrowPhases.END || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60) {
+        if (this.phase == BurrowPhases.END || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60 || this.husk.isInFluidType()) {
             BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
             this.phase = BurrowPhases.STOP;
         }
