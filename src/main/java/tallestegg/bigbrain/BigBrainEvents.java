@@ -158,9 +158,8 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && !player.getAbilities().flying && player.isAlive() && husk.isAggressive() && husk.getTarget() == player) {
-                if (event.isDismounting())
-                    event.setCanceled(true);
+            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && (!player.isSpectator() || !player.isCreative()) && player.isAlive() && husk.isAggressive() && husk.getTarget() == player && event.isDismounting()) {
+                event.setCanceled(true);
             }
         }
     }
@@ -168,7 +167,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
-        if (event.getEntity() instanceof Husk husk) {
+        if (entity instanceof Husk husk) {
             BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
             if (burrow != null) {
                 if (!husk.level.isClientSide)
@@ -176,6 +175,10 @@ public class BigBrainEvents {
                 if (burrow.isBurrowing())
                     BucklerItem.spawnRunningEffectsWhileCharging(entity);
             }
+        }
+        if (entity instanceof Dolphin dolphin) {
+            if (dolphin.touchingUnloadedChunk())
+                dolphin.setAirSupply(300);
         }
         ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
         if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
@@ -268,9 +271,11 @@ public class BigBrainEvents {
             pillager.goalSelector.addGoal(3, new ZoomInAtRandomGoal(pillager));
         }
 
-        if (entity instanceof Enemy && BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(entity.getEncodeId())) {
-            Mob mob = (Mob) entity;
-            mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
+        if (entity instanceof Enemy) {
+            PathfinderMob mob = (PathfinderMob) entity;
+            if (BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(entity.getEncodeId())) {
+                mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
+            }
         }
 
         if (entity instanceof AbstractVillager villager && BigBrainConfig.MobsAttackAllVillagers) {

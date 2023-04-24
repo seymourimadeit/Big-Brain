@@ -19,6 +19,7 @@ public class FindShelterGoal extends Goal {
     private double wantedX;
     private double wantedY;
     private double wantedZ;
+    private long canUseCheck;
 
     public FindShelterGoal(PathfinderMob entity) {
         this.mob = entity;
@@ -28,11 +29,12 @@ public class FindShelterGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        boolean raining = !level.isDay() && !BigBrainConfig.NightAnimalBlackList.contains(mob.getEncodeId()) || !BigBrainConfig.RainAnimalBlackList.contains(mob.getEncodeId()) && mob.getCommandSenderWorld().isRainingAt(mob.blockPosition());
-        boolean isTamed = mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
+        long gameTime = this.level.getGameTime();
+        boolean raining = !this.level.isDay() && !BigBrainConfig.NightAnimalBlackList.contains(this.mob.getEncodeId()) || !BigBrainConfig.RainAnimalBlackList.contains(mob.getEncodeId()) && mob.getCommandSenderWorld().isRainingAt(mob.blockPosition());
+        boolean isTamed = this.mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
         if (this.setWantedPos())
             return raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null && this.mob.getLevel().canSeeSky(mob.blockPosition());
-        return false;
+        return gameTime - this.canUseCheck > 200L;
     }
 
     @Override
@@ -40,6 +42,12 @@ public class FindShelterGoal extends Goal {
         if (!this.mob.getNavigation().isInProgress())
             this.mob.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, 1.35D);
         this.mob.getLookControl().setLookAt(this.wantedX, this.wantedY, this.wantedZ);
+    }
+
+    @Override
+    public void stop() {
+        this.mob.getNavigation().stop();
+        this.canUseCheck = this.mob.level.getGameTime();
     }
 
     @Override
