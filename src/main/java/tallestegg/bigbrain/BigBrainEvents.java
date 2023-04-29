@@ -63,7 +63,6 @@ import tallestegg.bigbrain.common.capabilities.implementations.IOneCriticalAfter
 import tallestegg.bigbrain.common.capabilities.providers.BurrowingProvider;
 import tallestegg.bigbrain.common.capabilities.providers.GuranteedCritProvider;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
-import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
@@ -180,11 +179,6 @@ public class BigBrainEvents {
             if (dolphin.touchingUnloadedChunk())
                 dolphin.setAirSupply(300);
         }
-        ((IBucklerUser) entity).setCooldown(((IBucklerUser) entity).getCooldown() + 1);
-        if (((IBucklerUser) entity).getCooldown() > BigBrainConfig.BucklerCooldown)
-            ((IBucklerUser) entity).setCooldown(BigBrainConfig.BucklerCooldown);
-        if (((IBucklerUser) entity).getCooldown() <= 0)
-            ((IBucklerUser) entity).setCooldown(0);
         int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
         ItemStack bucklerItemStack = BigBrainItems.checkEachHandForBuckler(entity);
         boolean bucklerReadyToCharge = BucklerItem.isReady(bucklerItemStack);
@@ -192,7 +186,6 @@ public class BigBrainEvents {
         if (bucklerReadyToCharge) {
             BucklerItem.setChargeTicks(bucklerItemStack, bucklerChargeTicks - 1);
             if (bucklerChargeTicks > 0) {
-                ((IBucklerUser) entity).setCooldown(0);
                 BucklerItem.moveFowards(entity);
                 BucklerItem.spawnRunningEffectsWhileCharging(entity);
                 if (turningLevel == 0 && !entity.level.isClientSide()) BucklerItem.bucklerBash(entity);
@@ -421,7 +414,6 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof PiglinBrute piglinBrute) {
             if (!BigBrainConfig.BruteSpawningWithBuckler) return;
             piglinBrute.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
-            ((IBucklerUser) piglinBrute).setCooldown(240);
             ItemStack itemstack = piglinBrute.getOffhandItem();
             if (itemstack.getItem() instanceof BucklerItem) {
                 if (rSource.nextInt(300) == 0) {

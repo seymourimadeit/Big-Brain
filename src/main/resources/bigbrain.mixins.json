@@ -5,7 +5,6 @@
   "refmap": "bigbrain.refmap.json",
   "mixins": [
     "BruteBrainMixin",
-    "LivingEntityMixin",
     "LookControllerMixin",
     "MeleeAttackGoalMixin",
     "MovementControllerMixin",

@@ -1,7 +1,6 @@
 package tallestegg.bigbrain.common.entity.ai.tasks;
 
 import com.google.common.collect.ImmutableMap;
-
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,16 +9,14 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
-import tallestegg.bigbrain.common.entity.IBucklerUser;
 import tallestegg.bigbrain.common.items.BigBrainItems;
 import tallestegg.bigbrain.common.items.BucklerItem;
 
 public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
     private ChargePhases chargePhase = ChargePhases.NONE;
+    private long nextOkStartTime;
     private int strafeTicks;
 
     public ChargeTask() {
@@ -29,13 +26,13 @@ public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel worldIn, T owner) {
         LivingEntity livingentity = this.getAttackTarget(owner);
-        return livingentity != null && livingentity.distanceTo(owner) >= 4.0D && BehaviorUtils.canSee(owner, livingentity) && ((IBucklerUser) owner).getCooldown() == BigBrainConfig.BucklerCooldown && owner.getOffhandItem().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubble();
+        return (worldIn.getGameTime() - nextOkStartTime > (long)BigBrainConfig.COMMON.BucklerCooldown.get()) && livingentity != null && livingentity.distanceTo(owner) >= 4.0D && BehaviorUtils.canSee(owner, livingentity) && owner.getOffhandItem().getItem() instanceof BucklerItem && !owner.isInWaterRainOrBubble();
     }
 
     @Override
     protected boolean canStillUse(ServerLevel worldIn, T entityIn, long gameTimeIn) {
         LivingEntity livingentity = this.getAttackTarget(entityIn);
-        return livingentity != null && entityIn.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET) && ((IBucklerUser) entityIn).getCooldown() == BigBrainConfig.BucklerCooldown && entityIn.getOffhandItem().getItem() instanceof BucklerItem
+        return livingentity != null && entityIn.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET) && entityIn.getOffhandItem().getItem() instanceof BucklerItem
                 && !entityIn.isInWaterRainOrBubble() && chargePhase != ChargePhases.FINISH;
     }
 
@@ -52,10 +49,12 @@ public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
             if (strafeTicks == 0)
                 chargePhase = ChargePhases.CHARGE;
         } else if (chargePhase == ChargePhases.CHARGE) {
-            if (!entityIn.isUsingItem()) {
+            if (!entityIn.isUsingItem() && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) <= 0) {
                 entityIn.startUsingItem(InteractionHand.OFF_HAND);
+                this.chargePhase = ChargePhases.CHARGING;
             }
-            if (entityIn.getTicksUsingItem() >= entityIn.getUseItem().getUseDuration())
+        } else if (chargePhase == ChargePhases.CHARGING) {
+            if (entityIn.getTicksUsingItem() >= entityIn.getUseItem().getUseDuration() && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0)
                 chargePhase = ChargePhases.FINISH;
         }
         if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) > 0 && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entityIn) > 0 || BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(entityIn)) <= 0)
@@ -72,9 +71,10 @@ public class ChargeTask<T extends PiglinBrute> extends Behavior<T> {
     protected void stop(ServerLevel worldIn, T entityIn, long gameTimeIn) {
         if (entityIn.isUsingItem())
             entityIn.stopUsingItem();
+        this.nextOkStartTime = gameTimeIn;
     }
 
     public enum ChargePhases {
-        NONE, STRAFE, CHARGE, FINISH;
+        NONE, STRAFE, CHARGE, CHARGING, FINISH
     }
 }
