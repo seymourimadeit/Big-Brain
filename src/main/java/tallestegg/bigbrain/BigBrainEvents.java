@@ -266,6 +266,7 @@ public class BigBrainEvents {
 
         if (entity instanceof Enemy) {
             PathfinderMob mob = (PathfinderMob) entity;
+            mob.goalSelector.addGoal(1, new ParkourGoal(mob));
             if (BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(entity.getEncodeId())) {
                 mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
             }
@@ -291,7 +292,7 @@ public class BigBrainEvents {
             if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId()))
                 creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
             if (BigBrainConfig.COMMON.bowAiNew.get()) {
-                if (BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
+                if (!BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
                     creature.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
                     creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
                 }
