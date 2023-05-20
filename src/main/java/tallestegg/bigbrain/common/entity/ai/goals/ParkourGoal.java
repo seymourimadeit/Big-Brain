@@ -2,7 +2,6 @@ package tallestegg.bigbrain.common.entity.ai.goals;
 
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityDimensions;
@@ -10,9 +9,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -24,8 +25,6 @@ import java.util.function.BiPredicate;
 
 public class ParkourGoal extends Goal {
     private static final List<Integer> ALLOWED_ANGLES = Lists.newArrayList(65, 70, 75, 80);
-    protected final int maxLongJumpHeight;
-    protected final int maxLongJumpWidth;
     protected final float maxJumpVelocity;
     private final Mob mob;
     private final BiPredicate<Mob, BlockPos> acceptableLandingSpot = ParkourGoal::defaultAcceptableLandingSpot;
@@ -37,8 +36,6 @@ public class ParkourGoal extends Goal {
 
     public ParkourGoal(Mob mob) {
         this.mob = mob;
-        this.maxLongJumpHeight = 1;
-        this.maxLongJumpWidth = 1;
         this.maxJumpVelocity = 1.5F;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.JUMP));
     }
@@ -61,7 +58,7 @@ public class ParkourGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        boolean flag = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && (this.chosenJump != null);
+        boolean flag = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null;
         return flag;
     }
 
@@ -72,14 +69,17 @@ public class ParkourGoal extends Goal {
         this.initialPosition = Optional.of(mob.position());
         if (this.mob.getNavigation() == null)
             return;
+        Vec3 pos = Vec3.atCenterOf(this.mob.getNavigation().getTargetPos());
+        this.mob.getLookControl().setLookAt(pos.x, pos.y, pos.z, 90.0F, 90.0F);
+        this.mob.setYRot(this.mob.getYHeadRot());
     }
 
     @Override
     public void tick() {
+        Vec3 pos = Vec3.atCenterOf(this.mob.getNavigation().getTargetPos());
+        this.mob.getLookControl().setLookAt(pos.x, pos.y, pos.z, 90.0F, 90.0F);
+        this.mob.setYRot(this.mob.getYHeadRot());
         if (this.chosenJump != null) {
-            if (this.posToJump != null) {
-                this.mob.getNavigation().moveTo(this.posToJump.getX(), this.posToJump.getY(), this.posToJump.getZ(), 1.25D);
-            }
             this.leapTowards(mob, this.mob.position().add(this.chosenJump), this.chosenJump.length(), 0.0F);
             this.mob.getJumpControl().jump();
         } else {
@@ -90,7 +90,6 @@ public class ParkourGoal extends Goal {
 
     @Override
     public void stop() {
-        this.mob.setDiscardFriction(false);
         this.mob.getNavigation().stop();
     }
 
@@ -100,9 +99,9 @@ public class ParkourGoal extends Goal {
             if (this.isAcceptableLandingPosition(pEntity, jumpPos)) {
                 Vec3 vec3 = Vec3.atCenterOf(jumpPos);
                 Vec3 vec31 = this.calculateOptimalJumpVector(pEntity, vec3);
+                if (vec31 == null)
+                    return;
                 if (vec31 != null) {
-                    this.mob.setYRot(this.mob.yBodyRot);
-                    this.mob.getLookControl().setLookAt(Vec3.atCenterOf(block).x(), this.mob.getEyeY(), Vec3.atCenterOf(block).z());
                     this.posToJump = jumpPos;
                     this.chosenJump = vec31;
                 }
@@ -160,52 +159,9 @@ public class ParkourGoal extends Goal {
             } else {
                 double d13 = d12 * d8;
                 double d14 = d12 * d7;
-                int i = Mth.ceil(d2 / d13) * 2;
-                double d15 = 0.0D;
-                Vec3 vec33 = null;
-                EntityDimensions entitydimensions = pMob.getDimensions(Pose.STANDING);
-
-                for (int j = 0; j < i - 1; ++j) {
-                    d15 += d2 / (double) i;
-                    double d16 = d7 / d8 * d15 - Math.pow(d15, 2.0D) * 0.08D / (2.0D * d11 * Math.pow(d8, 2.0D));
-                    double d17 = d15 * d10;
-                    double d18 = d15 * d9;
-                    Vec3 vec34 = new Vec3(vec3.x + d17, vec3.y + d16, vec3.z + d18);
-                    if (vec33 != null && !this.isClearTransition(pMob, entitydimensions, vec33, vec34)) {
-                        return null;
-                    }
-
-                    vec33 = vec34;
-                }
-
-                return (new Vec3(d13 * d10, d14, d13 * d9)).scale((double) 0.95F);
+                return (new Vec3(d13 * d10, d14, d13 * d9)).scale(0.95F);
             }
         }
-    }
-
-    private boolean isClearTransition(Mob pMob, EntityDimensions pDimensions, Vec3 pStart, Vec3 pEnd) {
-        Vec3 vec3 = pEnd.subtract(pStart);
-        double d0 = (double) Math.min(pDimensions.width, pDimensions.height);
-        int i = Mth.ceil(vec3.length() / d0);
-        Vec3 vec31 = vec3.normalize();
-        Vec3 vec32 = pStart;
-
-        for (int j = 0; j < i; ++j) {
-            vec32 = j == i - 1 ? pEnd : vec32.add(vec31.scale(d0 * (double) 0.9F));
-            if (!pMob.level.noCollision(pMob, pDimensions.makeBoundingBox(vec32))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private double getJumpVelocity(Level level, LivingEntity entity) {
-        double baseVelocity = 0.42D * getJumpVelocityMultiplier(level, entity);
-        if (entity.hasEffect(MobEffects.JUMP)) {
-            baseVelocity += 0.1D * (entity.getEffect(MobEffects.JUMP).getAmplifier() + 1);
-        }
-        return baseVelocity;
     }
 
     private double getJumpVelocityMultiplier(Level level, LivingEntity entity) {

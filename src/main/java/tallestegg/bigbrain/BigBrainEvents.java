@@ -264,9 +264,7 @@ public class BigBrainEvents {
             pillager.goalSelector.addGoal(3, new ZoomInAtRandomGoal(pillager));
         }
 
-        if (entity instanceof Enemy) {
-            PathfinderMob mob = (PathfinderMob) entity;
-            mob.goalSelector.addGoal(1, new ParkourGoal(mob));
+        if (entity instanceof Enemy && entity instanceof Mob mob) {
             if (BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(entity.getEncodeId())) {
                 mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
             }
@@ -277,6 +275,9 @@ public class BigBrainEvents {
         }
 
         if (entity instanceof PathfinderMob creature) {
+            if (BigBrainConfig.COMMON.jumpAi.get() && !BigBrainConfig.COMMON.jumpBlackList.get().contains(creature.getEncodeId()) && (creature instanceof Zombie || creature instanceof AbstractIllager || creature instanceof AbstractPiglin
+                    || creature instanceof Skeleton || BigBrainConfig.COMMON.jumpWhiteList.get().contains(creature.getEncodeId())))
+                creature.goalSelector.addGoal(1, new ParkourGoal(creature));
             if (GoalUtils.hasGroundPathNavigation(creature) && creature.getNavigation().getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
                 if (creature instanceof Raider) {
                     creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, false) {

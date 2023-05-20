@@ -98,8 +98,9 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.0.23'
+    minecraft 'net.minecraftforge:forge:1.19.4-45.0.58'
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    implementation fg.deobf("curse.maven:spark-361579:4505309")
 }
 
 repositories {
