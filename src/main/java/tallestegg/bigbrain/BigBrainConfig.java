@@ -123,6 +123,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue openFenceGates;
         public final ForgeConfigSpec.BooleanValue bowAiNew;
         public final ForgeConfigSpec.BooleanValue huskBurrowing;
+        public final ForgeConfigSpec.BooleanValue jumpAi;
         public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
         public final ForgeConfigSpec.IntValue BucklerCooldown;
         public final ForgeConfigSpec.IntValue BucklerRunTime;
@@ -137,6 +138,8 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.ConfigValue<List<String>> EntitiesThatCanAlsoUseTheBuckler;
         public final ForgeConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
         public final ForgeConfigSpec.ConfigValue<List<String>> bowAiBlackList;
+        public final ForgeConfigSpec.ConfigValue<List<String>> jumpWhiteList;
+        public final ForgeConfigSpec.ConfigValue<List<String>> jumpBlackList;
 
         public CommonConfig(ForgeConfigSpec.Builder builder) {
             builder.push("all mobs");
@@ -149,7 +152,10 @@ public class BigBrainConfig {
             openFenceGates = builder.define("Allow mobs to open fence gates if they are already able to open doors", true);
             fenceGateBlacklist = builder.comment("Any mob id input in this list will not open fence gates if they're already able to open doors").define("Fence Gate Opening Blacklist", Lists.newArrayList("minecraft:husk", "minecraft:zombie", "minecraft:vindicator", "minecraft:drowned"));
             bowAiNew = builder.define("Enable new bow ai?", true);
-            bowAiBlackList = builder.define("Mobs that have don't have the new bow ai", Lists.newArrayList());
+            bowAiBlackList = builder.define("Mobs that don't have the new bow ai", Lists.newArrayList());
+            jumpAi = builder.define("Enable jumping ai", true);
+            jumpWhiteList = builder.define("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"));
+            jumpBlackList = builder.define("Mobs that don't have the jumping ai", Lists.newArrayList());
             builder.pop();
             builder.push("buckler");
             BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
