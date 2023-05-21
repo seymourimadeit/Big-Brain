@@ -154,7 +154,7 @@ public class BigBrainConfig {
             bowAiNew = builder.define("Enable new bow ai?", true);
             bowAiBlackList = builder.define("Mobs that don't have the new bow ai", Lists.newArrayList());
             jumpAi = builder.define("Enable jumping ai", true);
-            jumpWhiteList = builder.define("List additional mobs that can also utilize jumping", Lists.newArrayList());
+            jumpWhiteList = builder.define("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"));
             jumpBlackList = builder.define("Mobs that don't have the jumping ai", Lists.newArrayList());
             builder.pop();
             builder.push("buckler");

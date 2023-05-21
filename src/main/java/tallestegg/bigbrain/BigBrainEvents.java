@@ -157,7 +157,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && (!player.isSpectator() || !player.isCreative()) && player.isAlive() && husk.isAggressive() && husk.getTarget() == player && event.isDismounting()) {
+            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isCarrying() && (!player.isSpectator() || !player.isCreative()) && player.isAlive() && event.isDismounting()) {
                 event.setCanceled(true);
             }
         }
@@ -253,9 +253,8 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof Husk husk && BigBrainConfig.COMMON.huskBurrowing.get()) {
+        if (entity instanceof Husk husk && BigBrainConfig.COMMON.huskBurrowing.get())
             husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
-        }
         if (entity instanceof Pillager pillager) {
             if (BigBrainConfig.PillagerMultishot)
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
@@ -276,7 +275,7 @@ public class BigBrainEvents {
 
         if (entity instanceof PathfinderMob creature) {
             if (BigBrainConfig.COMMON.jumpAi.get() && !BigBrainConfig.COMMON.jumpBlackList.get().contains(creature.getEncodeId()) && (creature instanceof Zombie || creature instanceof AbstractIllager || creature instanceof AbstractPiglin
-                    || creature instanceof Skeleton || BigBrainConfig.COMMON.jumpWhiteList.get().contains(creature.getEncodeId())))
+                    || creature instanceof AbstractSkeleton || creature instanceof Creeper || creature instanceof AbstractVillager || BigBrainConfig.COMMON.jumpWhiteList.get().contains(creature.getEncodeId())))
                 creature.goalSelector.addGoal(1, new ParkourGoal(creature));
             if (GoalUtils.hasGroundPathNavigation(creature) && creature.getNavigation().getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
                 if (creature instanceof Raider) {

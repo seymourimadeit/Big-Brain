@@ -164,24 +164,6 @@ public class ParkourGoal extends Goal {
         }
     }
 
-    private double getJumpVelocityMultiplier(Level level, LivingEntity entity) {
-        float f1 = level.getBlockState(entity.blockPosition()).getBlock().getJumpFactor();
-        float f2 = level.getBlockState(getVelocityAffectingPos(entity)).getBlock().getJumpFactor();
-        return (f1 == 1.0) ? (double) f2 : (double) f1;
-    }
-
-    private BlockPos getVelocityAffectingPos(LivingEntity entity) {
-        return floorBlockPos(entity.blockPosition().getX(), entity.getBoundingBox().minY - 0.5000001, entity.blockPosition().getZ());
-    }
-
-    private BlockPos floorBlockPos(double x, double y, double z) {
-        return new BlockPos((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
-    }
-
-    private BlockPos floorBlockPos(Vec3 pos) {
-        return floorBlockPos(pos.x(), pos.y(), pos.z());
-    }
-
     private void leapTowards(LivingEntity entity, Vec3 target, double horzVel, double yVel) {
         Vec3 dir = target.subtract(entity.position()).normalize();
         Vec3 leap = new Vec3(dir.x, 0.0, dir.z).normalize().scale(horzVel).yRot((float) yVel);
