@@ -35,6 +35,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import net.minecraft.world.phys.EntityHitResult;
@@ -171,8 +172,13 @@ public class BigBrainEvents {
             if (burrow != null) {
                 if (!husk.level.isClientSide)
                     BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
-                if (burrow.isBurrowing())
+                if (burrow.isBurrowing()) {
                     BucklerItem.spawnRunningEffectsWhileCharging(entity);
+                    if (entity.getRandom().nextInt(10) == 0) {
+                        BlockState onState = husk.getBlockStateOn();
+                        husk.playSound(onState.getSoundType(husk.level, husk.blockPosition(), husk).getBreakSound());
+                    }
+                }
             }
         }
         if (entity instanceof Dolphin dolphin) {
