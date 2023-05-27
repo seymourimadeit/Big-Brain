@@ -20,13 +20,13 @@ public class LookControllerMixin {
 
     @Inject(at = @At(value = "HEAD"), method = "tick", cancellable = true)
     public void tick(CallbackInfo info) {
-        if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), mob) >= 0 && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
+        if (mob != null && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), mob) >= 0 && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
             info.cancel();
     }
 
     @Inject(at = @At(value = "HEAD"), method = "setLookAt(DDDFF)V", cancellable = true)
     public void setLookAt(double x, double y, double z, float deltaYaw, float deltaPitch, CallbackInfo info) {
-        if (BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), mob) >= 0 && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
+        if (mob != null && BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), mob) >= 0 && BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
             info.cancel();
     }
 }
