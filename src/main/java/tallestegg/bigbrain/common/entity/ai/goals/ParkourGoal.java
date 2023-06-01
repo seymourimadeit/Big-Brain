@@ -43,7 +43,7 @@ public class ParkourGoal extends Goal {
     public static <E extends Mob> boolean defaultAcceptableLandingSpot(E p_251540_, BlockPos p_248879_) {
         Level level = p_251540_.level;
         BlockPos blockpos = p_248879_.below();
-        return level.getBlockState(blockpos).isSolidRender(level, blockpos) && p_251540_.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(level, p_248879_.mutable())) == 0.0F;
+        return level.getBlockState(blockpos).isSolidRender(level, blockpos);
     }
 
     @Override
