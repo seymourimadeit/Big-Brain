@@ -27,7 +27,7 @@ public class HuskBurrowGoal extends Goal {
 
     public HuskBurrowGoal(Husk husk) {
         this.husk = husk;
-        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
@@ -40,7 +40,10 @@ public class HuskBurrowGoal extends Goal {
     @Override
     public boolean canContinueToUse() {
         LivingEntity target = this.husk.getTarget();
-        return target != null && this.phase != BurrowPhases.STOP || this.entityInWall(this.husk) && this.phase == BurrowPhases.DIG_OUT && this.phase != BurrowPhases.STOP;
+        return target != null && burrowTime > 0 &&
+                this.phase != BurrowPhases.STOP
+                || this.entityInWall(this.husk) && this.phase == BurrowPhases.DIG_OUT
+                && this.phase != BurrowPhases.STOP || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60 || this.husk.isInFluidType();
     }
 
     @Override
@@ -64,8 +67,6 @@ public class HuskBurrowGoal extends Goal {
                         return;
             }
         }
-        if (this.phase == BurrowPhases.BURROW)
-            --this.burrowTime;
         if (target != null) {
             boolean canSee = this.husk.getSensing().hasLineOfSight(target);
             if (canSee) {
@@ -80,6 +81,7 @@ public class HuskBurrowGoal extends Goal {
                 BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(true);
                 this.phase = BurrowPhases.BURROW;
             } else if (this.phase == BurrowPhases.BURROW) {
+
                 this.husk.getNavigation().moveTo(target, 1.8D);
                 if (this.husk.isWithinMeleeAttackRange(target)) {
                     this.husk.getNavigation().stop();
@@ -89,6 +91,7 @@ public class HuskBurrowGoal extends Goal {
             }
             if (this.phase == BurrowPhases.GRAB) {
                 target.startRiding(this.husk, true);
+                BigBrainCapabilities.getBurrowing(this.husk).setCarrying(true);
                 this.phase = BurrowPhases.SINK;
             }
         }
@@ -96,6 +99,7 @@ public class HuskBurrowGoal extends Goal {
             this.waitUntilDigTime--;
             if (this.waitUntilDigTime <= 0) {
                 BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
+                BigBrainCapabilities.getBurrowing(this.husk).setDigging(true);
                 this.husk.noPhysics = true;
                 this.husk.setDeltaMovement(0.0D, -4.0D, 0.0D);
                 this.phase = BurrowPhases.DIG_OUT;
@@ -103,20 +107,26 @@ public class HuskBurrowGoal extends Goal {
         } else if (this.phase == BurrowPhases.DIG_OUT) {
             if (this.entityInWall(this.husk)) {
                 this.husk.ejectPassengers();
+                BigBrainCapabilities.getBurrowing(this.husk).setCarrying(false);
                 this.husk.setDeltaMovement(0.0, 0.5D, 0.0D);
             } else {
+                BigBrainCapabilities.getBurrowing(this.husk).setDigging(false);
                 this.phase = BurrowPhases.END;
             }
         }
         if (this.phase == BurrowPhases.END || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60 || this.husk.isInFluidType()) {
-            BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
             this.phase = BurrowPhases.STOP;
+        }
+        if (this.phase == BurrowPhases.BURROW) {
+            this.burrowTime--;
         }
     }
 
     @Override
     public void stop() {
         BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(false);
+        BigBrainCapabilities.getBurrowing(this.husk).setCarrying(false);
+        BigBrainCapabilities.getBurrowing(this.husk).setDigging(false);
         this.husk.setPose(Pose.STANDING);
         this.husk.noPhysics = false;
         this.husk.ejectPassengers();
@@ -133,7 +143,7 @@ public class HuskBurrowGoal extends Goal {
 
     private boolean entityInWall(Husk husk) {
         float f = husk.getDimensions(husk.getPose()).width * 0.8F;
-        AABB aabb = AABB.ofSize(husk.getEyePosition(), (double) f, 1.0E-6D, (double) f);
+        AABB aabb = AABB.ofSize(husk.getEyePosition(), f, 1.0E-6D, (double) f);
         return BlockPos.betweenClosedStream(aabb).anyMatch((p_201942_) -> {
             BlockState blockstate = husk.level.getBlockState(p_201942_);
             return !blockstate.isAir() && blockstate.isSuffocating(husk.level, p_201942_) && Shapes.joinIsNotEmpty(blockstate.getCollisionShape(husk.level, p_201942_).move(p_201942_.getX(), p_201942_.getY(), p_201942_.getZ()), Shapes.create(aabb), BooleanOp.AND);

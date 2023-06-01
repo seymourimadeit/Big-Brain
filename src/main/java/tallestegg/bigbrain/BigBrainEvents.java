@@ -164,9 +164,8 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isBurrowing() && !player.getAbilities().flying && player.isAlive() && husk.isAggressive() && husk.getTarget() == player) {
-                if (event.isDismounting())
-                    event.setCanceled(true);
+            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isCarrying() && (!player.isSpectator() || !player.isCreative()) && player.isAlive() && event.isDismounting()) {
+                event.setCanceled(true);
             }
         }
     }
@@ -257,6 +256,7 @@ public class BigBrainEvents {
             ((IOneCriticalAfterCharge) event.getEntity()).setCritical(false);
         }
     }
+
     @SubscribeEvent
     public static void attach(AttachCapabilitiesEvent<Entity> event) {
         final BurrowingProvider burrowingProvider = new BurrowingProvider();
@@ -266,6 +266,12 @@ public class BigBrainEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void onDamage(LivingDamageEvent event) {
+        if (event.getEntity() instanceof Husk && DamageSource.IN_WALL.equals(event.getSource()) && BigBrainCapabilities.getBurrowing(event.getEntity()).isCarrying())
+            event.setCanceled(true);
+
+    }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {

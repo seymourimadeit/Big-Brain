@@ -72,6 +72,7 @@ public class ParkourGoal extends Goal {
         Vec3 pos = Vec3.atCenterOf(this.mob.getNavigation().getTargetPos());
         this.mob.getLookControl().setLookAt(pos.x, pos.y, pos.z, 90.0F, 90.0F);
         this.mob.setYRot(this.mob.getYHeadRot());
+        this.pickCandidate(mob, this.mob.getNavigation().getTargetPos());
     }
 
     @Override
@@ -84,7 +85,6 @@ public class ParkourGoal extends Goal {
             this.mob.getJumpControl().jump();
         } else {
             --this.findJumpTries;
-            this.pickCandidate(mob, this.mob.getNavigation().getTargetPos());
         }
     }
 
