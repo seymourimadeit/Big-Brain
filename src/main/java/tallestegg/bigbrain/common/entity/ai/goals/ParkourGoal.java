@@ -40,10 +40,10 @@ public class ParkourGoal extends Goal {
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.JUMP));
     }
 
-    public static <E extends Mob> boolean defaultAcceptableLandingSpot(E p_251540_, BlockPos p_248879_) {
-        Level level = p_251540_.level;
-        BlockPos blockpos = p_248879_.below();
-        return level.getBlockState(blockpos).isSolidRender(level, blockpos) && p_251540_.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(level, p_248879_.mutable())) == 0.0F;
+    public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos pos) {
+        Level level = mob.level;
+        BlockPos blockpos = pos.below();
+        return level.getBlockState(blockpos).isSolidRender(level, blockpos);
     }
 
     @Override
@@ -72,6 +72,7 @@ public class ParkourGoal extends Goal {
         Vec3 pos = Vec3.atCenterOf(this.mob.getNavigation().getTargetPos());
         this.mob.getLookControl().setLookAt(pos.x, pos.y, pos.z, 90.0F, 90.0F);
         this.mob.setYRot(this.mob.getYHeadRot());
+        this.pickCandidate(mob, this.mob.getNavigation().getTargetPos());
     }
 
     @Override
@@ -84,7 +85,6 @@ public class ParkourGoal extends Goal {
             this.mob.getJumpControl().jump();
         } else {
             --this.findJumpTries;
-            this.pickCandidate(mob, this.mob.getNavigation().getTargetPos());
         }
     }
 

@@ -346,7 +346,7 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onDamage(LivingDamageEvent event) {
-        if (event.getEntity() instanceof Husk && event.getSource().is(DamageTypes.IN_WALL))
+        if (event.getEntity() instanceof Husk && event.getSource().is(DamageTypes.IN_WALL) && BigBrainCapabilities.getBurrowing(event.getEntity()).isCarrying())
             event.setCanceled(true);
 
     }
