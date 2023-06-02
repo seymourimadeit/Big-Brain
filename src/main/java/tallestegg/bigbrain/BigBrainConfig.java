@@ -155,7 +155,7 @@ public class BigBrainConfig {
             bowAiBlackList = builder.define("Mobs that don't have the new bow ai", Lists.newArrayList());
             jumpAi = builder.define("Enable jumping ai", true);
             jumpWhiteList = builder.define("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"));
-            jumpBlackList = builder.define("Mobs that don't have the jumping ai", Lists.newArrayList());
+            jumpBlackList = builder.define("Mobs that don't have the jumping ai", Lists.newArrayList("minecraft:villager"));
             builder.pop();
             builder.push("buckler");
             BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
