@@ -40,7 +40,7 @@ public class HuskBurrowGoal extends Goal {
     @Override
     public boolean canContinueToUse() {
         LivingEntity target = this.husk.getTarget();
-        return target != null && burrowTime > 0 &&
+        return target != null && target.isPassenger() && burrowTime > 0 &&
                 this.phase != BurrowPhases.STOP
                 || this.entityInWall(this.husk) && this.phase == BurrowPhases.DIG_OUT
                 && this.phase != BurrowPhases.STOP || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60 || this.husk.isInFluidType();
@@ -81,7 +81,6 @@ public class HuskBurrowGoal extends Goal {
                 BigBrainCapabilities.getBurrowing(this.husk).setBurrowing(true);
                 this.phase = BurrowPhases.BURROW;
             } else if (this.phase == BurrowPhases.BURROW) {
-
                 this.husk.getNavigation().moveTo(target, 1.8D);
                 if (this.husk.isWithinMeleeAttackRange(target)) {
                     this.husk.getNavigation().stop();
@@ -106,7 +105,8 @@ public class HuskBurrowGoal extends Goal {
             }
         } else if (this.phase == BurrowPhases.DIG_OUT) {
             if (this.entityInWall(this.husk)) {
-                this.husk.ejectPassengers();
+                if (!this.husk.getPassengers().isEmpty())
+                    this.husk.ejectPassengers();
                 BigBrainCapabilities.getBurrowing(this.husk).setCarrying(false);
                 this.husk.setDeltaMovement(0.0, 0.5D, 0.0D);
             } else {
@@ -129,7 +129,8 @@ public class HuskBurrowGoal extends Goal {
         BigBrainCapabilities.getBurrowing(this.husk).setDigging(false);
         this.husk.setPose(Pose.STANDING);
         this.husk.noPhysics = false;
-        this.husk.ejectPassengers();
+        if (!this.husk.getPassengers().isEmpty())
+            this.husk.ejectPassengers();
         this.canUseCheck = this.husk.level.getGameTime();
         this.burrowTime = 0;
         this.waitUntilDigTime = 0;
