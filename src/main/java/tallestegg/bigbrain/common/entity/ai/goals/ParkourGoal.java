@@ -2,18 +2,19 @@ package tallestegg.bigbrain.common.entity.ai.goals;
 
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.Path;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -33,6 +34,8 @@ public class ParkourGoal extends Goal {
     protected Vec3 chosenJump;
     protected BlockPos posToJump;
     protected int findJumpTries;
+    protected int failedToFindJumpCounter;
+    protected long tryAgainTime;
 
     public ParkourGoal(Mob mob) {
         this.mob = mob;
@@ -40,9 +43,9 @@ public class ParkourGoal extends Goal {
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.JUMP));
     }
 
-    public static <E extends Mob> boolean defaultAcceptableLandingSpot(E p_251540_, BlockPos p_248879_) {
-        Level level = p_251540_.level;
-        BlockPos blockpos = p_248879_.below();
+    public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos pos) {
+        Level level = mob.level;
+        BlockPos blockpos = pos.below();
         return level.getBlockState(blockpos).isSolidRender(level, blockpos);
     }
 
@@ -50,7 +53,7 @@ public class ParkourGoal extends Goal {
     public boolean canUse() {
         if (this.mob.getNavigation() != null && this.mob.isOnGround()) {
             Path path = this.mob.getNavigation().getPath();
-            return this.mob.getNavigation().isInProgress() && path != null && !path.canReach();
+            return this.mob.getNavigation().isInProgress() && path != null && !path.canReach() &&  (this.mob.getLevel().getGameTime() - tryAgainTime > 100L);
         } else {
             return false;
         }
@@ -58,7 +61,7 @@ public class ParkourGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        boolean flag = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null;
+        boolean flag = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null && this.failedToFindJumpCounter >= 2;
         return flag;
     }
 
@@ -91,6 +94,10 @@ public class ParkourGoal extends Goal {
     @Override
     public void stop() {
         this.mob.getNavigation().stop();
+        if (this.failedToFindJumpCounter >= 2) {
+            this.tryAgainTime = this.mob.getLevel().getGameTime();
+            this.failedToFindJumpCounter = 0;
+        }
     }
 
     protected void pickCandidate(Mob pEntity, BlockPos block) {
@@ -101,9 +108,15 @@ public class ParkourGoal extends Goal {
                 Vec3 vec31 = this.calculateOptimalJumpVector(pEntity, vec3);
                 if (vec31 == null)
                     return;
-                if (vec31 != null) {
-                    this.posToJump = jumpPos;
-                    this.chosenJump = vec31;
+                PathNavigation pathnavigation = pEntity.getNavigation();
+                Path path = pathnavigation.createPath(jumpPos, 0, 8);
+                if (path != null && !path.canReach()) {
+                    if (vec31 != null) {
+                        this.posToJump = jumpPos;
+                        this.chosenJump = vec31;
+                    }
+                } else {
+                    this.failedToFindJumpCounter++;
                 }
             }
         }
@@ -178,4 +191,39 @@ public class ParkourGoal extends Goal {
         ((Mob) entity).getLookControl().setLookAt(target);
         entity.setDeltaMovement(horzVelocity.yRot(clampedYVelocity));
     }
+
+    /*public BlockType testForBlock(Level level, BlockPos pos) {
+        BlockState blockState = level.getBlockState(pos);
+        Block block = blockState.getBlock();
+        Material material = blockState.getMaterial();
+        FluidState fluidState = level.getFluidState(pos);
+
+        if (blockState.is(Blocks.SWEET_BERRY_BUSH) ||
+                blockState.is(BlockTags.FIRE) ||
+                CampfireBlock.isLitCampfire(blockState) ||
+                fluidState.is(FluidTags.WATER))
+            return BlockType.PASSABLE_OBSTACLE;
+        if (fluidState.is(FluidTags.LAVA) ||
+                blockState.is(Blocks.CACTUS) ||
+                blockState.is(Blocks.HONEY_BLOCK) ||
+                blockState.is(Blocks.MAGMA_BLOCK))
+            return BlockType.SOLID_OBSTACLE;
+        if (block instanceof LeavesBlock ||
+                blockState.is(BlockTags.FENCES) ||
+                blockState.is(BlockTags.WALLS) ||
+                (block instanceof FenceGateBlock && !blockState.getValue(FenceGateBlock.OPEN) ||
+                        (DoorBlock.isWoodenDoor(blockState) && !blockState.getValue(DoorBlock.OPEN)) ||
+                        (block instanceof DoorBlock && material == Material.METAL && !blockState.getValue(DoorBlock.OPEN)) ||
+                        (block instanceof DoorBlock && blockState.getValue(DoorBlock.OPEN)) ||
+                        !blockState.isPathfindable(level, pos, PathComputationType.LAND))) {
+            return BlockType.BLOCKED;
+        }
+        return null;
+    }
+
+    public enum BlockType {
+        BLOCKED,
+        SOLID_OBSTACLE,
+        PASSABLE_OBSTACLE,
+    }*/
 }
