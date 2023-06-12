@@ -1,16 +1,15 @@
 package tallestegg.bigbrain;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -35,41 +34,30 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
-import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
-import tallestegg.bigbrain.common.capabilities.implementations.IOneCriticalAfterCharge;
 import tallestegg.bigbrain.common.capabilities.providers.BurrowingProvider;
-import tallestegg.bigbrain.common.capabilities.providers.GuranteedCritProvider;
-import tallestegg.bigbrain.common.enchantments.BigBrainEnchantments;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
-import tallestegg.bigbrain.common.items.BigBrainItems;
-import tallestegg.bigbrain.common.items.BucklerItem;
 import tallestegg.bigbrain.networking.BigBrainNetworking;
 import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
-import tallestegg.bigbrain.networking.CriticalCapabilityPacket;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -89,10 +77,10 @@ public class BigBrainEvents {
     public static void onBreed(BabyEntitySpawnEvent event) {
         if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
             Pig pig = (Pig) event.getParentA();
-            Level level = pig.getLevel();
+            Level level = pig.level();
             RandomSource randomSource = level.getRandom();
             for (int i = 0; i < BigBrainConfig.minPigBabiesBred + randomSource.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
-                Pig baby = EntityType.PIG.create(event.getChild().level);
+                Pig baby = EntityType.PIG.create(event.getChild().level());
                 baby.copyPosition(pig);
                 baby.setPersistenceRequired();
                 if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))
@@ -101,13 +89,6 @@ public class BigBrainEvents {
                 baby.setPersistenceRequired();
                 pig.getCommandSenderWorld().addFreshEntity(baby);
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onJump(LivingJumpEvent event) {
-        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(event.getEntity())) > 0) {
-            event.getEntity().setDeltaMovement(event.getEntity().getDeltaMovement().x(), 0.0D, event.getEntity().getDeltaMovement().z());
         }
     }
 
@@ -164,19 +145,32 @@ public class BigBrainEvents {
         }
     }
 
+    public static void spawnRunningEffectsWhileCharging(LivingEntity entity) {
+        int i = Mth.floor(entity.getX());
+        int j = Mth.floor(entity.getY() - (double) 0.2F);
+        int k = Mth.floor(entity.getZ());
+        BlockPos blockpos = new BlockPos(i, j, k);
+        BlockState blockstate = entity.level().getBlockState(blockpos);
+        if (!blockstate.addRunningEffects(entity.level(), blockpos, entity))
+            if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
+                Vec3 vec3 = entity.getDeltaMovement();
+                entity.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getX() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).height, entity.getY() + 0.1D, entity.getZ() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).width, vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
+            }
+    }
+
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Husk husk) {
             BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
             if (burrow != null) {
-                if (!husk.level.isClientSide)
+                if (!husk.level().isClientSide)
                     BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
                 if (burrow.isBurrowing()) {
-                    BucklerItem.spawnRunningEffectsWhileCharging(entity);
+                    spawnRunningEffectsWhileCharging(entity);
                     if (entity.getRandom().nextInt(10) == 0) {
                         BlockState onState = husk.getBlockStateOn();
-                        husk.playSound(onState.getSoundType(husk.level, husk.blockPosition(), husk).getBreakSound());
+                        husk.playSound(onState.getSoundType(husk.level(), husk.blockPosition(), husk).getBreakSound());
                     }
                 }
             }
@@ -185,70 +179,12 @@ public class BigBrainEvents {
             if (dolphin.touchingUnloadedChunk())
                 dolphin.setAirSupply(300);
         }
-        int turningLevel = BigBrainEnchantments.getBucklerEnchantsOnHands(BigBrainEnchantments.TURNING.get(), entity);
-        ItemStack bucklerItemStack = BigBrainItems.checkEachHandForBuckler(entity);
-        boolean bucklerReadyToCharge = BucklerItem.isReady(bucklerItemStack);
-        int bucklerChargeTicks = BucklerItem.getChargeTicks(bucklerItemStack);
-        if (bucklerReadyToCharge) {
-            BucklerItem.setChargeTicks(bucklerItemStack, bucklerChargeTicks - 1);
-            if (bucklerChargeTicks > 0) {
-                BucklerItem.moveFowards(entity);
-                BucklerItem.spawnRunningEffectsWhileCharging(entity);
-                if (turningLevel == 0 && !entity.level.isClientSide()) BucklerItem.bucklerBash(entity);
-            }
-            if (bucklerChargeTicks <= 0) {
-                AttributeInstance speed = entity.getAttribute(Attributes.MOVEMENT_SPEED);
-                AttributeInstance knockback = entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-                if (speed == null || knockback == null) {
-                    return;
-                }
-                knockback.removeModifier(KNOCKBACK_RESISTANCE);
-                speed.removeModifier(CHARGE_SPEED_BOOST);
-                entity.stopUsingItem();
-                BucklerItem.setChargeTicks(bucklerItemStack, 0);
-                BucklerItem.setReady(bucklerItemStack, false);
-            }
-        }
-        IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(entity);
-        if (criticalAfterCharge != null) {
-            if (criticalAfterCharge.isCritical()) {
-                if (entity.swingTime > 0) {
-                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), BigBrainSounds.CRITICAL_DEACTIVATE.get(), entity.getSoundSource(), 1.0F, 0.8F + entity.getRandom().nextFloat() * 0.4F);
-                    criticalAfterCharge.setCritical(false);
-                }
-                for (int i = 0; i < 2; ++i) {
-                    entity.level.addParticle(ParticleTypes.CRIT, entity.getRandomX(0.5D), entity.getRandomY(), entity.getRandomZ(0.5D), 0.0D, 0.0D, 0.0D);
-                }
-            }
-            if (event.getEntity() instanceof ServerPlayer player)
-                BigBrainNetworking.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new CriticalCapabilityPacket(player.getId(), criticalAfterCharge.isCritical()));
-        }
-    }
-
-    @SubscribeEvent
-    public static void onLootTableLoad(LootTableLoadEvent event) {
-        if (event.getName().toString().contains("minecraft:chests/bastion")) {
-            ResourceLocation bucklerBastionLoot = new ResourceLocation(BigBrain.MODID, "chests/buckler_loot_table");
-            event.getTable().addPool(LootPool.lootPool().name("buckler_bastion_chests").add(LootTableReference.lootTableReference(bucklerBastionLoot)).build());
-        }
-    }
-
-    @SubscribeEvent
-    public static void onCriticalHit(CriticalHitEvent event) {
-        Player player = event.getEntity();
-        IOneCriticalAfterCharge criticalAfterCharge = BigBrainCapabilities.getGuaranteedCritical(player);
-        if (criticalAfterCharge.isCritical()) {
-            event.setResult(Result.ALLOW);
-            event.setDamageModifier(1.5F);
-            event.getEntity().level.playSound(null, event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ(), SoundEvents.PLAYER_ATTACK_CRIT, event.getEntity().getSoundSource(), 1.0F, 1.0F);
-            criticalAfterCharge.setCritical(false);
-        }
     }
 
     @SubscribeEvent
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof Husk husk) {
-            if (!event.getTarget().level.isClientSide) {
+            if (!event.getTarget().level().isClientSide) {
                 BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
                 if (burrow != null)
                     BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
@@ -295,8 +231,6 @@ public class BigBrainEvents {
                     creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, true));
                 }
             }
-            if (BigBrainConfig.EntitiesThatCanAlsoUseTheBuckler.contains(entity.getEncodeId()))
-                creature.goalSelector.addGoal(0, new UseBucklerGoal<>(creature));
             if (BigBrainConfig.COMMON.bowAiNew.get()) {
                 if (!BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
                     creature.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
@@ -337,7 +271,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onHit(LivingHurtEvent event) {
         if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
-            for (Animal nearbyEntities : animal.getLevel().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
+            for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
                 if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO))
                     nearbyEntities.setLastHurtByMob((LivingEntity) event.getSource().getEntity());
             }
@@ -353,22 +287,11 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void attach(AttachCapabilitiesEvent<Entity> event) {
-        final GuranteedCritProvider critProvider = new GuranteedCritProvider();
         final BurrowingProvider burrowingProvider = new BurrowingProvider();
-        if (event.getObject() instanceof Player) {
-            event.addCapability(GuranteedCritProvider.IDENTIFIER, critProvider);
-            event.addListener(critProvider::invalidate);
-        }
         if (event.getObject() instanceof Husk) {
             event.addCapability(BurrowingProvider.IDENTIFIER, burrowingProvider);
             event.addListener(burrowingProvider::invalidate);
         }
-    }
-
-    @SubscribeEvent
-    public static void onShieldBlock(ShieldBlockEvent event) {
-        if (event.getEntity().getUseItem().getItem() instanceof BucklerItem)
-            event.setCanceled(true);
     }
 
     @SubscribeEvent
@@ -390,7 +313,7 @@ public class BigBrainEvents {
                 // aggressive.
                 if (pillager.getNavigation().isDone())
                     pillager.getNavigation().moveTo(event.getOriginalTarget(), 1.0D);
-                for (Raider raider : pillager.level.getNearbyEntities(Raider.class, TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(), pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
+                for (Raider raider : pillager.level().getNearbyEntities(Raider.class, TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(), pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
                     raider.setAggressive(true);
                     if (!(raider.getUseItem().getItem() instanceof SpyglassItem) && !raider.isPatrolling())
                         raider.setTarget(event.getOriginalTarget());
@@ -416,43 +339,6 @@ public class BigBrainEvents {
                 float chance = BigBrainConfig.spyGlassPillagerChance;
                 if (pillager.isPatrolLeader() && rSource.nextFloat() < chance)
                     pillager.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SPYGLASS));
-            }
-        }
-        if (event.getEntity() instanceof PiglinBrute piglinBrute) {
-            if (!BigBrainConfig.BruteSpawningWithBuckler) return;
-            piglinBrute.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(BigBrainItems.BUCKLER.get()));
-            ItemStack itemstack = piglinBrute.getOffhandItem();
-            if (itemstack.getItem() instanceof BucklerItem) {
-                if (rSource.nextInt(300) == 0) {
-                    Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
-                    map.putIfAbsent(BigBrainEnchantments.TURNING.get(), 1);
-                    EnchantmentHelper.setEnchantments(map, itemstack);
-                    piglinBrute.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
-                }
-                if (rSource.nextInt(500) == 0) {
-                    Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemstack);
-                    map.putIfAbsent(BigBrainEnchantments.BANG.get(), 1);
-                    EnchantmentHelper.setEnchantments(map, itemstack);
-                    piglinBrute.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void dropLoot(LivingDropsEvent event) {
-        if (event.getEntity() instanceof PiglinBrute brute) {
-            ItemStack itemstack = brute.getOffhandItem();
-            if (itemstack.getItem() instanceof BucklerItem) {
-                float f = 0.10F;
-                boolean flag = f > 1.0F;
-                if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack) && (event.isRecentlyHit() || flag) && Math.max(brute.getRandom().nextFloat() - (float) event.getLootingLevel() * 0.01F, 0.0F) < f) {
-                    if (itemstack.isDamageableItem()) {
-                        itemstack.setDamageValue(brute.getRandom().nextInt(brute.getRandom().nextInt(itemstack.getMaxDamage() / 2)));
-                    }
-                    brute.spawnAtLocation(itemstack);
-                    brute.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
-                }
             }
         }
     }

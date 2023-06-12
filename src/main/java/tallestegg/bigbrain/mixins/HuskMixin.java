@@ -21,7 +21,7 @@ public abstract class HuskMixin extends Zombie {
     }
 
     @Override
-    public void positionRider(Entity pPassenger) {
+    public void positionRider(Entity pPassenger, Entity.MoveFunction pCallback) {
         super.positionRider(pPassenger);
         float f = Mth.sin(this.yBodyRot * ((float)Math.PI / 180F));
         float f1 = Mth.cos(this.yBodyRot * ((float)Math.PI / 180F));

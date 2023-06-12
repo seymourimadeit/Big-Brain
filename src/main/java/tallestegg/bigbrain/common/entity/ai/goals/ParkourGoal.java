@@ -2,19 +2,12 @@ package tallestegg.bigbrain.common.entity.ai.goals;
 
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.Path;
-import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -44,16 +37,16 @@ public class ParkourGoal extends Goal {
     }
 
     public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos pos) {
-        Level level = mob.level;
+        Level level = mob.level();
         BlockPos blockpos = pos.below();
         return level.getBlockState(blockpos).isSolidRender(level, blockpos);
     }
 
     @Override
     public boolean canUse() {
-        if (this.mob.getNavigation() != null && this.mob.isOnGround()) {
+        if (this.mob.getNavigation() != null && this.mob.onGround()) {
             Path path = this.mob.getNavigation().getPath();
-            return this.mob.getNavigation().isInProgress() && path != null && !path.canReach() &&  (this.mob.getLevel().getGameTime() - tryAgainTime > 100L);
+            return this.mob.getNavigation().isInProgress() && path != null && !path.canReach() &&  (this.mob.level().getGameTime() - tryAgainTime > 100L);
         } else {
             return false;
         }
@@ -95,7 +88,7 @@ public class ParkourGoal extends Goal {
     public void stop() {
         this.mob.getNavigation().stop();
         if (this.failedToFindJumpCounter >= 2) {
-            this.tryAgainTime = this.mob.getLevel().getGameTime();
+            this.tryAgainTime = this.mob.level().getGameTime();
             this.failedToFindJumpCounter = 0;
         }
     }

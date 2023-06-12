@@ -20,7 +20,7 @@ public abstract class BeeModelMixin<T extends Bee> extends AgeableListModel<T> {
 
     @Inject(at = @At(value = "TAIL"), method = "setupAnim(Lnet/minecraft/world/entity/animal/Bee;FFFFF)V", cancellable = true)
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch, CallbackInfo ci) {
-        boolean flag = pEntity.isOnGround() && pEntity.getDeltaMovement().lengthSqr() < 1.0E-7D;
+        boolean flag = pEntity.onGround() && pEntity.getDeltaMovement().lengthSqr() < 1.0E-7D;
         if (!flag && !pEntity.isAngry() && BigBrainConfig.CLIENT.bedrockBeeAnim.get()) {
             float f1 = Mth.cos(pAgeInTicks * 0.18F);
             bone.y = bone.y + (Mth.cos(pAgeInTicks) * 3.6F) / 24F;

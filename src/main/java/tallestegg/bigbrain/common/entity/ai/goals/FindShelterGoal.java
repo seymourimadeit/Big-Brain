@@ -23,7 +23,7 @@ public class FindShelterGoal extends Goal {
 
     public FindShelterGoal(PathfinderMob entity) {
         this.mob = entity;
-        this.level = entity.level;
+        this.level = entity.level();
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
     }
 
@@ -33,7 +33,7 @@ public class FindShelterGoal extends Goal {
         boolean raining = !this.level.isDay() && !BigBrainConfig.NightAnimalBlackList.contains(this.mob.getEncodeId()) || !BigBrainConfig.RainAnimalBlackList.contains(mob.getEncodeId()) && mob.getCommandSenderWorld().isRainingAt(mob.blockPosition());
         boolean isTamed = this.mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
         if (this.setWantedPos())
-            return raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null && this.mob.getLevel().canSeeSky(mob.blockPosition());
+            return raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null && this.mob.level().canSeeSky(mob.blockPosition());
         return gameTime - this.canUseCheck > 200L;
     }
 
@@ -47,7 +47,7 @@ public class FindShelterGoal extends Goal {
     @Override
     public void stop() {
         this.mob.getNavigation().stop();
-        this.canUseCheck = this.mob.level.getGameTime();
+        this.canUseCheck = this.mob.level().getGameTime();
     }
 
     @Override

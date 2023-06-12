@@ -32,7 +32,7 @@ public class HuskBurrowGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        long gameTime = this.husk.level.getGameTime();
+        long gameTime = this.husk.level().getGameTime();
         LivingEntity target = this.husk.getTarget();
         return (gameTime - canUseCheck > 100L) && !this.husk.isBaby() && target != null && !target.isPassenger() && target.distanceTo(this.husk) >= 5.0D && target instanceof Player && this.husk.getBlockStateOn().is(BlockTags.SAND);
     }
@@ -63,7 +63,7 @@ public class HuskBurrowGoal extends Goal {
             Node nextNode = path.getNextNode();
             if (node != null) {
                 if (nextNode != null)
-                    if (!this.husk.level.getBlockState(nextNode.asBlockPos()).is(BlockTags.SAND) || !this.husk.level.getBlockState(node.asBlockPos()).is(BlockTags.SAND))
+                    if (!this.husk.level().getBlockState(nextNode.asBlockPos()).is(BlockTags.SAND) || !this.husk.level().getBlockState(node.asBlockPos()).is(BlockTags.SAND))
                         return;
             }
         }
@@ -131,7 +131,7 @@ public class HuskBurrowGoal extends Goal {
         this.husk.noPhysics = false;
         if (!this.husk.getPassengers().isEmpty())
             this.husk.ejectPassengers();
-        this.canUseCheck = this.husk.level.getGameTime();
+        this.canUseCheck = this.husk.level().getGameTime();
         this.burrowTime = 0;
         this.waitUntilDigTime = 0;
         this.husk.setAggressive(false);
@@ -146,8 +146,8 @@ public class HuskBurrowGoal extends Goal {
         float f = husk.getDimensions(husk.getPose()).width * 0.8F;
         AABB aabb = AABB.ofSize(husk.getEyePosition(), f, 1.0E-6D, (double) f);
         return BlockPos.betweenClosedStream(aabb).anyMatch((p_201942_) -> {
-            BlockState blockstate = husk.level.getBlockState(p_201942_);
-            return !blockstate.isAir() && blockstate.isSuffocating(husk.level, p_201942_) && Shapes.joinIsNotEmpty(blockstate.getCollisionShape(husk.level, p_201942_).move(p_201942_.getX(), p_201942_.getY(), p_201942_.getZ()), Shapes.create(aabb), BooleanOp.AND);
+            BlockState blockstate = husk.level().getBlockState(p_201942_);
+            return !blockstate.isAir() && blockstate.isSuffocating(husk.level(), p_201942_) && Shapes.joinIsNotEmpty(blockstate.getCollisionShape(husk.level(), p_201942_).move(p_201942_.getX(), p_201942_.getY(), p_201942_.getZ()), Shapes.create(aabb), BooleanOp.AND);
         });
     }
 

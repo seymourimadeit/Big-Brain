@@ -31,12 +31,12 @@ public abstract class FenceGateInteractGoal extends Goal {
 
     protected void setOpen(boolean open) {
         if (this.hasGate) {
-            BlockState blockstate = this.mob.level.getBlockState(this.gatePos);
+            BlockState blockstate = this.mob.level().getBlockState(this.gatePos);
             if (blockstate.getBlock() instanceof FenceGateBlock) {
-                this.mob.level.setBlock(this.gatePos, blockstate.setValue(FenceGateBlock.OPEN, Boolean.valueOf(open)),
+                this.mob.level().setBlock(this.gatePos, blockstate.setValue(FenceGateBlock.OPEN, Boolean.valueOf(open)),
                         10);
-                this.mob.level.playSound((Player)null, this.gatePos, open ? SoundEvents.FENCE_GATE_OPEN : SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0F, this.mob.level.getRandom().nextFloat() * 0.1F + 0.9F);
-                this.mob.level.gameEvent(mob, open ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, gatePos);
+                this.mob.level().playSound((Player)null, this.gatePos, open ? SoundEvents.FENCE_GATE_OPEN : SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0F, this.mob.level().getRandom().nextFloat() * 0.1F + 0.9F);
+                this.mob.level().gameEvent(mob, open ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, gatePos);
             }
         }
 
@@ -55,7 +55,7 @@ public abstract class FenceGateInteractGoal extends Goal {
                     this.gatePos = new BlockPos(node.x + mob.getRandom().nextInt(4) - 2, node.y, node.z + mob.getRandom().nextInt(4) - 2); //needed as normally pathfinding ignores closed fence gates
                     // and we need the mobs to recognize that a fence gate exists so it can be opened/closed
                     if (this.mob.distanceToSqr(this.gatePos.getX(), this.gatePos.getY(), this.gatePos.getZ()) < 2.25D) {
-                        this.hasGate = this.mob.level.getBlockState(this.gatePos).getBlock() instanceof FenceGateBlock;
+                        this.hasGate = this.mob.level().getBlockState(this.gatePos).getBlock() instanceof FenceGateBlock;
                         return this.hasGate;
                     }
                 }

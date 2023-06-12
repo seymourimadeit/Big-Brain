@@ -4,18 +4,11 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "bigbrain.refmap.json",
   "mixins": [
-    "BruteBrainMixin",
-    "LookControllerMixin",
     "MeleeAttackGoalMixin",
-    "MovementControllerMixin",
-    "PiglinBrainMixin",
     "HuskMixin",
-    "RangedCrossbowAttackGoalMixin",
-    "MeleeAttackTaskMixin"
+    "RangedCrossbowAttackGoalMixin"
   ],
   "client": [
-    "MouseHelperMixin",
-    "HumanoidModelMixin",
     "IllagerModelMixin",
     "ItemLayerRenderLayerMixin",
     "BeeModelMixin"

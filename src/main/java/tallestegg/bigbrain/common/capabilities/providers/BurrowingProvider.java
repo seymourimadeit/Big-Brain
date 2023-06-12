@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
-import tallestegg.bigbrain.common.capabilities.implementations.IOneCriticalAfterCharge;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BurrowingProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {

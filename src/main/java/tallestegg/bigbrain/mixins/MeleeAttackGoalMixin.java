@@ -8,10 +8,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tallestegg.bigbrain.BigBrainConfig;
-import tallestegg.bigbrain.common.items.BigBrainItems;
-import tallestegg.bigbrain.common.items.BucklerItem;
 
 @Mixin(MeleeAttackGoal.class)
 public class MeleeAttackGoalMixin {
@@ -36,11 +33,5 @@ public class MeleeAttackGoalMixin {
             }
             info.cancel();
         }
-    }
-    
-    @Inject(at = @At(value = "RETURN"), cancellable = true, method = "canUse")
-    public void canUse(CallbackInfoReturnable<Boolean> info) {
-        if (BucklerItem.getChargeTicks(BigBrainItems.checkEachHandForBuckler(mob)) > 0)
-            info.setReturnValue(false);
     }
 }

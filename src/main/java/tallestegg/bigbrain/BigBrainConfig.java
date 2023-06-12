@@ -33,11 +33,7 @@ public class BigBrainConfig {
     public static Boolean PillagerCover;
     public static Boolean PillagerMultishot;
     public static Boolean MobsAttackAllVillagers;
-    public static Boolean BruteSpawningWithBuckler;
-    public static Boolean BangBlockDestruction;
     public static Boolean PolarBearFish;
-    public static Boolean RenderAfterImage;
-    public static Boolean RenderEntityLayersDuringAfterImage;
     public static Boolean snowGolemSlow;
     public static Boolean animalShelter;
     public static Boolean meleeFix;
@@ -47,9 +43,6 @@ public class BigBrainConfig {
     public static Boolean sheepRunAway;
     public static Boolean openFenceGate;
     public static float spyGlassPillagerChance;
-    public static Integer BucklerCooldown;
-    public static Integer BucklerTurningRunTime;
-    public static Integer BucklerRunTime;
     public static Integer minPigBabiesBred;
     public static Integer maxPigBabiesBred;
     public static Double mobBlindnessVision;
@@ -57,7 +50,6 @@ public class BigBrainConfig {
     public static List<String> AnimalBlackList;
     public static List<String> NightAnimalBlackList;
     public static List<String> RainAnimalBlackList;
-    public static List<String> EntitiesThatCanAlsoUseTheBuckler;
     public static List<String> cantOpenFenceGates;
 
     public static void bakeCommonConfig() {
@@ -65,12 +57,7 @@ public class BigBrainConfig {
         PillagerMultishot = COMMON.PillagerMultishot.get();
         MobsAttackAllVillagers = COMMON.MobsAttackAllVillagers.get();
         MobBlackList = COMMON.MobBlackList.get();
-        BruteSpawningWithBuckler = COMMON.BruteBuckler.get();
-        BucklerCooldown = COMMON.BucklerCooldown.get();
-        BucklerRunTime = COMMON.BucklerRunTime.get();
-        BangBlockDestruction = COMMON.BangBlockDestruction.get();
         PolarBearFish = COMMON.PolarBearFish.get();
-        BucklerTurningRunTime = COMMON.BucklerTurningRunTime.get();
         minPigBabiesBred = COMMON.minPigBabiesBred.get();
         maxPigBabiesBred = COMMON.maxPigBabiesBred.get();
         snowGolemSlow = COMMON.snowGolemSlow.get();
@@ -80,7 +67,6 @@ public class BigBrainConfig {
         animalShelter = COMMON.animalShelter.get();
         mobBlindnessVision = COMMON.mobBlindnessVision.get();
         meleeFix = COMMON.meleeFix.get();
-        EntitiesThatCanAlsoUseTheBuckler = COMMON.EntitiesThatCanAlsoUseTheBuckler.get();
         ocelotCreeper = COMMON.ocelotCreeper.get();
         ocelotParrot = COMMON.ocelotParrot.get();
         ocelotPhantom = COMMON.ocelotPhantom.get();
@@ -89,19 +75,10 @@ public class BigBrainConfig {
         openFenceGate = COMMON.openFenceGates.get();
         cantOpenFenceGates = COMMON.fenceGateBlacklist.get();
     }
-
-    public static void bakeClientConfig() {
-        RenderAfterImage = CLIENT.RenderAfterImage.get();
-        RenderEntityLayersDuringAfterImage = CLIENT.RenderEntityLayersDuringAfterImage.get();
-    }
-
     @SubscribeEvent
     public static void onModConfigEvent(final ModConfigEvent.Loading configEvent) {
         if (configEvent.getConfig().getSpec() == BigBrainConfig.COMMON_SPEC) {
             bakeCommonConfig();
-        }
-        if (configEvent.getConfig().getSpec() == BigBrainConfig.CLIENT_SPEC) {
-            bakeClientConfig();
         }
     }
 
@@ -109,8 +86,6 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue PillagerCover;
         public final ForgeConfigSpec.BooleanValue PillagerMultishot;
         public final ForgeConfigSpec.BooleanValue MobsAttackAllVillagers;
-        public final ForgeConfigSpec.BooleanValue BruteBuckler;
-        public final ForgeConfigSpec.BooleanValue BangBlockDestruction;
         public final ForgeConfigSpec.BooleanValue PolarBearFish;
         public final ForgeConfigSpec.BooleanValue snowGolemSlow;
         public final ForgeConfigSpec.BooleanValue animalShelter;
@@ -125,9 +100,6 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue huskBurrowing;
         public final ForgeConfigSpec.BooleanValue jumpAi;
         public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
-        public final ForgeConfigSpec.IntValue BucklerCooldown;
-        public final ForgeConfigSpec.IntValue BucklerRunTime;
-        public final ForgeConfigSpec.IntValue BucklerTurningRunTime;
         public final ForgeConfigSpec.IntValue minPigBabiesBred;
         public final ForgeConfigSpec.IntValue maxPigBabiesBred;
         public final ForgeConfigSpec.DoubleValue mobBlindnessVision;
@@ -135,7 +107,6 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> EntitiesThatCanAlsoUseTheBuckler;
         public final ForgeConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
         public final ForgeConfigSpec.ConfigValue<List<String>> bowAiBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> jumpWhiteList;
@@ -148,7 +119,6 @@ public class BigBrainConfig {
                     .defineInRange("Blindness range", 0.10D, -500.0D, 10000.0D);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
             MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
-            EntitiesThatCanAlsoUseTheBuckler = builder.translation(BigBrain.MODID + ".config.mobBucklerWhiteList").comment("Any mob id input in this list will be able to use the buckler").define("Mobs that can also use the buckler", Lists.newArrayList("guardvillagers:guard"));
             openFenceGates = builder.define("Allow mobs to open fence gates if they are already able to open doors", true);
             fenceGateBlacklist = builder.comment("Any mob id input in this list will not open fence gates if they're already able to open doors").define("Fence Gate Opening Blacklist", Lists.newArrayList("minecraft:husk", "minecraft:zombie", "minecraft:vindicator", "minecraft:drowned"));
             bowAiNew = builder.define("Enable new bow ai?", true);
@@ -156,13 +126,6 @@ public class BigBrainConfig {
             jumpAi = builder.define("Enable jumping ai", true);
             jumpWhiteList = builder.define("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"));
             jumpBlackList = builder.define("Mobs that don't have the jumping ai", Lists.newArrayList("minecraft:villager"));
-            builder.pop();
-            builder.push("buckler");
-            BangBlockDestruction = builder.translation(BigBrain.MODID + ".config.blockBoom").define("Have the explosion spawned while using the Bang! enchant destroy blocks?", false);
-            BruteBuckler = builder.translation(BigBrain.MODID + ".config.bruteBuckler").define("Have brutes spawn with bucklers?", true);
-            BucklerCooldown = builder.translation(BigBrain.MODID + ".config.bucklerCoolDown").defineInRange("How long should the buckler's cooldown be in ticks?", 240, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            BucklerRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move be in ticks?", 15, Integer.MIN_VALUE, Integer.MAX_VALUE); // Thinking of removing this in 1.17.
-            BucklerTurningRunTime = builder.translation(BigBrain.MODID + ".config.bucklerRunTime").defineInRange("How long should the buckler's charge move if you have the turning enchant be in ticks?", 30, Integer.MIN_VALUE, Integer.MAX_VALUE);
             builder.pop();
             builder.push("husk");
             huskBurrowing = builder.define("Enable burrowing attack for husk?", true);
@@ -201,16 +164,10 @@ public class BigBrainConfig {
     }
 
     public static class ClientConfig {
-        public final ForgeConfigSpec.BooleanValue RenderAfterImage;
-        public final ForgeConfigSpec.BooleanValue RenderEntityLayersDuringAfterImage;
         public final ForgeConfigSpec.BooleanValue bedrockBeeAnim;
         public final ForgeConfigSpec.BooleanValue drownedGlow;
 
         public ClientConfig(ForgeConfigSpec.Builder builder) {
-            builder.push("after image");
-            RenderAfterImage = builder.translation(BigBrain.MODID + ".config.afterImage").define("Render an after image while an entity is charging with a buckler?", true);
-            RenderEntityLayersDuringAfterImage = builder.translation(BigBrain.MODID + ".config.entityLayers").comment("Keep in mind this won't affect their opacity due to technical reasons.").define("Render entity layers while rendering the after image?", false);
-            builder.pop();
             builder.push("bedrock animations");
             bedrockBeeAnim = builder.define("Allow bees to have a idle animation akin to bedrock", true);
             drownedGlow = builder.define("Allow drowned to render glowing spots, like in bedrock", true);
