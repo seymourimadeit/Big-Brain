@@ -9,7 +9,7 @@ displayName="Big Brain" #mandatory
 updateJSONURL="https://raw.githubusercontent.com/seymourimadeit/Big-Brain/main/update.json" #optional
 displayURL="https://www.curseforge.com/minecraft/mc-mods/big-brain/" #optional
 logoFile="bigbrain.png" #optional
-credits="TallestEgg and MCVinnyQ for the buckler texture!" #optional
+credits="TallestEgg" #optional
 # A text field displayed in the mod UI
 authors="TallestEgg" #optional
 # The description text for the mod (multi line!) (#mandatory)
