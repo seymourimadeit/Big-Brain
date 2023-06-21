@@ -174,8 +174,7 @@ public class BigBrainClientEvents {
                 }
             }
         }
-        if (event.getEntity() instanceof Skeleton skeleton) {
-            SkeletonModel skeleModel = (SkeletonModel) event.getRenderer().getModel();
+        if (event.getEntity() instanceof Skeleton skeleton && event.getRenderer().getModel() instanceof SkeletonModel skeleModel) {
             if (skeleModel.rightArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW || skeleModel.leftArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW) {
                 if (skeleton.getDeltaMovement().y() > 0 && skeleton.getDeltaMovement().x() > 0 && skeleton.getDeltaMovement().z() > 0) {
                     skeleModel.rightArmPose = HumanoidModel.ArmPose.EMPTY;
