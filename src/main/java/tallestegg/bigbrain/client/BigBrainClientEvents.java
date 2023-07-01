@@ -22,8 +22,7 @@ public class BigBrainClientEvents {
     public static void onEntityRenderPost(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = event.getEntity();
         LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> renderer = event.getRenderer();
-        if (event.getEntity() instanceof Skeleton skeleton) {
-            SkeletonModel skeleModel = (SkeletonModel) event.getRenderer().getModel();
+        if (event.getEntity() instanceof Skeleton skeleton && renderer.getModel() instanceof SkeletonModel skeleModel) {
             if (skeleModel.rightArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW || skeleModel.leftArmPose == HumanoidModel.ArmPose.BOW_AND_ARROW) {
                 if (skeleton.getDeltaMovement().y() > 0 && skeleton.getDeltaMovement().x() > 0 && skeleton.getDeltaMovement().z() > 0) {
                     skeleModel.rightArmPose = HumanoidModel.ArmPose.EMPTY;
