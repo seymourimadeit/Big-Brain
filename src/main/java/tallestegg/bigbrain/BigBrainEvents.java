@@ -357,7 +357,6 @@ public class BigBrainEvents {
         final BurrowingProvider burrowingProvider = new BurrowingProvider();
         if (event.getObject() instanceof Player) {
             event.addCapability(GuranteedCritProvider.IDENTIFIER, critProvider);
-            event.addListener(critProvider::invalidate);
         }
         if (event.getObject() instanceof Husk) {
             event.addCapability(BurrowingProvider.IDENTIFIER, burrowingProvider);
