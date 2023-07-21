@@ -40,7 +40,7 @@ public class HuskBurrowGoal extends Goal {
     @Override
     public boolean canContinueToUse() {
         LivingEntity target = this.husk.getTarget();
-        return target != null && target.isPassenger() && burrowTime > 0 &&
+        return target != null && burrowTime > 0 &&
                 this.phase != BurrowPhases.STOP
                 || this.entityInWall(this.husk) && this.phase == BurrowPhases.DIG_OUT
                 && this.phase != BurrowPhases.STOP || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || this.burrowTime <= 0 && this.phase == BurrowPhases.BURROW || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime < -60 || this.husk.isInFluidType();
@@ -89,7 +89,11 @@ public class HuskBurrowGoal extends Goal {
                 }
             }
             if (this.phase == BurrowPhases.GRAB) {
-                target.startRiding(this.husk, true);
+                if (!target.isPassenger()) {
+                    target.startRiding(this.husk, true);
+                } else {
+                    this.phase = BurrowPhases.END;
+                }
                 BigBrainCapabilities.getBurrowing(this.husk).setCarrying(true);
                 this.phase = BurrowPhases.SINK;
             }
