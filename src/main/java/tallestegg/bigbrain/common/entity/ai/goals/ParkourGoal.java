@@ -88,6 +88,9 @@ public class ParkourGoal extends Goal {
                 this.mob.setYBodyRot(this.mob.yHeadRot);
             }
             if (this.lookTime <= 0)
+                this.phase = JumpPhases.JUMP;
+        }
+        else if (this.chosenJump != null && this.phase == JumpPhases.JUMP) {
             this.leapTowards(mob, this.mob.position().add(this.chosenJump), this.chosenJump.length(), 0.0F);
             this.mob.getJumpControl().jump();
             this.phase = JumpPhases.END;
