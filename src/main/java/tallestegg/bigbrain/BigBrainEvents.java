@@ -15,13 +15,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
-import net.minecraft.world.entity.monster.piglin.PiglinAi;
-import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Snowball;
@@ -30,8 +29,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpyglassItem;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
@@ -50,7 +47,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
@@ -59,15 +55,11 @@ import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.networking.BigBrainNetworking;
 import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
-    private static final Method setTargetPiglin = ObfuscationReflectionHelper.findMethod(PiglinAi.class, "m_34826_", AbstractPiglin.class, LivingEntity.class);
     private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");
     private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
     private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_BASE);
@@ -130,9 +122,16 @@ public class BigBrainEvents {
     public static void entityHitbox(EntityEvent.Size event) {
         if (event.getEntity() instanceof Husk husk) {
             if (husk.hasPose(Pose.SWIMMING)) {
-                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F), true);
-                event.setNewEyeHeight(0.5F);
+                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F));
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void entityEye(EntityEvent.EyeHeight event) {
+        if (event.getEntity() instanceof Husk husk) {
+            if (husk.hasPose(Pose.SWIMMING))
+                event.setNewEyeHeight(0.5F);
         }
     }
 
@@ -296,12 +295,9 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onTargetSet(LivingChangeTargetEvent event) {
-        if (event.getEntity() instanceof AbstractPiglin) {
-            try {
-                setTargetPiglin.invoke(PiglinAi.class, event.getEntity(), event.getOriginalTarget());
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                new RuntimeException("Big Brain has failed to invoke maybeRetaliate");
-            }
+        if (event.getEntity() instanceof AbstractPiglin piglin) {
+            if (event.getOriginalTarget() != null)
+                piglin.getBrain().setMemory(MemoryModuleType.ANGRY_AT, event.getOriginalTarget().getUUID());
         }
         if (event.getEntity() instanceof Creeper creeper && event.getOriginalTarget() instanceof Ocelot && event.getOriginalTarget() != null)
             creeper.setTarget(null);
