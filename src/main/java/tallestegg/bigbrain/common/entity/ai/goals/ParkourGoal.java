@@ -1,13 +1,12 @@
 package tallestegg.bigbrain.common.entity.ai.goals;
 
 import com.google.common.collect.Lists;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
@@ -58,12 +57,13 @@ public class ParkourGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        boolean flag = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null && this.failedToFindJumpCounter >= 2 || this.phase != JumpPhases.END;
-        return flag;
+        boolean flag = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null  && this.phase != JumpPhases.END;
+        return flag && this.failedToFindJumpCounter <= 5;
     }
 
     @Override
     public void start() {
+        this.phase = JumpPhases.NONE;
         this.chosenJump = null;
         this.findJumpTries = 20;
         this.initialPosition = Optional.of(mob.position());
@@ -73,15 +73,14 @@ public class ParkourGoal extends Goal {
         this.mob.getLookControl().setLookAt(pos.x, this.mob.getEyeY(), pos.z, 90.0F, 90.0F);
         this.mob.setYRot(this.mob.getYHeadRot());
         this.pickCandidate(mob, this.mob.getNavigation().getTargetPos());
-        this.phase = JumpPhases.LOOK_AT_BLOCK;
-        if (lookTime == 0)
-            this.lookTime = 5;
     }
 
     @Override
     public void tick() {
-       if (this.phase == JumpPhases.LOOK_AT_BLOCK && this.lookTime > 0) {
-            --this.lookTime;
+        System.out.println(failedToFindJumpCounter);
+        if (this.phase == JumpPhases.LOOK_AT_BLOCK) {
+            if (this.lookTime > 0)
+                --this.lookTime;
             if (this.posToJump != null) {
                 Vec3 pos = Vec3.atCenterOf(posToJump);
                 this.lookAt(pos, 30.0F, 30.0F);
@@ -89,11 +88,12 @@ public class ParkourGoal extends Goal {
             }
             if (this.lookTime <= 0)
                 this.phase = JumpPhases.JUMP;
-        }
-        else if (this.chosenJump != null && this.phase == JumpPhases.JUMP) {
-            this.leapTowards(mob, this.mob.position().add(this.chosenJump), this.chosenJump.length(), 0.0F);
-            this.mob.getJumpControl().jump();
-            this.phase = JumpPhases.END;
+        } else if (this.phase == JumpPhases.JUMP) {
+            if (this.chosenJump != null) {
+                this.leapTowards(mob, this.mob.position().add(this.chosenJump), this.chosenJump.length(), 0.0F);
+                this.mob.getJumpControl().jump();
+                this.phase = JumpPhases.END;
+            }
         } else {
             --this.findJumpTries;
         }
@@ -104,8 +104,8 @@ public class ParkourGoal extends Goal {
         double d2 = vec3.z() - this.mob.getZ();
         double d1 = vec3.y() - this.mob.getEyeY();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        float f = (float)(Mth.atan2(d2, d0) * 57.2957763671875) - 90.0F;
-        float f1 = (float)(-(Mth.atan2(d1, d3) * 57.2957763671875));
+        float f = (float) (Mth.atan2(d2, d0) * 57.2957763671875) - 90.0F;
+        float f1 = (float) (-(Mth.atan2(d1, d3) * 57.2957763671875));
         this.mob.setXRot(this.rotlerp(this.mob.getXRot(), f1, pMaxXRotIncrease));
         this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f, pMaxYRotIncrease));
     }
@@ -126,11 +126,9 @@ public class ParkourGoal extends Goal {
 
     @Override
     public void stop() {
-        this.mob.getNavigation().stop();
-        if (this.failedToFindJumpCounter >= 2) {
-            this.tryAgainTime = this.mob.level().getGameTime();
-            this.failedToFindJumpCounter = 0;
-        }
+        this.phase = JumpPhases.END;
+        this.tryAgainTime = this.mob.level().getGameTime();
+        this.failedToFindJumpCounter = 0;
     }
 
     protected void pickCandidate(Mob pEntity, BlockPos block) {
@@ -139,18 +137,18 @@ public class ParkourGoal extends Goal {
             if (this.isAcceptableLandingPosition(pEntity, jumpPos)) {
                 Vec3 vec3 = Vec3.atCenterOf(jumpPos);
                 Vec3 vec31 = this.calculateOptimalJumpVector(pEntity, vec3);
-                PathNavigation pathnavigation = pEntity.getNavigation();
-                Path path = pathnavigation.createPath(jumpPos, 0, 8);
-                if (path != null && !path.canReach()) {
-                    if (vec31 != null) {
-                        this.lookAt(vec3, 30.0F, 30.0F);
-                        this.mob.setYBodyRot(this.mob.yHeadRot);
-                        this.posToJump = jumpPos;
-                        this.chosenJump = vec31;
+                if (vec31 != null) {
+                    this.lookAt(vec3, 30.0F, 30.0F);
+                    this.mob.setYBodyRot(this.mob.yHeadRot);
+                    this.posToJump = jumpPos;
+                    this.chosenJump = vec31;
+                    if (this.phase == JumpPhases.NONE) {
+                        this.lookTime = 5;
+                        this.phase = JumpPhases.LOOK_AT_BLOCK;
                     }
-                } else {
-                    this.failedToFindJumpCounter++;
                 }
+            } else {
+                this.failedToFindJumpCounter++;
             }
         }
     }
@@ -261,6 +259,7 @@ public class ParkourGoal extends Goal {
     }*/
 
     public enum JumpPhases {
+        NONE,
         LOOK_AT_BLOCK,
         JUMP,
         END

@@ -217,7 +217,7 @@ public class BigBrainEvents {
         if (entity instanceof PathfinderMob creature) {
             if (BigBrainConfig.COMMON.jumpAi.get() && !BigBrainConfig.COMMON.jumpBlackList.get().contains(creature.getEncodeId()) && (creature instanceof Zombie || creature instanceof AbstractIllager || creature instanceof AbstractPiglin
                     || creature instanceof AbstractSkeleton || creature instanceof Creeper || creature instanceof AbstractVillager || BigBrainConfig.COMMON.jumpWhiteList.get().contains(creature.getEncodeId())))
-                creature.goalSelector.addGoal(1, new ParkourGoal(creature));
+                creature.goalSelector.addGoal(0, new ParkourGoal(creature));
             if (GoalUtils.hasGroundPathNavigation(creature) && creature.getNavigation().getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
                 if (creature instanceof Raider) {
                     creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, false) {
