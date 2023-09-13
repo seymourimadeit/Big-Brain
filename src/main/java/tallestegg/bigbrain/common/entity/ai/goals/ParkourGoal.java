@@ -57,7 +57,7 @@ public class ParkourGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        boolean flag = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null  && this.phase != JumpPhases.END;
+        boolean flag = this.initialPosition.isPresent() && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null  && this.phase != JumpPhases.END;
         return flag && this.failedToFindJumpCounter <= 5;
     }
 
@@ -77,7 +77,6 @@ public class ParkourGoal extends Goal {
 
     @Override
     public void tick() {
-        System.out.println(failedToFindJumpCounter);
         if (this.phase == JumpPhases.LOOK_AT_BLOCK) {
             if (this.lookTime > 0)
                 --this.lookTime;
