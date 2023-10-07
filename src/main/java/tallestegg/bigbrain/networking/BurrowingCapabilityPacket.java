@@ -1,9 +1,7 @@
 package tallestegg.bigbrain.networking;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 public class BurrowingCapabilityPacket {
     private final int entityId;
@@ -23,11 +21,11 @@ public class BurrowingCapabilityPacket {
         buf.writeBoolean(msg.burrow);
     }
 
-    public static void handle(BurrowingCapabilityPacket msg, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            BigBrainNetworking.syncBurrow(msg);
+    public void handle(CustomPayloadEvent.Context context) {
+        context.enqueueWork(() -> {
+            BigBrainNetworking.syncBurrow(this);
         });
-        context.get().setPacketHandled(true);
+        context.setPacketHandled(true);
     }
 
     public int getEntityId() {

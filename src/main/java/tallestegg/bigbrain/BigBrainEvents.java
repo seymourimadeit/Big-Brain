@@ -118,22 +118,6 @@ public class BigBrainEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void entityHitbox(EntityEvent.Size event) {
-        if (event.getEntity() instanceof Husk husk) {
-            if (husk.hasPose(Pose.SWIMMING)) {
-                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F));
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void entityEye(EntityEvent.EyeHeight event) {
-        if (event.getEntity() instanceof Husk husk) {
-            if (husk.hasPose(Pose.SWIMMING))
-                event.setNewEyeHeight(0.5F);
-        }
-    }
 
     @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
@@ -164,7 +148,7 @@ public class BigBrainEvents {
             BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
             if (burrow != null) {
                 if (!husk.level().isClientSide)
-                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
+                    BigBrainNetworking.INSTANCE.send(new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()), PacketDistributor.TRACKING_ENTITY.with(husk));
                 if (burrow.isBurrowing()) {
                     spawnRunningEffectsWhileCharging(entity);
                     if (entity.getRandom().nextInt(10) == 0) {
@@ -186,7 +170,7 @@ public class BigBrainEvents {
             if (!event.getTarget().level().isClientSide) {
                 BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
                 if (burrow != null)
-                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()));
+                    BigBrainNetworking.INSTANCE.send(new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()), PacketDistributor.TRACKING_ENTITY.with(husk));
             }
         }
     }

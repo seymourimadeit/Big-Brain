@@ -4,15 +4,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.SimpleChannel;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
 
 public class BigBrainNetworking {
-    private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(BigBrain.MODID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
+    private static final Integer PROTOCOL_VERSION = 1;
+    public static final SimpleChannel INSTANCE = ChannelBuilder.named(BigBrain.MODID).networkProtocolVersion(PROTOCOL_VERSION).clientAcceptedVersions(Channel.VersionTest.exact(PROTOCOL_VERSION)).serverAcceptedVersions(Channel.VersionTest.exact(PROTOCOL_VERSION)).simpleChannel();
 
 
     public static void syncBurrow(BurrowingCapabilityPacket msg) {
@@ -25,6 +27,6 @@ public class BigBrainNetworking {
 
     public static void registerPackets() {
         int id = 0;
-        INSTANCE.registerMessage(id++, BurrowingCapabilityPacket.class, BurrowingCapabilityPacket::encode, BurrowingCapabilityPacket::decode, BurrowingCapabilityPacket::handle);
+        INSTANCE.messageBuilder(BurrowingCapabilityPacket.class, 0).encoder(BurrowingCapabilityPacket::encode).decoder(BurrowingCapabilityPacket::decode).consumerMainThread(BurrowingCapabilityPacket::handle).add();
     }
 }
