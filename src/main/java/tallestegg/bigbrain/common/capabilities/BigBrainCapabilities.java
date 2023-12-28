@@ -1,31 +1,20 @@
 package tallestegg.bigbrain.common.capabilities;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.NotNull;
+import com.mojang.serialization.Codec;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import tallestegg.bigbrain.BigBrain;
-import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
 
-@Mod.EventBusSubscriber(modid = BigBrain.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+import java.util.function.Supplier;
+
+
 public class BigBrainCapabilities {
-    public static final Capability<BurrowCapability> BURROW_TRACKER = CapabilityManager.get(new CapabilityToken<>() {
-    });
-
-    @SubscribeEvent
-    public static void register(RegisterCapabilitiesEvent event) {
-        event.register(BurrowCapability.class);
-    }
-
-    public static BurrowCapability getBurrowing(LivingEntity entity) {
-        @NotNull LazyOptional<BurrowCapability> listener = entity.getCapability(BURROW_TRACKER);
-        if (listener.isPresent())
-            return listener.orElseThrow(() -> new IllegalStateException("Capability not found! Report this to the Big Brain github!"));
-        return null;
-    }
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, BigBrain.MODID);
+    public static final Supplier<AttachmentType<Boolean>> BURROWING = ATTACHMENT_TYPES.register(
+            "burrowing", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
+    public static final Supplier<AttachmentType<Boolean>> CARRYING = ATTACHMENT_TYPES.register(
+            "carrying", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
+    public static final Supplier<AttachmentType<Boolean>> DIGGING = ATTACHMENT_TYPES.register(
+            "digging", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
 }

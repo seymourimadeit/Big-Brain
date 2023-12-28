@@ -9,10 +9,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 
@@ -31,7 +31,7 @@ public class BigBrainClientEvents {
             }
         }
         if (entityIn instanceof Husk husk) {
-            if (husk.getSwimAmount(event.getPartialTick()) > 0.0F && !event.isCanceled()) {
+            if (husk.getSwimAmount(event.getPartialTick()) > 0.0F) {
                 event.getPoseStack().popPose();
             }
         }
@@ -41,7 +41,8 @@ public class BigBrainClientEvents {
     public static void onEntityRenderPre(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
         LivingEntity entityIn = event.getEntity();
         if (entityIn instanceof Husk husk) {
-            if (BigBrainCapabilities.getBurrowing(entityIn) != null && BigBrainCapabilities.getBurrowing(entityIn).isBurrowing())
+            boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING);
+            if (burrowing)
                 event.setCanceled(false);
             if (husk.getSwimAmount(event.getPartialTick()) > 0.0F) {
                 event.getPoseStack().pushPose();

@@ -10,7 +10,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
@@ -36,35 +35,25 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityMountEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.*;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
-import tallestegg.bigbrain.common.capabilities.implementations.BurrowCapability;
-import tallestegg.bigbrain.common.capabilities.providers.BurrowingProvider;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.networking.BigBrainNetworking;
 import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
 
-import java.util.UUID;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
-    private static final UUID CHARGE_SPEED_UUID = UUID.fromString("A2F995E8-B25A-4883-B9D0-93A676DC4045");
-    private static final UUID KNOCKBACK_RESISTANCE_UUID = UUID.fromString("93E74BB2-05A5-4AC0-8DF5-A55768208A95");
-    private static final AttributeModifier CHARGE_SPEED_BOOST = new AttributeModifier(CHARGE_SPEED_UUID, "Charge speed boost", 9.0D, AttributeModifier.Operation.MULTIPLY_BASE);
-    private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 1.0D, AttributeModifier.Operation.ADDITION);
-
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
         if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
@@ -121,8 +110,9 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
-        if (event.getEntity() instanceof Player player) {
-            if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isCarrying() && (!player.isSpectator() || !player.isCreative()) && player.isAlive() && event.isDismounting()) {
+        if (event.getEntityBeingMounted() instanceof Husk husk) {
+            boolean carrying = husk.getData(BigBrainCapabilities.CARRYING);
+            if (event.getEntity() instanceof Player player && husk.isAlive() && carrying && (!player.isSpectator() || !player.isCreative()) && player.isAlive() && event.isDismounting()) {
                 event.setCanceled(true);
             }
         }
@@ -145,16 +135,16 @@ public class BigBrainEvents {
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Husk husk) {
-            BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
-            if (burrow != null) {
-                if (!husk.level().isClientSide)
-                    BigBrainNetworking.INSTANCE.send(new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()), PacketDistributor.TRACKING_ENTITY.with(husk));
-                if (burrow.isBurrowing()) {
-                    spawnRunningEffectsWhileCharging(entity);
-                    if (entity.getRandom().nextInt(10) == 0) {
-                        BlockState onState = husk.getBlockStateOn();
-                        husk.playSound(onState.getSoundType(husk.level(), husk.blockPosition(), husk).getBreakSound());
-                    }
+            boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING.get());
+            boolean digging = husk.getData(BigBrainCapabilities.DIGGING.get());
+            boolean carrying = husk.getData(BigBrainCapabilities.CARRYING.get());
+            if (!husk.level().isClientSide)
+                BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrowing));
+            if (burrowing) {
+                spawnRunningEffectsWhileCharging(entity);
+                if (entity.getRandom().nextInt(10) == 0) {
+                    BlockState onState = husk.getBlockStateOn();
+                    husk.playSound(onState.getSoundType(husk.level(), husk.blockPosition(), husk).getBreakSound());
                 }
             }
         }
@@ -168,9 +158,9 @@ public class BigBrainEvents {
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof Husk husk) {
             if (!event.getTarget().level().isClientSide) {
-                BurrowCapability burrow = BigBrainCapabilities.getBurrowing(husk);
-                if (burrow != null)
-                    BigBrainNetworking.INSTANCE.send(new BurrowingCapabilityPacket(husk.getId(), burrow.isBurrowing()), PacketDistributor.TRACKING_ENTITY.with(husk));
+                boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING.get());
+                if (burrowing)
+                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrowing));
             }
         }
     }
@@ -215,8 +205,8 @@ public class BigBrainEvents {
                 }
             }
             if (BigBrainConfig.COMMON.bowAiNew.get()) {
-                if (!BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.availableGoals.stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
-                    creature.goalSelector.availableGoals.removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
+                if (!BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.getAvailableGoals().stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
+                    creature.goalSelector.getAvailableGoals().removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
                     creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
                 }
             }
@@ -263,17 +253,10 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onDamage(LivingDamageEvent event) {
-        if (event.getEntity() instanceof Husk && event.getSource().is(DamageTypes.IN_WALL) && BigBrainCapabilities.getBurrowing(event.getEntity()).isCarrying())
-            event.setCanceled(true);
-
-    }
-
-    @SubscribeEvent
-    public static void attach(AttachCapabilitiesEvent<Entity> event) {
-        final BurrowingProvider burrowingProvider = new BurrowingProvider();
-        if (event.getObject() instanceof Husk) {
-            event.addCapability(BurrowingProvider.IDENTIFIER, burrowingProvider);
-            event.addListener(burrowingProvider::invalidate);
+        if (event.getEntity() instanceof Husk husk) {
+            boolean carrying = husk.getData(BigBrainCapabilities.CARRYING);
+            if (event.getSource().is(DamageTypes.IN_WALL) && carrying)
+                event.setCanceled(true);
         }
     }
 

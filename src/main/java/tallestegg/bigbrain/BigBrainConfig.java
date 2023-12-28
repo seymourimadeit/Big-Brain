@@ -3,29 +3,30 @@ package tallestegg.bigbrain;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-@EventBusSubscriber(modid = BigBrain.MODID, bus = EventBusSubscriber.Bus.MOD)
+
+@Mod.EventBusSubscriber(modid = BigBrain.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BigBrainConfig {
-    public static final ForgeConfigSpec COMMON_SPEC;
+    public static final ModConfigSpec COMMON_SPEC;
     public static final CommonConfig COMMON;
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
     public static final ClientConfig CLIENT;
     static {
         {
-            final Pair<CommonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(CommonConfig::new);
+            final Pair<CommonConfig, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(CommonConfig::new);
             COMMON = specPair.getLeft();
             COMMON_SPEC = specPair.getRight();
         }
         {
-            final Pair<ClientConfig, ForgeConfigSpec> specPair1 = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+            final Pair<ClientConfig, ModConfigSpec> specPair1 = new ModConfigSpec.Builder().configure(ClientConfig::new);
             CLIENT = specPair1.getLeft();
             CLIENT_SPEC = specPair1.getRight();
         }
@@ -75,6 +76,7 @@ public class BigBrainConfig {
         openFenceGate = COMMON.openFenceGates.get();
         cantOpenFenceGates = COMMON.fenceGateBlacklist.get();
     }
+
     @SubscribeEvent
     public static void onModConfigEvent(final ModConfigEvent.Loading configEvent) {
         if (configEvent.getConfig().getSpec() == BigBrainConfig.COMMON_SPEC) {
@@ -83,36 +85,36 @@ public class BigBrainConfig {
     }
 
     public static class CommonConfig {
-        public final ForgeConfigSpec.BooleanValue PillagerCover;
-        public final ForgeConfigSpec.BooleanValue PillagerMultishot;
-        public final ForgeConfigSpec.BooleanValue MobsAttackAllVillagers;
-        public final ForgeConfigSpec.BooleanValue PolarBearFish;
-        public final ForgeConfigSpec.BooleanValue snowGolemSlow;
-        public final ForgeConfigSpec.BooleanValue animalShelter;
-        public final ForgeConfigSpec.BooleanValue animalPanic;
-        public final ForgeConfigSpec.BooleanValue meleeFix;
-        public final ForgeConfigSpec.BooleanValue ocelotParrot;
-        public final ForgeConfigSpec.BooleanValue ocelotPhantom;
-        public final ForgeConfigSpec.BooleanValue ocelotCreeper;
-        public final ForgeConfigSpec.BooleanValue sheepRunAway;
-        public final ForgeConfigSpec.BooleanValue openFenceGates;
-        public final ForgeConfigSpec.BooleanValue bowAiNew;
-        public final ForgeConfigSpec.BooleanValue huskBurrowing;
-        public final ForgeConfigSpec.BooleanValue jumpAi;
-        public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
-        public final ForgeConfigSpec.IntValue minPigBabiesBred;
-        public final ForgeConfigSpec.IntValue maxPigBabiesBred;
-        public final ForgeConfigSpec.DoubleValue mobBlindnessVision;
-        public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
-        public final ForgeConfigSpec.ConfigValue<List<String>> bowAiBlackList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> jumpWhiteList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> jumpBlackList;
+        public final ModConfigSpec.BooleanValue PillagerCover;
+        public final ModConfigSpec.BooleanValue PillagerMultishot;
+        public final ModConfigSpec.BooleanValue MobsAttackAllVillagers;
+        public final ModConfigSpec.BooleanValue PolarBearFish;
+        public final ModConfigSpec.BooleanValue snowGolemSlow;
+        public final ModConfigSpec.BooleanValue animalShelter;
+        public final ModConfigSpec.BooleanValue animalPanic;
+        public final ModConfigSpec.BooleanValue meleeFix;
+        public final ModConfigSpec.BooleanValue ocelotParrot;
+        public final ModConfigSpec.BooleanValue ocelotPhantom;
+        public final ModConfigSpec.BooleanValue ocelotCreeper;
+        public final ModConfigSpec.BooleanValue sheepRunAway;
+        public final ModConfigSpec.BooleanValue openFenceGates;
+        public final ModConfigSpec.BooleanValue bowAiNew;
+        public final ModConfigSpec.BooleanValue huskBurrowing;
+        public final ModConfigSpec.BooleanValue jumpAi;
+        public final ModConfigSpec.DoubleValue pillagerSpyGlass;
+        public final ModConfigSpec.IntValue minPigBabiesBred;
+        public final ModConfigSpec.IntValue maxPigBabiesBred;
+        public final ModConfigSpec.DoubleValue mobBlindnessVision;
+        public final ModConfigSpec.ConfigValue<List<String>> MobBlackList;
+        public final ModConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
+        public final ModConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
+        public final ModConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
+        public final ModConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
+        public final ModConfigSpec.ConfigValue<List<String>> bowAiBlackList;
+        public final ModConfigSpec.ConfigValue<List<String>> jumpWhiteList;
+        public final ModConfigSpec.ConfigValue<List<String>> jumpBlackList;
 
-        public CommonConfig(ForgeConfigSpec.Builder builder) {
+        public CommonConfig(ModConfigSpec.Builder builder) {
             builder.push("all mobs");
             meleeFix = builder.translation(BigBrain.MODID + ".config.meleeFix").define("Enable the fix for melee cooldowns for mobs?", true);
             mobBlindnessVision = builder.translation(BigBrain.MODID + ".config.blindness").comment("This determines the range a mob will detect other entities if they have the blindness potion, by default entities will only detect targets in a 10 block radius if they are blinded.")
@@ -164,10 +166,10 @@ public class BigBrainConfig {
     }
 
     public static class ClientConfig {
-        public final ForgeConfigSpec.BooleanValue bedrockBeeAnim;
-        public final ForgeConfigSpec.BooleanValue drownedGlow;
+        public final ModConfigSpec.BooleanValue bedrockBeeAnim;
+        public final ModConfigSpec.BooleanValue drownedGlow;
 
-        public ClientConfig(ForgeConfigSpec.Builder builder) {
+        public ClientConfig(ModConfigSpec.Builder builder) {
             builder.push("bedrock animations");
             bedrockBeeAnim = builder.define("Allow bees to have a idle animation akin to bedrock", true);
             drownedGlow = builder.define("Allow drowned to render glowing spots, like in bedrock", true);
