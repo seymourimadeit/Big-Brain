@@ -47,7 +47,7 @@ public class BigBrainConfig {
     public static Integer maxPigBabiesBred;
     public static Double mobBlindnessVision;
     public static List<String> MobBlackList;
-    public static List<String> AnimalBlackList;
+    public static List<String> AnimalWhiteList;
     public static List<String> NightAnimalBlackList;
     public static List<String> RainAnimalBlackList;
     public static List<String> cantOpenFenceGates;
@@ -61,7 +61,7 @@ public class BigBrainConfig {
         minPigBabiesBred = COMMON.minPigBabiesBred.get();
         maxPigBabiesBred = COMMON.maxPigBabiesBred.get();
         snowGolemSlow = COMMON.snowGolemSlow.get();
-        AnimalBlackList = COMMON.AnimalCoverBlackList.get();
+        AnimalWhiteList = COMMON.AnimalCoverWhiteList.get();
         NightAnimalBlackList = COMMON.NightCoverBlackList.get();
         RainAnimalBlackList = COMMON.RainAnimalBlackList.get();
         animalShelter = COMMON.animalShelter.get();
@@ -104,7 +104,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.IntValue maxPigBabiesBred;
         public final ForgeConfigSpec.DoubleValue mobBlindnessVision;
         public final ForgeConfigSpec.ConfigValue<List<String>> MobBlackList;
-        public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverBlackList;
+        public final ForgeConfigSpec.ConfigValue<List<String>> AnimalCoverWhiteList;
         public final ForgeConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
         public final ForgeConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
@@ -137,7 +137,7 @@ public class BigBrainConfig {
             builder.pop();
             builder.push("animals");
             animalPanic = builder.define("Have animals alert their kin to panic if hurt?", true);
-            AnimalCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:fox", "minecraft:wolf", "minecraft:turtle", "minecraft:polar_bear", "minecraft:axolotl"));
+            AnimalCoverWhiteList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:cow", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:llama", "minecraft:mooshroom", "minecraft:cat"));
             NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").define("Animal Night BlackList", Lists.newArrayList("minecraft:cat"));
             RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalRainBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());
             animalShelter = builder.translation(BigBrain.MODID + ".config.animalShelter").define("Animals seek shelter?", true);

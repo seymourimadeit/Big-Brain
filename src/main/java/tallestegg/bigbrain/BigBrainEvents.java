@@ -242,7 +242,7 @@ public class BigBrainEvents {
                     polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, (Predicate<LivingEntity>) null));
             }
 
-            if (BigBrainConfig.animalShelter && entity instanceof Animal animal && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
+            if (BigBrainConfig.animalShelter && entity instanceof Animal animal && BigBrainConfig.AnimalWhiteList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
                 animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
                 animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
             }
