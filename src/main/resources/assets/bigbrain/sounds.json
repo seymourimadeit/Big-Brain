@@ -1,0 +1,11 @@
+{
+  "entity.armadillo.crack": {
+    "sounds": [
+      "item/armor/crack_wolf1",
+      "item/armor/crack_wolf2",
+      "item/armor/crack_wolf3",
+      "item/armor/crack_wolf4"
+    ],
+    "subtitle": "subtitles.entity.armadillo.crack"
+  }
+}

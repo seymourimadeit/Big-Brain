@@ -12,6 +12,7 @@ import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.networking.BigBrainNetworking;
 import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
+import tallestegg.bigbrain.networking.ShellHealthPacket;
 
 @Mod(BigBrain.MODID)
 public class BigBrain {
@@ -22,10 +23,12 @@ public class BigBrain {
         container.registerConfig(ModConfig.Type.CLIENT, BigBrainConfig.CLIENT_SPEC);
         BigBrainSounds.SOUNDS.register(modEventBus);
         BigBrainCapabilities.ATTACHMENT_TYPES.register(modEventBus);
+        modEventBus.addListener(this::registerPackets);
     }
 
     private void registerPackets(final RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToClient(BurrowingCapabilityPacket.TYPE, BurrowingCapabilityPacket.STREAM_CODEC, BurrowingCapabilityPacket::handle);
+        registrar.playToClient(ShellHealthPacket.TYPE, ShellHealthPacket.STREAM_CODEC, ShellHealthPacket::handle);
     }
 }

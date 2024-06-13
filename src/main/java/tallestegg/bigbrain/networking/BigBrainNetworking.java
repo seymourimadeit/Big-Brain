@@ -12,4 +12,10 @@ public class BigBrainNetworking {
             living.setData(BigBrainCapabilities.BURROWING.get(), msg.burrow());
         }
     }
+    public static void syncShellHealth(ShellHealthPacket msg) {
+        Entity entity = Minecraft.getInstance().level.getEntity(msg.entityId());
+        if (entity != null && entity instanceof LivingEntity living) {
+            living.setData(BigBrainCapabilities.SHELL_HEALTH.get(), msg.shellHealth());
+        }
+    }
 }

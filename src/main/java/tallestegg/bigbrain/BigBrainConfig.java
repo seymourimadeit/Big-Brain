@@ -102,6 +102,8 @@ public class BigBrainConfig {
         public final ModConfigSpec.BooleanValue bowAiNew;
         public final ModConfigSpec.BooleanValue huskBurrowing;
         public final ModConfigSpec.BooleanValue jumpAi;
+
+        public final ModConfigSpec.BooleanValue armadilloShell;
         public final ModConfigSpec.DoubleValue pillagerSpyGlass;
         public final ModConfigSpec.IntValue minPigBabiesBred;
         public final ModConfigSpec.IntValue maxPigBabiesBred;
@@ -147,6 +149,9 @@ public class BigBrainConfig {
             builder.push("pigs");
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            builder.pop();
+            builder.push("pigs");
+            armadilloShell = builder.define("Allow armadillos to use their shell like wolf armor?", true);
             builder.pop();
             builder.pop();
             builder.push("polar bears");

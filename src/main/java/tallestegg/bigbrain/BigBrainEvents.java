@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.*;
+import net.minecraft.world.entity.animal.armadillo.Armadillo;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -46,9 +48,12 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.codehaus.plexus.util.cli.shell.Shell;
+import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
 import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
+import tallestegg.bigbrain.networking.ShellHealthPacket;
 
 import java.util.function.Predicate;
 
@@ -161,11 +166,17 @@ public class BigBrainEvents {
                 PacketDistributor.sendToPlayersTrackingEntity(husk, new BurrowingCapabilityPacket(husk.getId(), burrowing));
             }
         }
+        if (event.getTarget() instanceof Armadillo armadillo) {
+            int shellHealth = armadillo.getData(BigBrainCapabilities.SHELL_HEALTH.get());
+            PacketDistributor.sendToPlayersTrackingEntity(armadillo, new ShellHealthPacket(armadillo.getId(), shellHealth));
+        }
     }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
+        if (entity instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get())
+            armadillo.setData(BigBrainCapabilities.SHELL_HEALTH, 13);
         if (entity instanceof Husk husk && BigBrainConfig.COMMON.huskBurrowing.get())
             husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
         if (entity instanceof Pillager pillager) {
@@ -181,11 +192,9 @@ public class BigBrainEvents {
                 mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
             }
         }
-
         if (entity instanceof AbstractVillager villager && BigBrainConfig.MobsAttackAllVillagers) {
             villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId()) && avoidTarget instanceof Enemy));
         }
-
         if (entity instanceof PathfinderMob creature) {
             if (BigBrainConfig.COMMON.jumpAi.get() && !BigBrainConfig.COMMON.jumpBlackList.get().contains(creature.getEncodeId()) && (creature instanceof Zombie || creature instanceof AbstractIllager || creature instanceof AbstractPiglin
                     || creature instanceof AbstractSkeleton || creature instanceof Creeper || creature instanceof AbstractVillager || BigBrainConfig.COMMON.jumpWhiteList.get().contains(creature.getEncodeId())))
@@ -246,6 +255,21 @@ public class BigBrainEvents {
                 if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO))
                     nearbyEntities.setLastHurtByMob((LivingEntity) event.getSource().getEntity());
             }
+        }
+        if (event.getEntity() instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get()) {
+            int shellHealth = armadillo.getData(BigBrainCapabilities.SHELL_HEALTH.get());
+            int damageTaken = (int) event.getAmount();
+            if (shellHealth > 0) {
+                event.setCanceled(true);
+                if (damageTaken > 6)
+                    armadillo.playSound(BigBrainSounds.ARMADILLO_CRACK.get());
+                armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), shellHealth - (int) event.getAmount());
+            } else if (shellHealth == 0) {
+                armadillo.playSound(BigBrainSounds.ARMADILLO_CRACK.get());
+            } else if (shellHealth <= 0) {
+                event.setAmount(event.getAmount() * 2.0F);
+            }
+            PacketDistributor.sendToPlayersTrackingEntity(armadillo, new ShellHealthPacket(armadillo.getId(), shellHealth));
         }
     }
 
