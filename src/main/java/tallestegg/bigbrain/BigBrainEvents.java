@@ -122,16 +122,8 @@ public class BigBrainEvents {
     public static void entityHitbox(EntityEvent.Size event) {
         if (event.getEntity() instanceof Husk husk) {
             if (husk.hasPose(Pose.SWIMMING)) {
-                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F));
+                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F), true);
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void entityEye(EntityEvent.EyeHeight event) {
-        if (event.getEntity() instanceof Husk husk) {
-            if (husk.hasPose(Pose.SWIMMING))
-                event.setNewEyeHeight(0.5F);
         }
     }
 
