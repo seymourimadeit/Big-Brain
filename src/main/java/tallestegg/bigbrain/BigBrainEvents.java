@@ -36,7 +36,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
@@ -44,15 +44,15 @@ import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
-import tallestegg.bigbrain.networking.BigBrainNetworking;
 import tallestegg.bigbrain.networking.BurrowingCapabilityPacket;
 
 import java.util.function.Predicate;
 
-@Mod.EventBusSubscriber(modid = BigBrain.MODID)
+@EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
     @SubscribeEvent
     public static void onBreed(BabyEntitySpawnEvent event) {
@@ -127,30 +127,29 @@ public class BigBrainEvents {
         if (!blockstate.addRunningEffects(entity.level(), blockpos, entity))
             if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
                 Vec3 vec3 = entity.getDeltaMovement();
-                entity.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getX() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).height, entity.getY() + 0.1D, entity.getZ() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).width, vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
+                entity.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getX() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).height(), entity.getY() + 0.1D, entity.getZ() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).width(), vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
             }
     }
 
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity entity = event.getEntity();
-        if (entity instanceof Husk husk) {
-            boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING.get());
-            boolean digging = husk.getData(BigBrainCapabilities.DIGGING.get());
-            boolean carrying = husk.getData(BigBrainCapabilities.CARRYING.get());
-            if (!husk.level().isClientSide)
-                BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrowing));
-            if (burrowing) {
-                spawnRunningEffectsWhileCharging(entity);
-                if (entity.getRandom().nextInt(10) == 0) {
-                    BlockState onState = husk.getBlockStateOn();
-                    husk.playSound(onState.getSoundType(husk.level(), husk.blockPosition(), husk).getBreakSound());
+    public static void onLivingTick(EntityTickEvent.Pre event) {
+        if (event.getEntity() instanceof LivingEntity entity) {
+            if (entity instanceof Husk husk) {
+                boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING.get());
+                if (!husk.level().isClientSide)
+                    PacketDistributor.sendToPlayersTrackingEntity(husk, new BurrowingCapabilityPacket(husk.getId(), burrowing));
+                if (burrowing) {
+                    spawnRunningEffectsWhileCharging(entity);
+                    if (entity.getRandom().nextInt(10) == 0) {
+                        BlockState onState = husk.getBlockStateOn();
+                        husk.playSound(onState.getSoundType(husk.level(), husk.blockPosition(), husk).getBreakSound());
+                    }
                 }
             }
-        }
-        if (entity instanceof Dolphin dolphin) {
-            if (dolphin.touchingUnloadedChunk())
-                dolphin.setAirSupply(300);
+            if (entity instanceof Dolphin dolphin) {
+                if (dolphin.touchingUnloadedChunk())
+                    dolphin.setAirSupply(300);
+            }
         }
     }
 
@@ -159,8 +158,7 @@ public class BigBrainEvents {
         if (event.getTarget() instanceof Husk husk) {
             if (!event.getTarget().level().isClientSide) {
                 boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING.get());
-                if (burrowing)
-                    BigBrainNetworking.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> husk), new BurrowingCapabilityPacket(husk.getId(), burrowing));
+                PacketDistributor.sendToPlayersTrackingEntity(husk, new BurrowingCapabilityPacket(husk.getId(), burrowing));
             }
         }
     }
@@ -216,7 +214,7 @@ public class BigBrainEvents {
                     polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, (Predicate<LivingEntity>) null));
             }
 
-            if (BigBrainConfig.animalShelter && entity instanceof Animal animal && !BigBrainConfig.AnimalBlackList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
+            if (BigBrainConfig.animalShelter && entity instanceof Animal animal && BigBrainConfig.AnimalWhiteList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
                 animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
                 animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
             }
@@ -294,7 +292,7 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void finalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
+    public static void finalizeSpawn(FinalizeSpawnEvent event) {
         MobSpawnType spawnType = event.getSpawnType();
         RandomSource rSource = event.getLevel().getRandom();
         if (event.getEntity() instanceof Pillager pillager) {

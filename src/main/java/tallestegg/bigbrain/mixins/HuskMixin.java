@@ -18,14 +18,8 @@ public abstract class HuskMixin extends Zombie {
     public boolean canRiderInteract() {
         return true;
     }
-
     @Override
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pSize) {
-        return pPose == Pose.SWIMMING ? 0.5F : super.getStandingEyeHeight(pPose, pSize);
-    }
-
-    @Override
-    public EntityDimensions getDimensions(Pose pPose) {
-        return pPose == Pose.SWIMMING ? EntityDimensions.scalable(1.0F, 1.5F) : super.getDimensions(pPose);
+    public EntityDimensions getDefaultDimensions(Pose pPose) {
+        return pPose == Pose.SWIMMING ? EntityDimensions.scalable(1.0F, 1.5F).withEyeHeight(0.5F) : super.getDimensions(pPose);
     }
 }

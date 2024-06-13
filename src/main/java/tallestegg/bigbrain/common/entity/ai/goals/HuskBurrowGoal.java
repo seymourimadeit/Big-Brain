@@ -150,7 +150,7 @@ public class HuskBurrowGoal extends Goal {
     }
 
     private boolean entityInWall(Husk husk) {
-        float f = husk.getDimensions(husk.getPose()).width * 0.8F;
+        float f = husk.getDimensions(husk.getPose()).width() * 0.8F;
         AABB aabb = AABB.ofSize(husk.getEyePosition(), f, 1.0E-6D, (double) f);
         return BlockPos.betweenClosedStream(aabb).anyMatch((p_201942_) -> {
             BlockState blockstate = husk.level().getBlockState(p_201942_);

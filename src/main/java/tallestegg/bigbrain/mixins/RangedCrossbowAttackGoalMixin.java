@@ -18,7 +18,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 
 @Mixin(RangedCrossbowAttackGoal.class)
-public class RangedCrossbowAttackGoalMixin<T extends Monster & RangedAttackMob & CrossbowAttackMob> extends Goal {
+public class RangedCrossbowAttackGoalMixin<T extends net.minecraft.world.entity.Mob & RangedAttackMob & CrossbowAttackMob> extends Goal {
     @Shadow
     @Final
     private T mob;

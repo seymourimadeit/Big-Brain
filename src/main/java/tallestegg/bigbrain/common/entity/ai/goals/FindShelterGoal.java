@@ -34,7 +34,7 @@ public class FindShelterGoal extends Goal {
         boolean isTamed = this.mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
         if (this.setWantedPos())
             return raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null && this.mob.level().canSeeSky(mob.blockPosition());
-        return gameTime - this.canUseCheck > 200L;
+        return gameTime - this.canUseCheck > 1200L;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class FindShelterGoal extends Goal {
 
     protected boolean setWantedPos() {
         Vec3 vec3 = this.getHidePos();
-        if (vec3 == null || !vec3.closerThan(mob.position(), 20.0D)) {
+        if (vec3 == null) {
             return false;
         } else {
             this.wantedX = vec3.x;
@@ -88,6 +88,8 @@ public class FindShelterGoal extends Goal {
             BlockPos position = new BlockPos(blockpos1.getX(), blockpos1.getY() + 2, blockpos1.getZ());
             if (!this.level.canSeeSky(position) && position.closerThan(mob.blockPosition(), 20.0D)) {
                 return Vec3.atBottomCenterOf(position);
+            } else {
+                return null;
             }
         }
         return null;

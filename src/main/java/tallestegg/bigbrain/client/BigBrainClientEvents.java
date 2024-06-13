@@ -11,12 +11,13 @@ import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import tallestegg.bigbrain.BigBrain;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
+@EventBusSubscriber(value = Dist.CLIENT, modid = BigBrain.MODID)
 public class BigBrainClientEvents {
     @SubscribeEvent
     public static void onEntityRenderPost(RenderLivingEvent.Post<LivingEntity, EntityModel<LivingEntity>> event) {
