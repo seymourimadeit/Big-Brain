@@ -1,0 +1,3 @@
+- Made animal shelter a whitelist instead of a blacklist
+- Fixed bug with unused sounds being displayed in logs
+- Made animals seeking shelter an opt-in feature (whitelist instead of blacklist)
