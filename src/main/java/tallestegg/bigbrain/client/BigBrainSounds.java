@@ -15,6 +15,6 @@ public class BigBrainSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ARMADILLO_CRACK = createVariableRangeSound("entity.armadillo.crack");
 
     public static DeferredHolder<SoundEvent, SoundEvent> createVariableRangeSound(String path) {
-        return SOUNDS.register(path, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(BigBrain.MODID, path)));
+        return SOUNDS.register(path, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, path)));
     }
 }

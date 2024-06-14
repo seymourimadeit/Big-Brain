@@ -9,6 +9,7 @@ import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.Vec3;
@@ -23,7 +24,7 @@ public class RunWhileChargingGoal extends RandomStrollGoal {
     public boolean canUse() {
         return mob.isUsingItem() && mob.getUseItem().getItem() instanceof CrossbowItem
                 && mob.getTarget() != null && !CrossbowItem.isCharged(mob.getUseItem())
-                && mob.getUseItem().getEnchantmentLevel(Enchantments.MULTISHOT) == 0
+                &&  EnchantmentHelper.has(this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(mob, item -> item instanceof CrossbowItem)), EnchantmentEffectComponents.PROJECTILE_COUNT)
                 && this.findPosition();
     }
 
@@ -54,7 +55,7 @@ public class RunWhileChargingGoal extends RandomStrollGoal {
     public void tick() {
         int i = this.mob.getTicksUsingItem();
         ItemStack itemstack = this.mob.getUseItem();
-        if (i >= CrossbowItem.getChargeDuration(itemstack)) {
+        if (i >= CrossbowItem.getChargeDuration(itemstack, this.mob)) {
             this.mob.releaseUsingItem();
             ((Pillager) mob).setChargingCrossbow(false);
         }

@@ -6,6 +6,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public class PressureEntityWithMultishotCrossbowGoal<T extends Monster & RangedAttackMob & CrossbowAttackMob> extends RangedCrossbowAttackGoal<T> {
@@ -22,7 +24,7 @@ public class PressureEntityWithMultishotCrossbowGoal<T extends Monster & RangedA
     }
 
     private boolean isHoldingCrossbow() {
-        return this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(mob, item -> item instanceof CrossbowItem)).getEnchantmentLevel(Enchantments.MULTISHOT) > 0 && this.mob.isHolding(is -> is.getItem() instanceof CrossbowItem);
+        return EnchantmentHelper.has(this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(mob, item -> item instanceof CrossbowItem)), EnchantmentEffectComponents.PROJECTILE_COUNT) && this.mob.isHolding(is -> is.getItem() instanceof CrossbowItem);
     }
 
     private boolean isValidTarget() {

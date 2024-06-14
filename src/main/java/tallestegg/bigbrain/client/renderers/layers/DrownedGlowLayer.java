@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Drowned;
 import tallestegg.bigbrain.BigBrain;
 
 public class DrownedGlowLayer<T extends Drowned, M extends DrownedModel<T>> extends EyesLayer<T, M> {
-    private static final RenderType DROWNED_EYES = RenderType.eyes(new ResourceLocation(BigBrain.MODID, "textures/entity/zombie/drowned_glow_layer.png"));
+    private static final RenderType DROWNED_EYES = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, "textures/entity/zombie/drowned_glow_layer.png"));
 
     public DrownedGlowLayer(RenderLayerParent<T, M> p_117507_) {
         super(p_117507_);

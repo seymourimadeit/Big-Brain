@@ -67,7 +67,8 @@ public class BigBrainEvents {
             RandomSource randomSource = level.getRandom();
             for (int i = 0; i < BigBrainConfig.minPigBabiesBred + randomSource.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
                 Pig baby = EntityType.PIG.create(event.getChild().level());
-                baby.copyPosition(pig);
+                if (baby != null)
+                    baby.copyPosition(pig);
                 baby.setPersistenceRequired();
                 if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))
                     level.addFreshEntity(new ExperienceOrb(level, pig.getX(), pig.getY(), pig.getZ(), pig.getRandom().nextInt(7) + 1));

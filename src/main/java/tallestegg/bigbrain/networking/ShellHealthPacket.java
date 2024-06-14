@@ -9,7 +9,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import tallestegg.bigbrain.BigBrain;
 
 public record ShellHealthPacket(int entityId, int shellHealth) implements CustomPacketPayload {
-    public static final Type<ShellHealthPacket> TYPE = new Type<>(new ResourceLocation(BigBrain.MODID, "shell_health"));
+    public static final Type<ShellHealthPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, "shell_health"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ShellHealthPacket> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT, ShellHealthPacket::entityId, ByteBufCodecs.INT, ShellHealthPacket::shellHealth, ShellHealthPacket::new);
 
     public static void handle(ShellHealthPacket payload, IPayloadContext context) {

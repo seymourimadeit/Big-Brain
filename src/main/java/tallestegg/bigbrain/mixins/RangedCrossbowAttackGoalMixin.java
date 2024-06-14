@@ -36,11 +36,11 @@ public class RangedCrossbowAttackGoalMixin<T extends net.minecraft.world.entity.
     @Shadow
     private int seeTime;
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CrossbowItem;getChargeDuration(Lnet/minecraft/world/item/ItemStack;)I"), method = "tick")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CrossbowItem;getChargeDuration(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)I"), method = "tick")
     public void tick(CallbackInfo info) {
         int i = this.mob.getTicksUsingItem();
         ItemStack itemstack = this.mob.getUseItem();
-        if (i >= CrossbowItem.getChargeDuration(itemstack) || CrossbowItem.isCharged(itemstack)) {
+        if (i >= CrossbowItem.getChargeDuration(itemstack, this.mob) || CrossbowItem.isCharged(itemstack)) {
             this.mob.releaseUsingItem();
             this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.CHARGED;
             this.attackDelay = 20 + this.mob.getRandom().nextInt(20);

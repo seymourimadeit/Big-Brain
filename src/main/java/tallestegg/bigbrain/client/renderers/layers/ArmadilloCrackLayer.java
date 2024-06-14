@@ -15,7 +15,7 @@ import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 
 public class ArmadilloCrackLayer extends RenderLayer<Armadillo, ArmadilloModel> {
-    private static final RenderType CRACKED = RenderType.entityCutoutNoCull(new ResourceLocation(BigBrain.MODID, "textures/entity/armadillo/cracked.png"));
+    private static final RenderType CRACKED = RenderType.entityCutoutNoCull(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, "textures/entity/armadillo/cracked.png"));
     //private static final RenderType NAKED = RenderType.entityCutoutNoCull(new ResourceLocation(BigBrain.MODID, "textures/entity/armadillo/naked.png"));
 
     public ArmadilloCrackLayer(RenderLayerParent<Armadillo, ArmadilloModel> layerParent) {
@@ -36,6 +36,6 @@ public class ArmadilloCrackLayer extends RenderLayer<Armadillo, ArmadilloModel> 
         VertexConsumer vertexconsumer = pBuffer.getBuffer(this.renderType(pLivingEntity));
         int armor = pLivingEntity.getData(BigBrainCapabilities.SHELL_HEALTH.get());
         if ((armor < 13 || armor <= 0) && this.renderType(pLivingEntity) != null)
-            this.getParentModel().renderToBuffer(pPoseStack, vertexconsumer, 15728640, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+            this.getParentModel().renderToBuffer(pPoseStack, vertexconsumer, 15728640, OverlayTexture.NO_OVERLAY);
     }
 }

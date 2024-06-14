@@ -118,7 +118,7 @@ public class HuskBurrowGoal extends Goal {
                     if (!this.husk.getPassengers().isEmpty())
                         this.husk.ejectPassengers();
                     this.husk.setData(BigBrainCapabilities.CARRYING.get(), false);
-                    this.husk.setDeltaMovement(0.0, 0.5D, 0.0D);
+                    this.husk.setDeltaMovement(0.0, 1.0D, 0.0D);
                 } else {
                     this.husk.setData(BigBrainCapabilities.DIGGING.get(), false);
                     this.phase = BurrowPhases.END;

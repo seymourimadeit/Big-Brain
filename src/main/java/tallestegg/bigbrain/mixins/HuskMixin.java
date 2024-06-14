@@ -20,6 +20,6 @@ public abstract class HuskMixin extends Zombie {
     }
     @Override
     public EntityDimensions getDefaultDimensions(Pose pPose) {
-        return pPose == Pose.SWIMMING ? EntityDimensions.scalable(1.0F, 1.5F).withEyeHeight(0.5F) : super.getDimensions(pPose);
+        return pPose == Pose.SWIMMING ? EntityDimensions.scalable(1.0F, 1.5F).withEyeHeight(0.5F) : super.getDefaultDimensions(pPose);
     }
 }
