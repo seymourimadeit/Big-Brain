@@ -1,0 +1,2 @@
+- Removed unused sounds
+- Made animals seeking shelter an opt-in feature (whitelist instead of blacklist)
