@@ -1,2 +1,1 @@
-- Made animal shelter a whitelist instead of a blacklist
-- Port to 1.21
+- Update to latest neoforge

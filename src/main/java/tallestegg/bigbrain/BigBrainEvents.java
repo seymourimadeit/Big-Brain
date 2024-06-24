@@ -250,39 +250,33 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void onHit(LivingHurtEvent event) {
+    public static void onHit(LivingDamageEvent.Pre event) {
         if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
             for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
-                if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO))
-                    nearbyEntities.setLastHurtByMob((LivingEntity) event.getSource().getEntity());
+                if (event.getContainer().getSource().getEntity() instanceof LivingEntity && !event.getContainer().getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO))
+                    nearbyEntities.setLastHurtByMob((LivingEntity) event.getContainer().getSource().getEntity());
             }
         }
         if (event.getEntity() instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get()) {
             int shellHealth = armadillo.getData(BigBrainCapabilities.SHELL_HEALTH.get());
-            int damageTaken = (int) event.getAmount();
+            int damageTaken = (int) event.getContainer().getOriginalDamage();
             if (shellHealth > 0) {
-                event.setCanceled(true);
                 if (damageTaken > 6)
                     armadillo.playSound(BigBrainSounds.ARMADILLO_CRACK.get());
-                armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), shellHealth - (int) event.getAmount());
+                armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), shellHealth - (int) event.getContainer().getOriginalDamage());
             } else if (shellHealth == 0) {
                 armadillo.playSound(BigBrainSounds.ARMADILLO_CRACK.get());
             } else if (shellHealth <= 0) {
-                event.setAmount(event.getAmount() * 2.0F);
+                event.getContainer().setNewDamage(event.getContainer().getOriginalDamage() * 2.0F);
             }
             PacketDistributor.sendToPlayersTrackingEntity(armadillo, new ShellHealthPacket(armadillo.getId(), shellHealth));
         }
-    }
-
-    @SubscribeEvent
-    public static void onDamage(LivingDamageEvent event) {
         if (event.getEntity() instanceof Husk husk) {
             boolean carrying = husk.getData(BigBrainCapabilities.CARRYING);
-            if (event.getSource().is(DamageTypes.IN_WALL) && carrying)
-                event.setCanceled(true);
+            if (event.getContainer().getSource().is(DamageTypes.IN_WALL) && carrying)
+                event.getContainer().setNewDamage(0.0F);
         }
     }
-
     @SubscribeEvent
     public static void onTargetSet(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof AbstractPiglin piglin) {
