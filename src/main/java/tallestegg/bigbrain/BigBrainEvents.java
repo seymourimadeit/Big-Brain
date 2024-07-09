@@ -280,10 +280,10 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onTargetSet(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof AbstractPiglin piglin) {
-            if (event.getOriginalTarget() != null)
-                piglin.getBrain().setMemory(MemoryModuleType.ANGRY_AT, event.getOriginalTarget().getUUID());
+            if (event.getOriginalAboutToBeSetTarget() != null)
+                piglin.getBrain().setMemory(MemoryModuleType.ANGRY_AT, event.getOriginalAboutToBeSetTarget().getUUID());
         }
-        if (event.getEntity() instanceof Creeper creeper && event.getOriginalTarget() instanceof Ocelot && event.getOriginalTarget() != null)
+        if (event.getEntity() instanceof Creeper creeper && event.getOriginalAboutToBeSetTarget() instanceof Ocelot && event.getOriginalAboutToBeSetTarget() != null)
             creeper.setTarget(null);
         if (event.getEntity() instanceof Pillager pillager) {
             if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling()) {
@@ -292,11 +292,11 @@ public class BigBrainEvents {
                 // target the player, the patrol goal is executed with a pillager isn't
                 // aggressive.
                 if (pillager.getNavigation().isDone())
-                    pillager.getNavigation().moveTo(event.getOriginalTarget(), 1.0D);
+                    pillager.getNavigation().moveTo(event.getOriginalAboutToBeSetTarget(), 1.0D);
                 for (Raider raider : pillager.level().getNearbyEntities(Raider.class, TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(), pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
                     raider.setAggressive(true);
                     if (!(raider.getUseItem().getItem() instanceof SpyglassItem) && !raider.isPatrolling())
-                        raider.setTarget(event.getOriginalTarget());
+                        raider.setTarget(event.getOriginalAboutToBeSetTarget());
                 }
             }
         }

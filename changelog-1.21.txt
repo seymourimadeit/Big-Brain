@@ -1,1 +1,2 @@
 - Update to latest neoforge
+- Fix bug with Pillagers not running while reloading

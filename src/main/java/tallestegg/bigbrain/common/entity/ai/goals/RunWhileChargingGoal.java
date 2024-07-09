@@ -24,7 +24,7 @@ public class RunWhileChargingGoal extends RandomStrollGoal {
     public boolean canUse() {
         return mob.isUsingItem() && mob.getUseItem().getItem() instanceof CrossbowItem
                 && mob.getTarget() != null && !CrossbowItem.isCharged(mob.getUseItem())
-                &&  EnchantmentHelper.has(this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(mob, item -> item instanceof CrossbowItem)), EnchantmentEffectComponents.PROJECTILE_COUNT)
+                && !EnchantmentHelper.has(this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(mob, item -> item instanceof CrossbowItem)), EnchantmentEffectComponents.PROJECTILE_COUNT)
                 && this.findPosition();
     }
 
