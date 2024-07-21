@@ -22,15 +22,12 @@ public class ArmadilloCrackLayer extends RenderLayer<Armadillo, ArmadilloModel> 
     public RenderType renderType(Armadillo armadillo) {
         int armor = armadillo.getData(BigBrainCapabilities.SHELL_HEALTH.get());
         if (armor < 13 && armor > 6) {
-            System.out.println("low");
             return RenderType.entityTranslucent(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, "textures/entity/armadillo/cracked_low.png"));
         }
         if (armor <= 6 && armor > 0) {
-            System.out.println("medium");
             return RenderType.entityTranslucent(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, "textures/entity/armadillo/cracked_medium.png"));
         }
         if (armor <= 0) {
-            System.out.println("high");
             return RenderType.entityTranslucent(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, "textures/entity/armadillo/cracked_high.png"));
         } else {
             return null;
