@@ -150,9 +150,8 @@ public class BigBrainConfig {
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             maxPigBabiesBred = builder.translation(BigBrain.MODID + ".config.maxPigs").defineInRange("What is the maxmium amount of extra piglets that could be bred?", 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
             builder.pop();
-            builder.push("pigs");
+            builder.push("armadillos");
             armadilloShell = builder.define("Allow armadillos to use their shell like wolf armor?", true);
-            builder.pop();
             builder.pop();
             builder.push("polar bears");
             PolarBearFish = builder.translation(BigBrain.MODID + ".config.polarBearFish").define("Have polar bears attack fish?", true);
@@ -164,6 +163,7 @@ public class BigBrainConfig {
             builder.pop();
             builder.push("sheep");
             sheepRunAway = builder.define("Have sheep run away from wolves?", true);
+            builder.pop();
             builder.pop();
             builder.push("snow golems");
             snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").comment("Freezing time can be added up by successive shots.").define("Allow snow balls to apply 5 seconds of freezing when they hit an entity?", true);

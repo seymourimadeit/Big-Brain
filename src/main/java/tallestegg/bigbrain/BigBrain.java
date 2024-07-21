@@ -6,6 +6,8 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import tallestegg.bigbrain.client.BigBrainSounds;
@@ -30,5 +32,12 @@ public class BigBrain {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToClient(BurrowingCapabilityPacket.TYPE, BurrowingCapabilityPacket.STREAM_CODEC, BurrowingCapabilityPacket::handle);
         registrar.playToClient(ShellHealthPacket.TYPE, ShellHealthPacket.STREAM_CODEC, ShellHealthPacket::handle);
+    }
+
+    @Mod(value = BigBrain.MODID, dist = Dist.CLIENT)
+    public static class BigBrainClient {
+        public BigBrainClient(IEventBus modEventBus, Dist dist, ModContainer container) {
+            container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        }
     }
 }

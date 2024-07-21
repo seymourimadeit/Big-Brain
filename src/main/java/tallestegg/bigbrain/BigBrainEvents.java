@@ -3,9 +3,13 @@ package tallestegg.bigbrain;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -17,6 +21,7 @@ import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.armadillo.Armadillo;
@@ -34,6 +39,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -176,8 +182,6 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get())
-            armadillo.setData(BigBrainCapabilities.SHELL_HEALTH, 13);
         if (entity instanceof Husk husk && BigBrainConfig.COMMON.huskBurrowing.get())
             husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
         if (entity instanceof Pillager pillager) {
@@ -251,21 +255,27 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onHit(LivingDamageEvent.Pre event) {
-        if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
-            for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
-                if (event.getContainer().getSource().getEntity() instanceof LivingEntity && !event.getContainer().getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO))
-                    nearbyEntities.setLastHurtByMob((LivingEntity) event.getContainer().getSource().getEntity());
-            }
-        }
         if (event.getEntity() instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get()) {
             int shellHealth = armadillo.getData(BigBrainCapabilities.SHELL_HEALTH.get());
-            int damageTaken = (int) event.getContainer().getOriginalDamage();
-            if (shellHealth > 0) {
-                if (damageTaken > 6)
-                    armadillo.playSound(BigBrainSounds.ARMADILLO_CRACK.get());
-                armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), shellHealth - (int) event.getContainer().getOriginalDamage());
-            } else if (shellHealth == 0) {
+            if (shellHealth < 13) {
                 armadillo.playSound(BigBrainSounds.ARMADILLO_CRACK.get());
+                if (armadillo.level() instanceof ServerLevel serverlevel) {
+                    serverlevel.sendParticles(
+                            new ItemParticleOption(ParticleTypes.ITEM, Items.ARMADILLO_SCUTE.getDefaultInstance()),
+                            armadillo.getX(),
+                            armadillo.getY() + 1.0,
+                            armadillo.getZ(),
+                            20,
+                            0.2,
+                            0.1,
+                            0.2,
+                            0.1
+                    );
+                }
+            }
+            if (shellHealth > 0) {
+                event.setNewDamage(0.0F);
+                armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), shellHealth - (int) event.getContainer().getOriginalDamage());
             } else if (shellHealth <= 0) {
                 event.getContainer().setNewDamage(event.getContainer().getOriginalDamage() * 2.0F);
             }
@@ -277,6 +287,20 @@ public class BigBrainEvents {
                 event.getContainer().setNewDamage(0.0F);
         }
     }
+
+    @SubscribeEvent
+    public static void onHitPost(LivingDamageEvent.Post event) {
+        if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
+            for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
+                if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO)) {
+                    Vec3 vec3 = DefaultRandomPos.getPos(nearbyEntities, 5, 4);
+                    if (vec3 != null)
+                        nearbyEntities.getNavigation().moveTo(vec3.x, vec3.y, vec3.z, 2.0D);
+                }
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void onTargetSet(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof AbstractPiglin piglin) {
@@ -314,6 +338,8 @@ public class BigBrainEvents {
     public static void finalizeSpawn(FinalizeSpawnEvent event) {
         MobSpawnType spawnType = event.getSpawnType();
         RandomSource rSource = event.getLevel().getRandom();
+        if (event.getEntity() instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get())
+            armadillo.setData(BigBrainCapabilities.SHELL_HEALTH, 13);
         if (event.getEntity() instanceof Pillager pillager) {
             if (spawnType == MobSpawnType.PATROL) {
                 float chance = BigBrainConfig.spyGlassPillagerChance;
