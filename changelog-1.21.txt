@@ -1,2 +1,2 @@
-- Update to latest neoforge
-- Fix bug with Pillagers not running while reloading
+- Fix animal panic not functioning
+- Config GUI

@@ -48,11 +48,11 @@ public class BigBrainConfig {
     public static Integer minPigBabiesBred;
     public static Integer maxPigBabiesBred;
     public static Double mobBlindnessVision;
-    public static List<String> MobBlackList;
-    public static List<String> AnimalWhiteList;
-    public static List<String> NightAnimalBlackList;
-    public static List<String> RainAnimalBlackList;
-    public static List<String> cantOpenFenceGates;
+    public static List<? extends String> MobBlackList;
+    public static List<? extends String> AnimalWhiteList;
+    public static List<? extends String> NightAnimalBlackList;
+    public static List<? extends String> RainAnimalBlackList;
+    public static List<? extends String> cantOpenFenceGates;
 
     public static void bakeCommonConfig() {
         PillagerCover = COMMON.PillagerCover.get();
@@ -108,14 +108,14 @@ public class BigBrainConfig {
         public final ModConfigSpec.IntValue minPigBabiesBred;
         public final ModConfigSpec.IntValue maxPigBabiesBred;
         public final ModConfigSpec.DoubleValue mobBlindnessVision;
-        public final ModConfigSpec.ConfigValue<List<String>> MobBlackList;
-        public final ModConfigSpec.ConfigValue<List<String>> AnimalCoverWhiteList;
-        public final ModConfigSpec.ConfigValue<List<String>> NightCoverBlackList;
-        public final ModConfigSpec.ConfigValue<List<String>> RainAnimalBlackList;
-        public final ModConfigSpec.ConfigValue<List<String>> fenceGateBlacklist;
-        public final ModConfigSpec.ConfigValue<List<String>> bowAiBlackList;
-        public final ModConfigSpec.ConfigValue<List<String>> jumpWhiteList;
-        public final ModConfigSpec.ConfigValue<List<String>> jumpBlackList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> MobBlackList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> AnimalCoverWhiteList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> NightCoverBlackList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> RainAnimalBlackList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> fenceGateBlacklist;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> bowAiBlackList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> jumpWhiteList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> jumpBlackList;
 
         public CommonConfig(ModConfigSpec.Builder builder) {
             builder.push("all mobs");
@@ -123,14 +123,14 @@ public class BigBrainConfig {
             mobBlindnessVision = builder.translation(BigBrain.MODID + ".config.blindness").comment("This determines the range a mob will detect other entities if they have the blindness potion, by default entities will only detect targets in a 10 block radius if they are blinded.")
                     .defineInRange("Blindness range", 0.10D, -500.0D, 10000.0D);
             MobsAttackAllVillagers = builder.translation(BigBrain.MODID + ".config.attackvillagers").define("Have all mobs attack villagers?", false);
-            MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").define("Mob BlackList", new ArrayList<>());
+            MobBlackList = builder.translation(BigBrain.MODID + ".config.blacklist").comment("Any mob id in this list will not attack villagers if the config option for that is on.").defineListAllowEmpty("Mob BlackList", new ArrayList<>(), () -> "", obj -> true);
             openFenceGates = builder.define("Allow mobs to open fence gates if they are already able to open doors", true);
-            fenceGateBlacklist = builder.comment("Any mob id input in this list will not open fence gates if they're already able to open doors").define("Fence Gate Opening Blacklist", Lists.newArrayList("minecraft:husk", "minecraft:zombie", "minecraft:vindicator", "minecraft:drowned"));
+            fenceGateBlacklist = builder.comment("Any mob id input in this list will not open fence gates if they're already able to open doors").defineListAllowEmpty("Fence Gate Opening Blacklist", Lists.newArrayList("minecraft:husk", "minecraft:zombie", "minecraft:vindicator", "minecraft:drowned"), () -> "", obj -> true);
             bowAiNew = builder.define("Enable new bow ai?", true);
-            bowAiBlackList = builder.define("Mobs that don't have the new bow ai", Lists.newArrayList());
+            bowAiBlackList = builder.defineListAllowEmpty("Mobs that don't have the new bow ai", Lists.newArrayList(), () -> "", obj -> true);
             jumpAi = builder.define("Enable jumping ai", true);
-            jumpWhiteList = builder.define("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"));
-            jumpBlackList = builder.define("Mobs that don't have the jumping ai", Lists.newArrayList("minecraft:villager"));
+            jumpWhiteList = builder.defineListAllowEmpty("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"), () -> "", obj -> true);
+            jumpBlackList = builder.defineListAllowEmpty("Mobs that don't have the jumping ai", Lists.newArrayList("minecraft:villager"), () -> "", obj -> true);
             builder.pop();
             builder.push("husk");
             huskBurrowing = builder.define("Enable burrowing attack for husk?", true);
@@ -142,9 +142,9 @@ public class BigBrainConfig {
             builder.pop();
             builder.push("animals");
             animalPanic = builder.define("Have animals alert their kin to panic if hurt?", true);
-            AnimalCoverWhiteList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will attempt to find an area to stay in while it's raining or at night.").define("Animal BlackList", Lists.newArrayList("minecraft:cow", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:llama", "minecraft:mooshroom", "minecraft:cat"));
-            NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").define("Animal Night BlackList", Lists.newArrayList("minecraft:cat"));
-            RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalRainBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").define("Animal Raining BlackList", Lists.newArrayList());
+            AnimalCoverWhiteList = builder.translation(BigBrain.MODID + ".config.animalBlacklist").comment("Any mob id in this list will attempt to find an area to stay in while it's raining or at night.").defineListAllowEmpty("Animal BlackList", Lists.newArrayList("minecraft:cow", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:llama", "minecraft:mooshroom", "minecraft:cat"), () -> "", obj -> true);
+            NightCoverBlackList = builder.translation(BigBrain.MODID + ".config.animalNightBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's night.").defineListAllowEmpty("Animal Night BlackList", Lists.newArrayList("minecraft:cat"), () -> "", obj -> true);
+            RainAnimalBlackList = builder.translation(BigBrain.MODID + ".config.animalRainBlacklist").comment("Any mob id in this list will not attempt to find an area to stay in while it's raining.").defineListAllowEmpty("Animal Raining BlackList", Lists.newArrayList(), () -> "", obj -> true);
             animalShelter = builder.translation(BigBrain.MODID + ".config.animalShelter").define("Animals seek shelter?", true);
             builder.push("pigs");
             minPigBabiesBred = builder.translation(BigBrain.MODID + ".config.minPigs").defineInRange("What is the minimium amount of extra piglets that could be bred?", 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
