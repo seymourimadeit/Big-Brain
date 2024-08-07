@@ -138,6 +138,4 @@ public class NewBowAttackGoal<T extends PathfinderMob & RangedAttackMob> extends
         else
             return LandRandomPos.getPos(mob, 5, 7);
     }
-
-
 }
