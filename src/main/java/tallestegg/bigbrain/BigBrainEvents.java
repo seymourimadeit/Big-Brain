@@ -7,6 +7,8 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -281,16 +283,14 @@ public class BigBrainEvents {
             if (event.getContainer().getSource().is(DamageTypes.IN_WALL) && carrying)
                 event.getContainer().setNewDamage(0.0F);
         }
-    }
-
-    @SubscribeEvent
-    public static void onHitPost(LivingDamageEvent.Post event) {
         if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
-            for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
-                if (event.getSource().getEntity() instanceof LivingEntity && !event.getSource().is(DamageTypes.MOB_ATTACK_NO_AGGRO)) {
+            if (event.getSource().is(DamageTypeTags.PANIC_CAUSES)) {
+                for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
                     Vec3 vec3 = DefaultRandomPos.getPos(nearbyEntities, 5, 4);
-                    if (vec3 != null)
+                    if (vec3 != null) {
+                        nearbyEntities.getNavigation().stop();
                         nearbyEntities.getNavigation().moveTo(vec3.x, vec3.y, vec3.z, 2.0D);
+                    }
                 }
             }
         }

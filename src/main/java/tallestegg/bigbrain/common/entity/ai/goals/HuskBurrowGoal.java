@@ -5,7 +5,9 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Husk;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
@@ -16,6 +18,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 
 import java.util.EnumSet;
+import java.util.List;
 
 public class HuskBurrowGoal extends Goal {
     protected Husk husk;
@@ -34,12 +37,16 @@ public class HuskBurrowGoal extends Goal {
     public boolean canUse() {
         long gameTime = this.husk.level().getGameTime();
         LivingEntity target = this.husk.getTarget();
-        return (gameTime - canUseCheck > 100L) && !this.husk.isBaby() && target != null && !target.isPassenger() && target.distanceTo(this.husk) >= 5.0D && target instanceof Player && this.husk.getBlockStateOn().is(BlockTags.SAND);
+        return (gameTime - canUseCheck > 100L) && !this.husk.isBaby() && target != null && target.getVehicle() == null && target.distanceTo(this.husk) >= 5.0D && target instanceof Player && this.husk.getBlockStateOn().is(BlockTags.SAND);
     }
 
     @Override
     public boolean canContinueToUse() {
         LivingEntity target = this.husk.getTarget();
+        for (Husk nearbyEntities : husk.level().getEntitiesOfClass(husk.getClass(), husk.getBoundingBox().inflate(5.0D))) {
+            boolean burrowing = nearbyEntities.getData(BigBrainCapabilities.BURROWING);
+            return !burrowing && nearbyEntities != husk;
+        }
         return target != null && burrowTime > 0 &&
                 this.phase != BurrowPhases.STOP
                 || this.entityInWall(this.husk) && this.phase == BurrowPhases.DIG_OUT
@@ -129,7 +136,6 @@ public class HuskBurrowGoal extends Goal {
 
     @Override
     public void stop() {
-        System.out.println("ass");
         this.husk.setData(BigBrainCapabilities.BURROWING.get(), false);
         this.husk.setData(BigBrainCapabilities.CARRYING.get(), false);
         this.husk.setData(BigBrainCapabilities.DIGGING.get(), false);
