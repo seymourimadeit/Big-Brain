@@ -4,12 +4,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -39,7 +36,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -54,7 +50,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.codehaus.plexus.util.cli.shell.Shell;
 import tallestegg.bigbrain.client.BigBrainSounds;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 import tallestegg.bigbrain.common.entity.ai.goals.*;
@@ -310,7 +305,7 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof Creeper creeper && event.getOriginalAboutToBeSetTarget() instanceof Ocelot && event.getOriginalAboutToBeSetTarget() != null)
             creeper.setTarget(null);
         if (event.getEntity() instanceof Pillager pillager) {
-            if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling()) {
+            if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling() && event.getOriginalAboutToBeSetTarget() != null) {
                 pillager.setAggressive(true); // This needs to be done as pillagers patrolling stare at the player from
                 // afar when spotted, and we want pillagers with spyglasses to immediately
                 // target the player, the patrol goal is executed with a pillager isn't

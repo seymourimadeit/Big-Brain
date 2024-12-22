@@ -30,17 +30,16 @@ public class FindShelterGoal extends Goal {
     @Override
     public boolean canUse() {
         long gameTime = this.level.getGameTime();
-        boolean raining = !this.level.isDay() && !BigBrainConfig.NightAnimalBlackList.contains(this.mob.getEncodeId()) || !BigBrainConfig.RainAnimalBlackList.contains(mob.getEncodeId()) && mob.getCommandSenderWorld().isRainingAt(mob.blockPosition());
+        boolean raining = !this.level.isDay() && !BigBrainConfig.NightAnimalBlackList.contains(this.mob.getEncodeId()) || !BigBrainConfig.RainAnimalBlackList.contains(mob.getEncodeId()) && mob.level().isRainingAt(mob.blockPosition());
         boolean isTamed = this.mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
         if (this.setWantedPos())
             return raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null && this.mob.level().canSeeSky(mob.blockPosition());
-        return gameTime - this.canUseCheck > 1200L;
+        return (gameTime - this.canUseCheck) > 2400L;
     }
 
     @Override
     public void start() {
-        if (!this.mob.getNavigation().isInProgress())
-            this.mob.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, 1.35D);
+        this.mob.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, 1.35D);
         this.mob.getLookControl().setLookAt(this.wantedX, this.wantedY, this.wantedZ);
     }
 
@@ -54,17 +53,9 @@ public class FindShelterGoal extends Goal {
     public boolean requiresUpdateEveryTick() {
         return true;
     }
-
-    @Override
-    public void tick() {
-        if (!this.mob.getNavigation().isInProgress())
-            this.mob.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, 1.35D);
-        this.mob.getLookControl().setLookAt(this.wantedX, this.wantedY, this.wantedZ);
-    }
-
     @Override
     public boolean canContinueToUse() {
-        return !this.mob.getNavigation().isDone() && this.setWantedPos();
+        return !this.mob.getNavigation().isDone() || ( this.mob.getNavigation().getPath() != null && this.mob.getNavigation().getPath().canReach());
     }
 
     protected boolean setWantedPos() {
