@@ -1,12 +1,12 @@
 package tallestegg.bigbrain.common.entity.ai.goals;
 
 import com.google.common.collect.Lists;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.behavior.LongJumpUtil;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.level.Level;
@@ -59,7 +59,7 @@ public class ParkourGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        boolean flag = this.initialPosition.isPresent() && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null  && this.phase != JumpPhases.END;
+        boolean flag = this.initialPosition.isPresent() && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null && this.phase != JumpPhases.END;
         return flag && this.failedToFindJumpCounter <= 5;
     }
 
@@ -137,7 +137,7 @@ public class ParkourGoal extends Goal {
             BlockPos jumpPos = pEntity.blockPosition().closerThan(pos, 3.0D) ? pos : block;
             if (this.isAcceptableLandingPosition(pEntity, jumpPos)) {
                 Vec3 vec3 = Vec3.atCenterOf(jumpPos);
-                Vec3 vec31 = this.calculateOptimalJumpVector(pEntity, vec3);
+                Vec3 vec31 = this.calculateOptimalJumpVector(pEntity, vec3).orElse(null);
                 if (vec31 != null) {
                     this.lookAt(vec3, 30.0F, 30.0F);
                     this.mob.setYBodyRot(this.mob.yHeadRot);
@@ -162,18 +162,18 @@ public class ParkourGoal extends Goal {
     }
 
     @Nullable
-    protected Vec3 calculateOptimalJumpVector(Mob pMob, Vec3 pTarget) {
+    protected Optional<Vec3> calculateOptimalJumpVector(Mob pMob, Vec3 pTarget) {
         List<Integer> list = Lists.newArrayList(ALLOWED_ANGLES);
         Collections.shuffle(list);
 
         for (int i : list) {
-            Vec3 vec3 = this.calculateJumpVectorForAngle(pMob, pTarget, i);
-            if (vec3 != null) {
+            Optional<Vec3> vec3 = LongJumpUtil.calculateJumpVectorForAngle(pMob, pTarget, this.maxJumpVelocity, i, false);
+            if (vec3.isPresent()) {
                 return vec3;
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Nullable
@@ -188,7 +188,6 @@ public class ParkourGoal extends Goal {
         double d2 = Math.sqrt(d1);
         double d3 = vec32.y;
         double d4 = Math.sin((double) (2.0F * f));
-        double d5 = 0.08D;
         double d6 = Math.pow(Math.cos((double) f), 2.0D);
         double d7 = Math.sin((double) f);
         double d8 = Math.cos((double) f);
