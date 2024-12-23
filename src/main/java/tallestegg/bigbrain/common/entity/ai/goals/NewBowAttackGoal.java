@@ -11,6 +11,7 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
+import tallestegg.bigbrain.BigBrainConfig;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -71,7 +72,7 @@ public class NewBowAttackGoal<T extends PathfinderMob & RangedAttackMob> extends
                     mob.stopUsingItem();
                 } else if (canSee) {
                     int i = mob.getTicksUsingItem();
-                    int timeToShoot = distanceSquared <= 40.0D && this.mob.level().getDifficulty() == Difficulty.HARD ? Mth.floor(Mth.lerp(distanceSquared / (double) this.attackRadiusSqr, 5.0D, 20.0D)) : 20;
+                    int timeToShoot = distanceSquared <= 40.0D && BigBrainConfig.COMMON.bowAiCloseRange.get() ? Mth.floor(Mth.lerp(distanceSquared / (double) this.attackRadiusSqr, 5.0D, 20.0D)) : 20;
                     if (i >= timeToShoot) {
                         mob.stopUsingItem();
                         mob.performRangedAttack(target, BowItem.getPowerForTime(i));

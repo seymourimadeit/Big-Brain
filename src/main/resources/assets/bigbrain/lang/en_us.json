@@ -43,5 +43,6 @@
   "bigbrain.configuration.husk": "Husks",
   "bigbrain.configuration.snow golems": "Snow Golems",
   "bigbrain.configuration.Have ocelots attack phantoms?": "Have ocelots attack phantoms?",
-  "bigbrain.configuration.armadillos": "Armadillos"
+  "bigbrain.configuration.armadillos": "Armadillos",
+  "bigbrain.configuration.Enable bow attacking mobs to shoot faster if the attacker is closer (deals less damage)": "Enable bow attacking mobs to shoot faster if the attacker is closer (deals less damage)"
 }

@@ -100,6 +100,7 @@ public class BigBrainConfig {
         public final ModConfigSpec.BooleanValue sheepRunAway;
         public final ModConfigSpec.BooleanValue openFenceGates;
         public final ModConfigSpec.BooleanValue bowAiNew;
+        public final ModConfigSpec.BooleanValue bowAiCloseRange;
         public final ModConfigSpec.BooleanValue huskBurrowing;
         public final ModConfigSpec.BooleanValue jumpAi;
 
@@ -127,6 +128,7 @@ public class BigBrainConfig {
             openFenceGates = builder.define("Allow mobs to open fence gates if they are already able to open doors", true);
             fenceGateBlacklist = builder.comment("Any mob id input in this list will not open fence gates if they're already able to open doors").defineListAllowEmpty("Fence Gate Opening Blacklist", Lists.newArrayList("minecraft:husk", "minecraft:zombie", "minecraft:vindicator", "minecraft:drowned"), () -> "", obj -> true);
             bowAiNew = builder.define("Enable new bow ai?", true);
+            bowAiCloseRange = builder.define("Enable bow attacking mobs to shoot faster if the attacker is closer (deals less damage)", true);
             bowAiBlackList = builder.defineListAllowEmpty("Mobs that don't have the new bow ai", Lists.newArrayList(), () -> "", obj -> true);
             jumpAi = builder.define("Enable jumping ai", true);
             jumpWhiteList = builder.defineListAllowEmpty("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"), () -> "", obj -> true);
