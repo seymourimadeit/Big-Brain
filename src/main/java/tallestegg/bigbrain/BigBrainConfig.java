@@ -102,8 +102,8 @@ public class BigBrainConfig {
         public final ModConfigSpec.BooleanValue bowAiNew;
         public final ModConfigSpec.BooleanValue bowAiCloseRange;
         public final ModConfigSpec.BooleanValue huskBurrowing;
+        public final ModConfigSpec.BooleanValue babyNerf;
         public final ModConfigSpec.BooleanValue jumpAi;
-
         public final ModConfigSpec.BooleanValue armadilloShell;
         public final ModConfigSpec.DoubleValue pillagerSpyGlass;
         public final ModConfigSpec.IntValue minPigBabiesBred;
@@ -117,6 +117,7 @@ public class BigBrainConfig {
         public final ModConfigSpec.ConfigValue<List<? extends String>> bowAiBlackList;
         public final ModConfigSpec.ConfigValue<List<? extends String>> jumpWhiteList;
         public final ModConfigSpec.ConfigValue<List<? extends String>> jumpBlackList;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> babiesExemptFromNerf;
 
         public CommonConfig(ModConfigSpec.Builder builder) {
             builder.push("all mobs");
@@ -133,6 +134,8 @@ public class BigBrainConfig {
             jumpAi = builder.define("Enable jumping ai", true);
             jumpWhiteList = builder.defineListAllowEmpty("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"), () -> "", obj -> true);
             jumpBlackList = builder.defineListAllowEmpty("Mobs that don't have the jumping ai", Lists.newArrayList("minecraft:villager"), () -> "", obj -> true);
+            babyNerf = builder.define("Halve all health of baby mobs?", true);
+            babiesExemptFromNerf = builder.defineListAllowEmpty("Baby mobs exempt from above nerf if enabled", Lists.newArrayList("minecraft:villager", "minecraft:horse", "minecraft:donkey", "minecraft:bee", "minecraft:mule", "minecraft:cow", "minecraft:goat", "minecraft:mooshroom","minecraft:sheep","minecraft:pig","minecraft:chicken","minecraft:wolf","minecraft:cat","minecraft:ocelot","minecraft:axolotl","minecraft:llama","minecraft:rabbit","minecraft:turtle","minecraft:strider","minecraft:armadillo","minecraft:camel","minecraft:squid"), () -> "", obj -> true);
             builder.pop();
             builder.push("husk");
             huskBurrowing = builder.define("Enable burrowing attack for husk?", true);

@@ -176,38 +176,6 @@ public class ParkourGoal extends Goal {
         return Optional.empty();
     }
 
-    @Nullable
-    private Vec3 calculateJumpVectorForAngle(Mob pMob, Vec3 pTarget, int pAngle) {
-        Vec3 vec3 = pMob.position();
-        Vec3 vec31 = (new Vec3(pTarget.x - vec3.x, 0.0D, pTarget.z - vec3.z)).normalize().scale(0.5D);
-        pTarget = pTarget.subtract(vec31);
-        Vec3 vec32 = pTarget.subtract(vec3);
-        float f = (float) pAngle * (float) Math.PI / 180.0F;
-        double d0 = Math.atan2(vec32.z, vec32.x);
-        double d1 = vec32.subtract(0.0D, vec32.y, 0.0D).lengthSqr();
-        double d2 = Math.sqrt(d1);
-        double d3 = vec32.y;
-        double d4 = Math.sin((double) (2.0F * f));
-        double d6 = Math.pow(Math.cos((double) f), 2.0D);
-        double d7 = Math.sin((double) f);
-        double d8 = Math.cos((double) f);
-        double d9 = Math.sin(d0);
-        double d10 = Math.cos(d0);
-        double d11 = d1 * 0.08D / (d2 * d4 - 2.0D * d3 * d6);
-        if (d11 < 0.0D) {
-            return null;
-        } else {
-            double d12 = Math.sqrt(d11);
-            if (d12 > (double) this.maxJumpVelocity) {
-                return null;
-            } else {
-                double d13 = d12 * d8;
-                double d14 = d12 * d7;
-                return (new Vec3(d13 * d10, d14, d13 * d9)).scale(0.95F);
-            }
-        }
-    }
-
     private void leapTowards(LivingEntity entity, Vec3 target, double horzVel, double yVel) {
         Vec3 dir = target.subtract(entity.position()).normalize();
         Vec3 leap = new Vec3(dir.x, 0.0, dir.z).normalize().scale(horzVel).yRot((float) yVel);

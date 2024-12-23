@@ -159,6 +159,12 @@ public class BigBrainEvents {
                 if (dolphin.touchingUnloadedChunk())
                     dolphin.setAirSupply(300);
             }
+            if (entity instanceof AgeableMob ageableMob) {
+                if (!ageableMob.isBaby() && ageableMob.getMaxHealth() < ageableMob.getAttribute(Attributes.MAX_HEALTH).getAttribute().value().getDefaultValue()) {
+                    ageableMob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(ageableMob.getMaxHealth() * 2F);
+                    ageableMob.setHealth(ageableMob.getMaxHealth());
+                }
+            }
         }
     }
 
@@ -198,6 +204,9 @@ public class BigBrainEvents {
             villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId()) && avoidTarget instanceof Enemy));
         }
         if (entity instanceof PathfinderMob creature) {
+            if (creature.isBaby() && BigBrainConfig.COMMON.babyNerf.get() && !BigBrainConfig.COMMON.babiesExemptFromNerf.get().contains(creature.getEncodeId())) {
+                creature.getAttribute(Attributes.MAX_HEALTH).setBaseValue((creature.getMaxHealth() * 0.50F));
+            }
             if (BigBrainConfig.COMMON.jumpAi.get() && !BigBrainConfig.COMMON.jumpBlackList.get().contains(creature.getEncodeId()) && (creature instanceof Zombie || creature instanceof AbstractIllager || creature instanceof AbstractPiglin
                     || creature instanceof AbstractSkeleton || creature instanceof Creeper || creature instanceof AbstractVillager || BigBrainConfig.COMMON.jumpWhiteList.get().contains(creature.getEncodeId())))
                 creature.goalSelector.addGoal(0, new ParkourGoal(creature));
