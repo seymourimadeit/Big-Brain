@@ -159,8 +159,8 @@ public class BigBrainEvents {
                 if (dolphin.touchingUnloadedChunk())
                     dolphin.setAirSupply(300);
             }
-            if (entity instanceof AgeableMob ageableMob) {
-                if (!ageableMob.isBaby() && ageableMob.getMaxHealth() < ageableMob.getAttribute(Attributes.MAX_HEALTH).getAttribute().value().getDefaultValue()) {
+            if (entity instanceof AgeableMob ageableMob && !ageableMob.level().isClientSide) {
+                if (ageableMob.getAge() == -1 && !BigBrainConfig.COMMON.babiesExemptFromNerf.get().contains(ageableMob.getEncodeId())) {
                     ageableMob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(ageableMob.getMaxHealth() * 2F);
                     ageableMob.setHealth(ageableMob.getMaxHealth());
                 }
