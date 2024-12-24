@@ -1,6 +1,6 @@
 {
   "item.bigbrain.snowball.desc.hit": "On hit:",
-  "item.bigbrain.snowball.desc.freeze": "  +5s Freezing",
+  "item.bigbrain.snowball.desc.freeze": "  +%ss Freezing",
   "subtitles.entity.armadillo.crack": "Armadillo shell cracks",
   "bigbrain.config.meleeFix": "Enable melee fix?",
   "bigbrain.configuration.Enable new bow ai?": "Enable new bow ai?",

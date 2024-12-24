@@ -97,7 +97,7 @@ public class BigBrainEvents {
             if (event.getRayTraceResult().getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult) event.getRayTraceResult()).getEntity();
                 if (entity instanceof LivingEntity living) {
-                    if (living.canFreeze()) living.setTicksFrozen(living.getTicksFrozen() + 100);
+                    if (living.canFreeze()) living.setTicksFrozen(living.getTicksFrozen() + BigBrainConfig.COMMON.snowBallFreezingTime.get());
                 }
             }
         }
@@ -159,7 +159,7 @@ public class BigBrainEvents {
                 if (dolphin.touchingUnloadedChunk())
                     dolphin.setAirSupply(300);
             }
-            if (entity instanceof AgeableMob ageableMob && !ageableMob.level().isClientSide) {
+            if (entity instanceof AgeableMob ageableMob && !ageableMob.level().isClientSide && BigBrainConfig.COMMON.babyNerf.get()) {
                 if (ageableMob.getAge() == -1 && !BigBrainConfig.COMMON.babiesExemptFromNerf.get().contains(ageableMob.getEncodeId())) {
                     ageableMob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(ageableMob.getMaxHealth() * 2F);
                     ageableMob.setHealth(ageableMob.getMaxHealth());
@@ -332,9 +332,9 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onToolTipLoad(ItemTooltipEvent event) {
-        if (event.getItemStack().getItem() == Items.SNOWBALL) {
+        if (event.getItemStack().getItem() == Items.SNOWBALL && BigBrainConfig.COMMON.snowGolemSlow.get()) {
             event.getToolTip().add(Component.translatable("item.bigbrain.snowball.desc.hit").withStyle(ChatFormatting.GRAY));
-            event.getToolTip().add(Component.translatable("item.bigbrain.snowball.desc.freeze").withStyle(ChatFormatting.BLUE));
+            event.getToolTip().add(Component.translatable("item.bigbrain.snowball.desc.freeze", (BigBrainConfig.COMMON.snowBallFreezingTime.get() / 20)).withStyle(ChatFormatting.BLUE));
         }
     }
 

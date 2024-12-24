@@ -108,6 +108,7 @@ public class BigBrainConfig {
         public final ModConfigSpec.DoubleValue pillagerSpyGlass;
         public final ModConfigSpec.IntValue minPigBabiesBred;
         public final ModConfigSpec.IntValue maxPigBabiesBred;
+        public final ModConfigSpec.IntValue snowBallFreezingTime;
         public final ModConfigSpec.DoubleValue mobBlindnessVision;
         public final ModConfigSpec.ConfigValue<List<? extends String>> MobBlackList;
         public final ModConfigSpec.ConfigValue<List<? extends String>> AnimalCoverWhiteList;
@@ -171,7 +172,8 @@ public class BigBrainConfig {
             builder.pop();
             builder.pop();
             builder.push("snow golems");
-            snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").comment("Freezing time can be added up by successive shots.").define("Allow snow balls to apply 5 seconds of freezing when they hit an entity?", true);
+            snowGolemSlow = builder.translation(BigBrain.MODID + ".config.snowGolemSlow").comment("Freezing time can be added up by successive shots.").define("Allow snow balls to freeze entities", true);
+            snowBallFreezingTime = builder.defineInRange("Each snowball will add up this amount of freezing time", 100, -99999, 99999);
             builder.pop();
         }
     }
@@ -179,6 +181,7 @@ public class BigBrainConfig {
     public static class ClientConfig {
         public final ModConfigSpec.BooleanValue bedrockBeeAnim;
         public final ModConfigSpec.BooleanValue drownedGlow;
+        
 
         public ClientConfig(ModConfigSpec.Builder builder) {
             builder.push("bedrock animations");

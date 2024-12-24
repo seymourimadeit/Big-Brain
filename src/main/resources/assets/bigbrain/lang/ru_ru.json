@@ -1,4 +1,4 @@
 {
 "item.bigbrain.snowball.desc.hit": "При попадании:",
-"item.bigbrain.snowball.desc.freeze": "  +5 секунд заморозки"
+"item.bigbrain.snowball.desc.freeze": "  +%s секунд заморозки"
 }
