@@ -10,23 +10,25 @@ jobs:
         with:
           fetch-depth: 1000
           fetch-tags: true
-
       - name: Setup JDK 21
         uses: actions/setup-java@v2
         with:
           java-version: '21'
           distribution: 'temurin'
-
       - name: Build with Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           arguments: build
           gradle-version: 8.9
-
+      - uses: BrycensRanch/read-properties-action@v1
+        id: version
+        with:
+          file: gradle.properties
+          property: mod_version
       - name: mc-publish
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          version: 2.2.4
+          version: ${{ steps.version.outputs.value }}
           curseforge-id: 421179
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           github-token: ${{ secrets.GIT_TOKEN }}
@@ -39,3 +41,28 @@ jobs:
           java: 21
           name: ""
           changelog-file: changelog-1.21.*
+      - name: Nuke Changelog dot txt
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: changelog-1.21.txt
+          write-mode: overwrite
+          contents: |
+            CHANGELOG:
+      - name: Increment version variable
+        id: bump_version
+        uses: christian-draeger/increment-semantic-version@1.2.3
+        with:
+          current-version: ${{ steps.version.outputs.value }}
+          version-fragment: 'hotfix'
+      - name: Replace single file
+        uses: richardrigutins/replace-in-files@v2
+        with:
+          files: 'gradle.properties'
+          search-text: ${{ steps.version.outputs.value }}
+          replacement-text: ${{ steps.bump_version.outputs.next-version }}
+      - name: Commit & Push
+        uses: Andro999b/push@v1.3
+        with:
+          github_token: ${{ secrets.GIT_TOKEN}}
+          branch: ${{ github.ref }}
+          force: true
