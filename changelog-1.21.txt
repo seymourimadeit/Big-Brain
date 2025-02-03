@@ -1,6 +1,0 @@
-- Fixed crash with pillagers setting target
-- Improved panic ai
-- polished husk burrowing by making them stop burrowing if other husks are burrowing
-- Polished parkour ai to use vanilla algorithm instead of an outdated copy and paste
-- added config for skeletons shooting faster based on distance
-- Hostile baby mobs have their healths halved
