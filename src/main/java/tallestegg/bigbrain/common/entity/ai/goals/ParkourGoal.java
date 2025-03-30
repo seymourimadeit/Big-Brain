@@ -71,8 +71,6 @@ public class ParkourGoal extends Goal {
         this.initialPosition = Optional.of(mob.position());
         if (this.mob.getNavigation() == null)
             return;
-        Vec3 pos = Vec3.atCenterOf(this.mob.getNavigation().getTargetPos());
-        this.mob.getLookControl().setLookAt(pos.x, this.mob.getEyeY(), pos.z, 90.0F, 90.0F);
         this.mob.setYRot(this.mob.getYHeadRot());
         this.pickCandidate(mob, this.mob.getNavigation().getTargetPos());
     }
@@ -139,6 +137,7 @@ public class ParkourGoal extends Goal {
                 Vec3 vec3 = Vec3.atCenterOf(jumpPos);
                 Vec3 vec31 = this.calculateOptimalJumpVector(pEntity, vec3).orElse(null);
                 if (vec31 != null) {
+                    this.mob.getLookControl().setLookAt(vec3.x, this.mob.getEyeY(), vec3.z, 90.0F, 90.0F);
                     this.lookAt(vec3, 30.0F, 30.0F);
                     this.mob.setYBodyRot(this.mob.yHeadRot);
                     this.posToJump = jumpPos;
