@@ -223,8 +223,8 @@ public class BigBrainEvents {
             }
             if (BigBrainConfig.COMMON.bowAiNew.get()) {
                 if (!BigBrainConfig.COMMON.bowAiBlackList.get().contains(entity.getEncodeId()) && creature.goalSelector.getAvailableGoals().stream().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof RangedBowAttackGoal<?>)) {
+                    creature.goalSelector.addGoal(2, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
                     creature.goalSelector.getAvailableGoals().removeIf((p_25367_) -> p_25367_.getGoal() instanceof RangedBowAttackGoal<?>);
-                    creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
                 }
             }
             if (entity instanceof PolarBear polar) {
