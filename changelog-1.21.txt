@@ -1,3 +1,3 @@
 - [CHANGE] fix #60 (crash with mob look direction during parkour ai)
 - [CHANGE] Improved animal panic feature by making them actively avoid the player after a herd mate is injured if they were not spawned by breeding or structure generation
-- [CHANGE] fix guards not being able to use bows if big brain was installed- [CHANGE] QWERGTHREWQERGT- [CHANGE] Update add-to-changelog.yaml
+- [CHANGE] fix guards not being able to use bows if big brain was installed- [CHANGE] QWERGTHREWQERGT- [CHANGE] Update add-to-changelog.yaml- [CHANGE] lets see if this works
