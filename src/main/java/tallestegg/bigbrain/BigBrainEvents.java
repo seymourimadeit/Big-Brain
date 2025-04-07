@@ -8,7 +8,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.armadillo.Armadillo;
@@ -97,7 +95,8 @@ public class BigBrainEvents {
             if (event.getRayTraceResult().getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult) event.getRayTraceResult()).getEntity();
                 if (entity instanceof LivingEntity living) {
-                    if (living.canFreeze()) living.setTicksFrozen(living.getTicksFrozen() + BigBrainConfig.COMMON.snowBallFreezingTime.get());
+                    if (living.canFreeze())
+                        living.setTicksFrozen(living.getTicksFrozen() + BigBrainConfig.COMMON.snowBallFreezingTime.get());
                 }
             }
         }
@@ -228,7 +227,6 @@ public class BigBrainEvents {
                     creature.goalSelector.addGoal(3, new NewBowAttackGoal(creature, 1.55D, 20, 15.0F));
                 }
             }
-
             if (entity instanceof PolarBear polar) {
                 if (BigBrainConfig.PolarBearFish)
                     polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, (Predicate<LivingEntity>) null));
@@ -237,6 +235,7 @@ public class BigBrainEvents {
             if (BigBrainConfig.animalShelter && entity instanceof Animal animal && BigBrainConfig.AnimalWhiteList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
                 animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
                 animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
+                animal.goalSelector.addGoal(1, new AnimalFearPlayerGoal<>(animal, Player.class, 16.0F, 1.8D, 2.8D));
             }
 
             if (entity instanceof Sheep sheep) {
@@ -295,11 +294,8 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
             if (event.getSource().is(DamageTypeTags.PANIC_CAUSES)) {
                 for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
-                    Vec3 vec3 = DefaultRandomPos.getPos(nearbyEntities, 5, 4);
-                    if (vec3 != null) {
-                        nearbyEntities.getNavigation().stop();
-                        nearbyEntities.getNavigation().moveTo(vec3.x, vec3.y, vec3.z, 2.0D);
-                    }
+                    if ((nearbyEntities.getSpawnType() != null) && nearbyEntities.getSpawnType() != (MobSpawnType.STRUCTURE))
+                        nearbyEntities.setData(BigBrainCapabilities.SAW_HUNT.get(), nearbyEntities.getData(BigBrainCapabilities.SAW_HUNT.get()) + 600);
                 }
             }
         }
@@ -343,7 +339,7 @@ public class BigBrainEvents {
         MobSpawnType spawnType = event.getSpawnType();
         RandomSource rSource = event.getLevel().getRandom();
         if (event.getEntity() instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get())
-            armadillo.setData(BigBrainCapabilities.SHELL_HEALTH, 13);
+            armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), 13);
         if (event.getEntity() instanceof Pillager pillager) {
             if (spawnType == MobSpawnType.PATROL) {
                 float chance = BigBrainConfig.spyGlassPillagerChance;

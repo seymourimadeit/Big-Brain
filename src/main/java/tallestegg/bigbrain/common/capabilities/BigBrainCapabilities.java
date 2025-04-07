@@ -19,4 +19,6 @@ public class BigBrainCapabilities {
             "digging", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
     public static final Supplier<AttachmentType<Integer>> SHELL_HEALTH = ATTACHMENT_TYPES.register(
             "shell_health", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).build());
+    public static final Supplier<AttachmentType<Integer>> SAW_HUNT = ATTACHMENT_TYPES.register(
+            "saw_hunt", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).build());
 }

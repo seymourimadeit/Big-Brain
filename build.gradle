@@ -76,6 +76,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
     implementation "curse.maven:spark-361579:5434153"
+    implementation "curse.maven:guardvillagers-360203:6066966"
 }
 
 repositories {

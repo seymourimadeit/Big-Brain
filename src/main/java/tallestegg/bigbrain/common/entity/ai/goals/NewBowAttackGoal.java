@@ -43,12 +43,11 @@ public class NewBowAttackGoal<T extends PathfinderMob & RangedAttackMob> extends
 
     @Override
     public boolean canContinueToUse() {
-        return (this.canUse());
+        return this.canUse();
     }
 
     @Override
     public void start() {
-        super.start();
         this.mob.setAggressive(true);
     }
 
@@ -59,7 +58,6 @@ public class NewBowAttackGoal<T extends PathfinderMob & RangedAttackMob> extends
 
     @Override
     public void tick() {
-        super.tick();
         LivingEntity target = mob.getTarget();
         if (target != null) {
             double distanceSquared = mob.distanceToSqr(target);
