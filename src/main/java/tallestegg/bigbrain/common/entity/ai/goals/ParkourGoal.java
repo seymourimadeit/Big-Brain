@@ -9,7 +9,6 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.LongJumpUtil;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.GoalUtils;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
@@ -42,7 +41,6 @@ public class ParkourGoal extends Goal {
     }
 
     public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos pos) {
-        Level level = mob.level();
         BlockPos blockpos = pos.below();
         return mob instanceof PathfinderMob && GoalUtils.isSolid((PathfinderMob) mob, blockpos);
     }

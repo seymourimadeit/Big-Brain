@@ -38,7 +38,6 @@ public class NewBowAttackGoal<T extends PathfinderMob & RangedAttackMob> extends
     @Override
     public boolean canUse() {
         LivingEntity target = mob.getTarget();
-        System.out.println(target != null && mob.getMainHandItem().getItem() instanceof BowItem);
         return target != null && mob.getMainHandItem().getItem() instanceof BowItem;
     }
 
