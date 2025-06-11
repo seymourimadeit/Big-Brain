@@ -46,5 +46,8 @@
   "bigbrain.configuration.armadillos": "Armadillos",
   "bigbrain.configuration.Enable bow attacking mobs to shoot faster if the attacker is closer (deals less damage)": "Enable bow attacking mobs to shoot faster if the attacker is closer (deals less damage)",
   "bigbrain.configuration.Halve all health of baby mobs?": "Halve all health of baby mobs",
-  "bigbrain.configuration.Baby mobs exempt from above nerf if enabled": "Baby mobs exempt from above nerf if enabled"
+  "bigbrain.configuration.Baby mobs exempt from above nerf if enabled": "Baby mobs exempt from above nerf if enabled",
+  "bigbrain.configuration.Jump only if a mob is actively targeting another mob": "Jump only if a mob is actively targeting another mob",
+  "bigbrain.configuration.How fast the husk is able to burrow": "How fast the husk is able to burrow",
+  "bigbrain.configuration.Each snowball will add up this amount of freezing time": "Each snowball will add up this amount of freezing tim"
 }

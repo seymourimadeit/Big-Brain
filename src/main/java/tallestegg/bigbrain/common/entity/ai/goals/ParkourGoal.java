@@ -11,6 +11,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
+import tallestegg.bigbrain.BigBrainConfig;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -45,11 +46,15 @@ public class ParkourGoal extends Goal {
         return mob instanceof PathfinderMob && GoalUtils.isSolid((PathfinderMob) mob, blockpos);
     }
 
+    public boolean canJump() {
+        Path path = this.mob.getNavigation().getPath();
+        return this.mob.getNavigation().isInProgress() && path != null && !path.canReach() && (this.mob.level().getGameTime() - tryAgainTime > 100L);
+    }
+
     @Override
     public boolean canUse() {
         if (this.mob.getNavigation() != null && this.mob.onGround()) {
-            Path path = this.mob.getNavigation().getPath();
-            return this.mob.getNavigation().isInProgress() && path != null && !path.canReach() && (this.mob.level().getGameTime() - tryAgainTime > 100L);
+            return this.canJump() || (BigBrainConfig.COMMON.jumpOnlyIfTargeting.get() && mob.getTarget() != null && this.canJump());
         } else {
             return false;
         }

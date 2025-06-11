@@ -307,8 +307,8 @@ public class BigBrainEvents {
             if (event.getOriginalAboutToBeSetTarget() != null)
                 piglin.getBrain().setMemory(MemoryModuleType.ANGRY_AT, event.getOriginalAboutToBeSetTarget().getUUID());
         }
-        if (event.getEntity() instanceof Creeper creeper && event.getOriginalAboutToBeSetTarget() instanceof Ocelot && event.getOriginalAboutToBeSetTarget() != null)
-            creeper.setTarget(null);
+        if (event.getEntity() instanceof Creeper && event.getOriginalAboutToBeSetTarget() != null && event.getOriginalAboutToBeSetTarget() instanceof Ocelot)
+            event.setNewAboutToBeSetTarget(null);
         if (event.getEntity() instanceof Pillager pillager) {
             if (pillager.getUseItem().getItem() instanceof SpyglassItem && pillager.isPatrolling() && event.getOriginalAboutToBeSetTarget() != null) {
                 pillager.setAggressive(true); // This needs to be done as pillagers patrolling stare at the player from

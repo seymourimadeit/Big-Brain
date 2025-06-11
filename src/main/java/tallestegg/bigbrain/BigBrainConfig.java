@@ -104,12 +104,14 @@ public class BigBrainConfig {
         public final ModConfigSpec.BooleanValue huskBurrowing;
         public final ModConfigSpec.BooleanValue babyNerf;
         public final ModConfigSpec.BooleanValue jumpAi;
+        public final ModConfigSpec.BooleanValue jumpOnlyIfTargeting;
         public final ModConfigSpec.BooleanValue armadilloShell;
         public final ModConfigSpec.DoubleValue pillagerSpyGlass;
         public final ModConfigSpec.IntValue minPigBabiesBred;
         public final ModConfigSpec.IntValue maxPigBabiesBred;
         public final ModConfigSpec.IntValue snowBallFreezingTime;
         public final ModConfigSpec.DoubleValue mobBlindnessVision;
+        public final ModConfigSpec.DoubleValue huskBurrowSpeed;
         public final ModConfigSpec.ConfigValue<List<? extends String>> MobBlackList;
         public final ModConfigSpec.ConfigValue<List<? extends String>> AnimalCoverWhiteList;
         public final ModConfigSpec.ConfigValue<List<? extends String>> NightCoverBlackList;
@@ -133,13 +135,15 @@ public class BigBrainConfig {
             bowAiCloseRange = builder.define("Enable bow attacking mobs to shoot faster if the attacker is closer (deals less damage)", true);
             bowAiBlackList = builder.defineListAllowEmpty("Mobs that don't have the new bow ai", Lists.newArrayList(), () -> "", obj -> true);
             jumpAi = builder.define("Enable jumping ai", true);
+            jumpOnlyIfTargeting = builder.define("Jump only if a mob is actively targeting another mob", false);
             jumpWhiteList = builder.defineListAllowEmpty("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"), () -> "", obj -> true);
             jumpBlackList = builder.defineListAllowEmpty("Mobs that don't have the jumping ai", Lists.newArrayList("minecraft:villager"), () -> "", obj -> true);
             babyNerf = builder.define("Halve all health of baby mobs?", true);
-            babiesExemptFromNerf = builder.defineListAllowEmpty("Baby mobs exempt from above nerf if enabled", Lists.newArrayList("minecraft:villager", "minecraft:horse", "minecraft:donkey", "minecraft:bee", "minecraft:mule", "minecraft:cow", "minecraft:goat", "minecraft:mooshroom","minecraft:sheep","minecraft:pig","minecraft:chicken","minecraft:wolf","minecraft:cat","minecraft:ocelot","minecraft:axolotl","minecraft:llama","minecraft:rabbit","minecraft:turtle","minecraft:strider","minecraft:armadillo","minecraft:camel","minecraft:squid"), () -> "", obj -> true);
+            babiesExemptFromNerf = builder.defineListAllowEmpty("Baby mobs exempt from above nerf if enabled", Lists.newArrayList("minecraft:villager", "minecraft:horse", "minecraft:donkey", "minecraft:bee", "minecraft:mule", "minecraft:cow", "minecraft:goat", "minecraft:mooshroom", "minecraft:sheep", "minecraft:pig", "minecraft:chicken", "minecraft:wolf", "minecraft:cat", "minecraft:ocelot", "minecraft:axolotl", "minecraft:llama", "minecraft:rabbit", "minecraft:turtle", "minecraft:strider", "minecraft:armadillo", "minecraft:camel", "minecraft:squid"), () -> "", obj -> true);
             builder.pop();
             builder.push("husk");
             huskBurrowing = builder.define("Enable burrowing attack for husk?", true);
+            huskBurrowSpeed = builder.defineInRange("How fast the husk is able to burrow", 1.8D, -10000.0D, 10000.0D);
             builder.pop();
             builder.push("pillager");
             PillagerCover = builder.translation(BigBrain.MODID + ".config.pillagerCover").define("Have pillagers run while reloading?", true);
@@ -181,7 +185,7 @@ public class BigBrainConfig {
     public static class ClientConfig {
         public final ModConfigSpec.BooleanValue bedrockBeeAnim;
         public final ModConfigSpec.BooleanValue drownedGlow;
-        
+
 
         public ClientConfig(ModConfigSpec.Builder builder) {
             builder.push("bedrock animations");

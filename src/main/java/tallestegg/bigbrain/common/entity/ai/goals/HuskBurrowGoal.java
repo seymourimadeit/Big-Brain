@@ -15,6 +15,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
+import tallestegg.bigbrain.BigBrainConfig;
 import tallestegg.bigbrain.common.capabilities.BigBrainCapabilities;
 
 import java.util.EnumSet;
@@ -95,7 +96,7 @@ public class HuskBurrowGoal extends Goal {
                 this.husk.setData(BigBrainCapabilities.BURROWING.get(), true);
                 this.phase = BurrowPhases.BURROW;
             } else if (this.phase == BurrowPhases.BURROW) {
-                this.husk.getNavigation().moveTo(target, 1.8D);
+                this.husk.getNavigation().moveTo(target, BigBrainConfig.COMMON.huskBurrowSpeed.get());
                 if (this.husk.isWithinMeleeAttackRange(target)) {
                     this.husk.getNavigation().stop();
                     this.husk.setPose(Pose.STANDING);
