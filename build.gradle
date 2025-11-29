@@ -77,6 +77,9 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
     implementation "curse.maven:spark-361579:5434153"
     implementation "curse.maven:guardvillagers-360203:6066966"
+    implementation "curse.maven:mixed-litter-1221222:7240064"
+    implementation "curse.maven:no-mans-land-538493:7240903"
+    implementation "curse.maven:biolith-852512:7074761"
 }
 
 repositories {

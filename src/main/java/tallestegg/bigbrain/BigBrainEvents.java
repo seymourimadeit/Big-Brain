@@ -65,25 +65,13 @@ public class BigBrainEvents {
         if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
             Pig pig = (Pig) event.getParentA();
             Level level = pig.level();
-            RandomSource randomSource = level.getRandom();
-            for (int i = 0; i < BigBrainConfig.minPigBabiesBred + randomSource.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
-                Pig baby = EntityType.PIG.create(event.getChild().level());
-                if (baby != null)
-                    baby.copyPosition(pig);
-                baby.setPersistenceRequired();
-                if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))
-                    level.addFreshEntity(new ExperienceOrb(level, pig.getX(), pig.getY(), pig.getZ(), pig.getRandom().nextInt(7) + 1));
-                baby.setBaby(true);
-                baby.setPersistenceRequired();
-                pig.getCommandSenderWorld().addFreshEntity(baby);
-            }
         }
     }
 
     @SubscribeEvent
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getLookingEntity() instanceof LivingEntity living) {
-            if (living.hasEffect(MobEffects.BLINDNESS)) event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
+            if (living.hasEffect(MobEffects.BLINDNESS)) event.modifyVisibility(BigBrainConfig.COMMON.mobBlindnessVision.get());
             if (living.getUseItem().getItem() instanceof SpyglassItem && living.getAttribute(Attributes.FOLLOW_RANGE) != null)
                 event.modifyVisibility(living.getAttributeValue(Attributes.FOLLOW_RANGE) * 2.0D);
         }
@@ -91,7 +79,7 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void onProjectileImpact(ProjectileImpactEvent event) {
-        if (event.getProjectile() instanceof Snowball && BigBrainConfig.snowGolemSlow) {
+        if (event.getProjectile() instanceof Snowball && BigBrainConfig.COMMON.snowGolemSlow.get()) {
             if (event.getRayTraceResult().getType() == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult) event.getRayTraceResult()).getEntity();
                 if (entity instanceof LivingEntity living) {
@@ -107,7 +95,7 @@ public class BigBrainEvents {
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
         Player player = event.getEntity();
-        if (BigBrainConfig.snowGolemSlow) {
+        if (BigBrainConfig.COMMON.snowGolemSlow.get()) {
             if (item == Items.SNOWBALL) {
                 player.swing(event.getHand(), true);
                 player.getCooldowns().addCooldown(item, 4);
@@ -187,20 +175,20 @@ public class BigBrainEvents {
         if (entity instanceof Husk husk && BigBrainConfig.COMMON.huskBurrowing.get())
             husk.goalSelector.addGoal(1, new HuskBurrowGoal(husk));
         if (entity instanceof Pillager pillager) {
-            if (BigBrainConfig.PillagerMultishot)
+            if (BigBrainConfig.COMMON.PillagerMultishot.get())
                 pillager.goalSelector.addGoal(2, new PressureEntityWithMultishotCrossbowGoal<>(pillager, 1.0D, 3.0F));
-            if (BigBrainConfig.PillagerCover)
+            if (BigBrainConfig.COMMON.PillagerCover.get())
                 pillager.goalSelector.addGoal(1, new RunWhileChargingGoal(pillager, 0.9D));
             pillager.goalSelector.addGoal(3, new ZoomInAtRandomGoal(pillager));
         }
 
         if (entity instanceof Enemy && entity instanceof Mob mob) {
-            if (BigBrainConfig.MobsAttackAllVillagers && !BigBrainConfig.MobBlackList.contains(entity.getEncodeId())) {
+            if (BigBrainConfig.COMMON.MobsAttackAllVillagers.get() && !BigBrainConfig.COMMON.MobBlackList.get().contains(entity.getEncodeId())) {
                 mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
             }
         }
-        if (entity instanceof AbstractVillager villager && BigBrainConfig.MobsAttackAllVillagers) {
-            villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> !BigBrainConfig.MobBlackList.contains(avoidTarget.getEncodeId()) && avoidTarget instanceof Enemy));
+        if (entity instanceof AbstractVillager villager && BigBrainConfig.COMMON.MobsAttackAllVillagers.get()) {
+            villager.goalSelector.addGoal(2, new AvoidEntityGoal<>(villager, Mob.class, 8.0F, 1.0D, 0.5D, (avoidTarget) -> !BigBrainConfig.COMMON.MobBlackList.get().contains(avoidTarget.getEncodeId()) && avoidTarget instanceof Enemy));
         }
         if (entity instanceof PathfinderMob creature) {
             if (creature.isBaby() && BigBrainConfig.COMMON.babyNerf.get() && !BigBrainConfig.COMMON.babiesExemptFromNerf.get().contains(creature.getEncodeId())) {
@@ -209,7 +197,7 @@ public class BigBrainEvents {
             if (BigBrainConfig.COMMON.jumpAi.get() && !BigBrainConfig.COMMON.jumpBlackList.get().contains(creature.getEncodeId()) && (creature instanceof Zombie || creature instanceof AbstractIllager || creature instanceof AbstractPiglin
                     || creature instanceof AbstractSkeleton || creature instanceof Creeper || creature instanceof AbstractVillager || BigBrainConfig.COMMON.jumpWhiteList.get().contains(creature.getEncodeId())))
                 creature.goalSelector.addGoal(0, new ParkourGoal(creature));
-            if (GoalUtils.hasGroundPathNavigation(creature) && creature.getNavigation().getNodeEvaluator().canOpenDoors() && BigBrainConfig.openFenceGate && !BigBrainConfig.cantOpenFenceGates.contains(creature.getEncodeId())) {
+            if (GoalUtils.hasGroundPathNavigation(creature) && creature.getNavigation().getNodeEvaluator().canOpenDoors() && BigBrainConfig.COMMON.openFenceGates.get() && !BigBrainConfig.COMMON.fenceGateBlacklist.get().contains(creature.getEncodeId())) {
                 if (creature instanceof Raider) {
                     creature.goalSelector.addGoal(2, new OpenFenceGateGoal(creature, false) {
                         @Override
@@ -228,32 +216,32 @@ public class BigBrainEvents {
                 }
             }
             if (entity instanceof PolarBear polar) {
-                if (BigBrainConfig.PolarBearFish)
+                if (BigBrainConfig.COMMON.PolarBearFish.get())
                     polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, (Predicate<LivingEntity>) null));
             }
 
-            if (BigBrainConfig.animalShelter && entity instanceof Animal animal && BigBrainConfig.AnimalWhiteList.contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
+            if (BigBrainConfig.COMMON.animalShelter.get() && entity instanceof Animal animal && BigBrainConfig.COMMON.AnimalCoverWhiteList.get().contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
                 animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
                 animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
                 animal.goalSelector.addGoal(1, new AnimalFearPlayerGoal<>(animal, Player.class, 16.0F, 1.8D, 2.8D));
             }
 
             if (entity instanceof Sheep sheep) {
-                if (BigBrainConfig.sheepRunAway)
+                if (BigBrainConfig.COMMON.sheepRunAway.get())
                     sheep.goalSelector.addGoal(2, new AvoidEntityGoal<>(sheep, Wolf.class, 8.0F, 1.0D, 1.6D));
             }
 
             if (entity instanceof Ocelot ocelot) {
-                if (BigBrainConfig.ocelotPhantom)
+                if (BigBrainConfig.COMMON.ocelotPhantom.get())
                     ocelot.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(ocelot, Phantom.class, 10, true, true, (Predicate<LivingEntity>) null));
-                if (BigBrainConfig.ocelotCreeper)
+                if (BigBrainConfig.COMMON.ocelotCreeper.get())
                     ocelot.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(ocelot, Creeper.class, 10, true, true, (Predicate<LivingEntity>) null));
-                if (BigBrainConfig.ocelotParrot)
+                if (BigBrainConfig.COMMON.ocelotParrot.get())
                     ocelot.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(ocelot, Parrot.class, 10, true, true, (Predicate<LivingEntity>) null));
             }
 
             if (entity instanceof Parrot parrot)
-                if (BigBrainConfig.ocelotParrot)
+                if (BigBrainConfig.COMMON.ocelotParrot.get())
                     parrot.goalSelector.addGoal(2, new AvoidEntityGoal<>(parrot, Ocelot.class, 8.0F, 1.0D, 5.0D));
         }
     }
@@ -342,7 +330,7 @@ public class BigBrainEvents {
             armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), 13);
         if (event.getEntity() instanceof Pillager pillager) {
             if (spawnType == MobSpawnType.PATROL) {
-                float chance = BigBrainConfig.spyGlassPillagerChance;
+                float chance = BigBrainConfig.COMMON.pillagerSpyGlass.get().floatValue();
                 if (pillager.isPatrolLeader() && rSource.nextFloat() < chance)
                     pillager.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SPYGLASS));
             }

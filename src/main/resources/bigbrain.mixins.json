@@ -6,7 +6,8 @@
   "mixins": [
     "MeleeAttackGoalMixin",
     "HuskMixin",
-    "RangedCrossbowAttackGoalMixin"
+    "RangedCrossbowAttackGoalMixin",
+    "PigMixin"
   ],
   "client": [
     "IllagerModelMixin",

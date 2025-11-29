@@ -30,7 +30,7 @@ public class FindShelterGoal extends Goal {
     @Override
     public boolean canUse() {
         long gameTime = this.level.getGameTime();
-        boolean raining = !this.level.isDay() && !BigBrainConfig.NightAnimalBlackList.contains(this.mob.getEncodeId()) || !BigBrainConfig.RainAnimalBlackList.contains(mob.getEncodeId()) && mob.level().isRainingAt(mob.blockPosition());
+        boolean raining = !this.level.isDay() && !BigBrainConfig.COMMON.NightCoverBlackList.get().contains(this.mob.getEncodeId()) || !BigBrainConfig.COMMON.RainAnimalBlackList.get().contains(mob.getEncodeId()) && mob.level().isRainingAt(mob.blockPosition());
         boolean isTamed = this.mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
         if (this.setWantedPos())
             return raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null && this.mob.level().canSeeSky(mob.blockPosition());

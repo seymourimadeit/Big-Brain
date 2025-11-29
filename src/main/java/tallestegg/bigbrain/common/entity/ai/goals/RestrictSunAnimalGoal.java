@@ -18,8 +18,8 @@ public class RestrictSunAnimalGoal extends RestrictSunGoal {
     @Override
     public boolean canUse() {
         boolean raining = mob.getCommandSenderWorld().isNight()
-                && !BigBrainConfig.NightAnimalBlackList.contains(mob.getEncodeId())
-                || !BigBrainConfig.RainAnimalBlackList.contains(mob.getEncodeId())
+                && !BigBrainConfig.COMMON.NightCoverBlackList.get().contains(mob.getEncodeId())
+                || !BigBrainConfig.COMMON.RainAnimalBlackList.get().contains(mob.getEncodeId())
                         && mob.getCommandSenderWorld().isRainingAt(mob.blockPosition());
         boolean isTamed = mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame()
                 || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;

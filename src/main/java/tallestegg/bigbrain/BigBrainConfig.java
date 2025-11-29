@@ -1,18 +1,14 @@
 package tallestegg.bigbrain;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import net.neoforged.bus.api.SubscribeEvent;
+import com.google.common.collect.Lists;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
 
 
-@EventBusSubscriber(modid = BigBrain.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class BigBrainConfig {
     public static final ModConfigSpec COMMON_SPEC;
     public static final CommonConfig COMMON;
@@ -29,59 +25,6 @@ public class BigBrainConfig {
             final Pair<ClientConfig, ModConfigSpec> specPair1 = new ModConfigSpec.Builder().configure(ClientConfig::new);
             CLIENT = specPair1.getLeft();
             CLIENT_SPEC = specPair1.getRight();
-        }
-    }
-
-    public static Boolean PillagerCover;
-    public static Boolean PillagerMultishot;
-    public static Boolean MobsAttackAllVillagers;
-    public static Boolean PolarBearFish;
-    public static Boolean snowGolemSlow;
-    public static Boolean animalShelter;
-    public static Boolean meleeFix;
-    public static Boolean ocelotParrot;
-    public static Boolean ocelotPhantom;
-    public static Boolean ocelotCreeper;
-    public static Boolean sheepRunAway;
-    public static Boolean openFenceGate;
-    public static float spyGlassPillagerChance;
-    public static Integer minPigBabiesBred;
-    public static Integer maxPigBabiesBred;
-    public static Double mobBlindnessVision;
-    public static List<? extends String> MobBlackList;
-    public static List<? extends String> AnimalWhiteList;
-    public static List<? extends String> NightAnimalBlackList;
-    public static List<? extends String> RainAnimalBlackList;
-    public static List<? extends String> cantOpenFenceGates;
-
-    public static void bakeCommonConfig() {
-        PillagerCover = COMMON.PillagerCover.get();
-        PillagerMultishot = COMMON.PillagerMultishot.get();
-        MobsAttackAllVillagers = COMMON.MobsAttackAllVillagers.get();
-        MobBlackList = COMMON.MobBlackList.get();
-        PolarBearFish = COMMON.PolarBearFish.get();
-        minPigBabiesBred = COMMON.minPigBabiesBred.get();
-        maxPigBabiesBred = COMMON.maxPigBabiesBred.get();
-        snowGolemSlow = COMMON.snowGolemSlow.get();
-        AnimalWhiteList = COMMON.AnimalCoverWhiteList.get();
-        NightAnimalBlackList = COMMON.NightCoverBlackList.get();
-        RainAnimalBlackList = COMMON.RainAnimalBlackList.get();
-        animalShelter = COMMON.animalShelter.get();
-        mobBlindnessVision = COMMON.mobBlindnessVision.get();
-        meleeFix = COMMON.meleeFix.get();
-        ocelotCreeper = COMMON.ocelotCreeper.get();
-        ocelotParrot = COMMON.ocelotParrot.get();
-        ocelotPhantom = COMMON.ocelotPhantom.get();
-        sheepRunAway = COMMON.sheepRunAway.get();
-        spyGlassPillagerChance = COMMON.pillagerSpyGlass.get().floatValue();
-        openFenceGate = COMMON.openFenceGates.get();
-        cantOpenFenceGates = COMMON.fenceGateBlacklist.get();
-    }
-
-    @SubscribeEvent
-    public static void onModConfigEvent(final ModConfigEvent.Loading configEvent) {
-        if (configEvent.getConfig().getSpec() == BigBrainConfig.COMMON_SPEC) {
-            bakeCommonConfig();
         }
     }
 

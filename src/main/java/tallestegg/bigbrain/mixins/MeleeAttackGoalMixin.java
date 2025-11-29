@@ -21,13 +21,13 @@ public class MeleeAttackGoalMixin {
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/ai/goal/MeleeAttackGoal;ticksUntilNextPathRecalculation:I"), cancellable = true, method = "start")
     public void start(CallbackInfo info) {
-        if (BigBrainConfig.meleeFix)
+        if (BigBrainConfig.COMMON.meleeFix.get())
             info.cancel();
     }
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/ai/goal/MeleeAttackGoal;ticksUntilNextAttack:I"), cancellable = true, method = "resetAttackCooldown", remap = false)
     public void resetAttackCooldown(CallbackInfo info) {
-        if (BigBrainConfig.meleeFix) {
+        if (BigBrainConfig.COMMON.meleeFix.get()) {
             if (this.ticksUntilNextAttack <= 0) {
                 this.ticksUntilNextAttack = 20;
             }
