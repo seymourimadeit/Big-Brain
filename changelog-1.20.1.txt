@@ -1,1 +1,2 @@
 - Made cooldown for FindShelterGoal longer to further mitigate against lag
+- Fix crashes with the Recruits mod
