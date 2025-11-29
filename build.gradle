@@ -24,7 +24,7 @@ mixin {
 }
 
 
-version = '1.20.1-1.7.4'
+version = '1.20.1-1.7.5'
 group = 'tallestegg.bigbrain' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'bigbrain'
 
@@ -99,6 +99,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.1.33'
+    implementation fg.deobf("curse.maven:spark-361579:4738952")
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 }
 

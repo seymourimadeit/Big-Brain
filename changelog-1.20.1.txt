@@ -1,2 +1,1 @@
-- Removed unused sounds
-- Made animals seeking shelter an opt-in feature (whitelist instead of blacklist)
+- Made cooldown for FindShelterGoal longer to further mitigate against lag
