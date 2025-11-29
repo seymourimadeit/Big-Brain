@@ -1,1 +1,1 @@
-CHANGELOG:
+CHANGELOG:- [CHANGE] fix #68 (mixed litter traits not passing down to pig litters)
