@@ -1,2 +1,2 @@
 - Made cooldown for FindShelterGoal longer to further mitigate against lag
-- Fix crashes with the Recruits mod
+- Fix crashes with the Recruits mod- [CHANGE] modify code to make it work on both neoforge and later forge versions on 1.20.1
