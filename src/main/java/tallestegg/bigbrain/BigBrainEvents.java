@@ -120,23 +120,6 @@ public class BigBrainEvents {
     }
 
     @SubscribeEvent
-    public static void entityHitbox(EntityEvent.Size event) {
-        if (event.getEntity() instanceof Husk husk) {
-            if (husk.hasPose(Pose.SWIMMING)) {
-                event.setNewSize(EntityDimensions.scalable(1.0F, 1.5F));
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void entityEye(EntityEvent.EyeHeight event) {
-        if (event.getEntity() instanceof Husk husk) {
-            if (husk.hasPose(Pose.SWIMMING))
-                event.setNewEyeHeight(0.5F);
-        }
-    }
-
-    @SubscribeEvent
     public static void onMount(EntityMountEvent event) {
         if (event.getEntity() instanceof Player player) {
             if (event.getEntityBeingMounted() instanceof Husk husk && husk.isAlive() && BigBrainCapabilities.getBurrowing(husk).isCarrying() && (!player.isSpectator() || !player.isCreative()) && player.isAlive() && event.isDismounting()) {
