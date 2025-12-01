@@ -99,6 +99,7 @@ public class BigBrainConfig {
         public final ForgeConfigSpec.BooleanValue bowAiNew;
         public final ForgeConfigSpec.BooleanValue huskBurrowing;
         public final ForgeConfigSpec.BooleanValue jumpAi;
+        public final ForgeConfigSpec.BooleanValue jumpOnlyIfTargeting;
         public final ForgeConfigSpec.DoubleValue pillagerSpyGlass;
         public final ForgeConfigSpec.IntValue minPigBabiesBred;
         public final ForgeConfigSpec.IntValue maxPigBabiesBred;
@@ -124,6 +125,7 @@ public class BigBrainConfig {
             bowAiNew = builder.define("Enable new bow ai?", true);
             bowAiBlackList = builder.define("Mobs that don't have the new bow ai", Lists.newArrayList());
             jumpAi = builder.define("Enable jumping ai", true);
+            jumpOnlyIfTargeting = builder.define("Jump only if mob is targeting an enemy", false);
             jumpWhiteList = builder.define("List additional mobs that can also utilize jumping", Lists.newArrayList("guardvillagers:guard"));
             jumpBlackList = builder.define("Mobs that don't have the jumping ai", Lists.newArrayList("minecraft:villager"));
             builder.pop();
