@@ -1,2 +1,1 @@
-- [CHANGE] modify code to make it work on both neoforge and later forge versions on 1.20.1
-- [CHANGE] mitigate against #70 by implementing changes from 1.21.1 to 1.20.1
+
