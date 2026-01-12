@@ -67,25 +67,6 @@ public class BigBrainEvents {
     private static final AttributeModifier KNOCKBACK_RESISTANCE = new AttributeModifier(KNOCKBACK_RESISTANCE_UUID, "Knockback reduction", 1.0D, AttributeModifier.Operation.ADDITION);
 
     @SubscribeEvent
-    public static void onBreed(BabyEntitySpawnEvent event) {
-        if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
-            Pig pig = (Pig) event.getParentA();
-            Level level = pig.level();
-            RandomSource randomSource = level.getRandom();
-            for (int i = 0; i < BigBrainConfig.minPigBabiesBred + randomSource.nextInt(BigBrainConfig.maxPigBabiesBred + 1); ++i) {
-                Pig baby = EntityType.PIG.create(event.getChild().level());
-                baby.copyPosition(pig);
-                baby.setPersistenceRequired();
-                if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))
-                    level.addFreshEntity(new ExperienceOrb(level, pig.getX(), pig.getY(), pig.getZ(), pig.getRandom().nextInt(7) + 1));
-                baby.setBaby(true);
-                baby.setPersistenceRequired();
-                pig.getCommandSenderWorld().addFreshEntity(baby);
-            }
-        }
-    }
-
-    @SubscribeEvent
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getLookingEntity() instanceof LivingEntity living) {
             if (living.hasEffect(MobEffects.BLINDNESS)) event.modifyVisibility(BigBrainConfig.mobBlindnessVision);
