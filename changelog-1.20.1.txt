@@ -1,0 +1,1 @@
+- [CHANGE] - Implement pig litters not having variants applied fix from 1.21.1
