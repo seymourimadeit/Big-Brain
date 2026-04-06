@@ -61,14 +61,6 @@ import java.util.function.Predicate;
 @EventBusSubscriber(modid = BigBrain.MODID)
 public class BigBrainEvents {
     @SubscribeEvent
-    public static void onBreed(BabyEntitySpawnEvent event) {
-        if (event.getParentA().getType() == EntityType.PIG && event.getParentB().getType() == EntityType.PIG) {
-            Pig pig = (Pig) event.getParentA();
-            Level level = pig.level();
-        }
-    }
-
-    @SubscribeEvent
     public static void modifiyVisibility(LivingEvent.LivingVisibilityEvent event) {
         if (event.getLookingEntity() instanceof LivingEntity living) {
             if (living.hasEffect(MobEffects.BLINDNESS)) event.modifyVisibility(BigBrainConfig.COMMON.mobBlindnessVision.get());
@@ -184,7 +176,7 @@ public class BigBrainEvents {
 
         if (entity instanceof Enemy && entity instanceof Mob mob) {
             if (BigBrainConfig.COMMON.MobsAttackAllVillagers.get() && !BigBrainConfig.COMMON.MobBlackList.get().contains(entity.getEncodeId())) {
-                mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
+                mob.targetSelector.addGoal(8, new NearestAttackableTargetGoal<>(mob, AbstractVillager.class, true));
             }
         }
         if (entity instanceof AbstractVillager villager && BigBrainConfig.COMMON.MobsAttackAllVillagers.get()) {
