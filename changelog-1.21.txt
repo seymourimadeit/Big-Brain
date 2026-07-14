@@ -1,2 +1,1 @@
-
-- [CHANGE] fix #72 (corrected priorities for mobs attacking villagers if option is enabled)
+CHANGELOG:
