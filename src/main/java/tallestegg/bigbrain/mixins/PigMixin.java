@@ -2,6 +2,7 @@ package tallestegg.bigbrain.mixins;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Pig;
@@ -16,10 +17,26 @@ public abstract class PigMixin extends Animal {
     }
 
     @Override
-    public void spawnChildFromBreeding(ServerLevel level, Animal animal) {
+    public void spawnChildFromBreeding(ServerLevel level, Animal mate) {
         RandomSource randomSource = this.getRandom();
         for (int i = 0; i < BigBrainConfig.COMMON.minPigBabiesBred.get() + randomSource.nextInt(BigBrainConfig.COMMON.maxPigBabiesBred.get() + 1); ++i) {
-            super.spawnChildFromBreeding(level, animal);
+            AgeableMob ageablemob = this.getBreedOffspring(level, mate);
+            final net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent event = new net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent(this, mate, ageablemob);
+            final boolean cancelled = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event).isCanceled();
+            ageablemob = event.getChild();
+            if (cancelled) {
+                this.setAge(6000);
+                mate.setAge(6000);
+                this.resetLove();
+                mate.resetLove();
+                return;
+            }
+            if (ageablemob != null) {
+                ageablemob.setBaby(true);
+                ageablemob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
+                this.finalizeSpawnChildFromBreeding(level, mate, ageablemob);
+                level.addFreshEntityWithPassengers(ageablemob);
+            }
         }
     }
 }
