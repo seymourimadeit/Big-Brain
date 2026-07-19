@@ -1,24 +1,23 @@
 package tallestegg.bigbrain.common.entity.ai.goals;
 
-import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.GoalUtils;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import tallestegg.bigbrain.BigBrainConfig;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
 public class ParkourGoal extends Goal {
-    private static final List<Integer> ALLOWED_ANGLES = Lists.newArrayList(65, 70, 75, 80);
+    private static final int[] JUMP_ANGLES = {65, 70, 75, 80};
     protected final float maxJumpVelocity;
     private final Mob mob;
     private final BiPredicate<Mob, BlockPos> acceptableLandingSpot = ParkourGoal::defaultAcceptableLandingSpot;
@@ -28,9 +27,10 @@ public class ParkourGoal extends Goal {
     protected Vec3 chosenJump;
     protected BlockPos posToJump;
     protected int findJumpTries;
-    protected int failedToFindJumpCounter;
     protected long tryAgainTime;
-    private int lookTime; // This is stupid, why do I have to do this to make the mob look at a block?
+    private int currentSearchDistance = 1;
+    private Direction searchDirection;
+    private BlockPos cachedMobPos;
 
     public ParkourGoal(Mob mob) {
         this.mob = mob;
@@ -39,155 +39,123 @@ public class ParkourGoal extends Goal {
     }
 
     public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos pos) {
-        BlockPos blockpos = pos.below();
-        return mob instanceof PathfinderMob && GoalUtils.isSolid((PathfinderMob) mob, blockpos);
+        return mob instanceof PathfinderMob && GoalUtils.isSolid((PathfinderMob) mob, pos.below());
     }
 
     public boolean canJump() {
+        long time = this.mob.level().getGameTime();
+        if (time - this.tryAgainTime <= 100L) return false;
+
         Path path = this.mob.getNavigation().getPath();
-        return this.mob.getNavigation().isInProgress() && path != null && !path.canReach() && (this.mob.level().getGameTime() - tryAgainTime > 100L);
+        return path != null && !path.canReach();
     }
 
     @Override
     public boolean canUse() {
-        if (this.mob.getNavigation() != null && this.mob.onGround()) {
-            return this.canJump() || (BigBrainConfig.COMMON.jumpOnlyIfTargeting.get() && mob.getTarget() != null && this.canJump());
-        } else {
-            return false;
+        if (this.mob.onGround() && this.mob.getNavigation().isInProgress()) {
+            if (!this.canJump())
+                return false;
+            if (BigBrainConfig.COMMON.jumpOnlyIfTargeting.get())
+                return this.mob.getTarget() != null;
+            return true;
         }
+        return false;
     }
 
     @Override
     public boolean canContinueToUse() {
-        boolean flag = this.initialPosition.isPresent() && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && this.chosenJump != null && this.phase != JumpPhases.END;
-        return flag && this.failedToFindJumpCounter <= 5;
+        return (this.phase == JumpPhases.SEARCHING || this.chosenJump != null)
+                && this.findJumpTries > 0
+                && !mob.isInWaterOrBubble();
     }
 
     @Override
     public void start() {
-        this.phase = JumpPhases.NONE;
+        this.phase = JumpPhases.SEARCHING;
         this.chosenJump = null;
         this.findJumpTries = 20;
-        this.initialPosition = Optional.of(mob.position());
-        if (this.mob.getNavigation() == null)
-            return;
         this.mob.setYRot(this.mob.getYHeadRot());
-        this.pickCandidate(mob, this.mob.getNavigation().getTargetPos());
+        this.currentSearchDistance = 1;
+        this.searchDirection = this.mob.getDirection();
+        BlockPos currentPos = this.mob.blockPosition();
+        this.cachedMobPos = currentPos;
+        this.initialPosition = Optional.of(Vec3.atLowerCornerOf(currentPos));
     }
 
     @Override
     public void tick() {
-        if (this.phase == JumpPhases.LOOK_AT_BLOCK) {
-            if (this.lookTime > 0)
-                --this.lookTime;
-            if (this.posToJump != null) {
-                Vec3 pos = Vec3.atCenterOf(posToJump);
-                this.lookAt(pos, 30.0F, 30.0F);
-                this.mob.setYBodyRot(this.mob.yHeadRot);
-            }
-            if (this.lookTime <= 0)
-                this.phase = JumpPhases.JUMP;
-        } else if (this.phase == JumpPhases.JUMP) {
-            if (this.chosenJump != null) {
-                this.leapTowards(mob, this.mob.position().add(this.chosenJump), this.chosenJump.length(), 0.0F);
-                this.mob.getJumpControl().jump();
+        LivingEntity target = this.mob.getTarget();
+        if (target != null) {
+            this.mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+
+        if (this.phase == JumpPhases.SEARCHING) {
+            pickNextCandidateTick();
+            --this.findJumpTries;
+            if (this.currentSearchDistance >= 8 && this.chosenJump == null) {
                 this.phase = JumpPhases.END;
             }
-        } else {
-            --this.findJumpTries;
-        }
-    }
-
-    public void lookAt(Vec3 vec3, float pMaxYRotIncrease, float pMaxXRotIncrease) {
-        double d0 = vec3.x() - this.mob.getX();
-        double d2 = vec3.z() - this.mob.getZ();
-        double d1 = vec3.y() - this.mob.getEyeY();
-        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        float f = (float) (Mth.atan2(d2, d0) * 57.2957763671875) - 90.0F;
-        float f1 = (float) (-(Mth.atan2(d1, d3) * 57.2957763671875));
-        this.mob.setXRot(this.rotlerp(this.mob.getXRot(), f1, pMaxXRotIncrease));
-        this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f, pMaxYRotIncrease));
-    }
-
-    private float rotlerp(float pAngle, float pTargetAngle, float pMaxIncrease) {
-        float f = Mth.wrapDegrees(pTargetAngle - pAngle);
-        if (f > pMaxIncrease) {
-            f = pMaxIncrease;
+            return;
         }
 
-        if (f < -pMaxIncrease) {
-            f = -pMaxIncrease;
+        if (this.phase == JumpPhases.JUMP) {
+            Vec3 jump = this.chosenJump;
+            if (jump != null) {
+                this.leapTowards(mob, this.mob.position().add(jump), jump.length(), 0.0F);
+                this.mob.getJumpControl().jump();
+                this.chosenJump = null;
+                this.phase = JumpPhases.END;
+            }
         }
-
-        return pAngle + f;
     }
-
 
     @Override
     public void stop() {
         this.phase = JumpPhases.END;
         this.tryAgainTime = this.mob.level().getGameTime();
-        this.failedToFindJumpCounter = 0;
+        this.chosenJump = null;
     }
 
-    protected void pickCandidate(Mob pEntity, BlockPos block) {
-        for (BlockPos pos : BlockPos.betweenClosed(pEntity.blockPosition(), block)) {
-            BlockPos jumpPos = pEntity.blockPosition().closerThan(pos, 3.0D) ? pos : block;
-            if (this.isAcceptableLandingPosition(pEntity, jumpPos)) {
-                Vec3 vec3 = Vec3.atCenterOf(jumpPos);
-                Vec3 vec31 = this.calculateOptimalJumpVector(pEntity, vec3).orElse(null);
-                if (vec31 != null) {
-                    this.mob.getLookControl().setLookAt(vec3.x, this.mob.getEyeY(), vec3.z, 90.0F, 90.0F);
-                    this.lookAt(vec3, 30.0F, 30.0F);
-                    this.mob.setYBodyRot(this.mob.yHeadRot);
-                    this.posToJump = jumpPos;
-                    this.chosenJump = vec31;
-                    if (this.phase == JumpPhases.NONE) {
-                        this.lookTime = 5;
-                        this.phase = JumpPhases.LOOK_AT_BLOCK;
-                    }
-                }
-            } else {
-                this.failedToFindJumpCounter++;
-            }
+    protected void pickNextCandidateTick() {
+        BlockPos jumpPos = this.cachedMobPos.relative(this.searchDirection, this.currentSearchDistance++);
+        Level level = this.mob.level();
+
+        if (!level.getBlockState(jumpPos).isAir() || !this.isAcceptableLandingPosition(this.mob, jumpPos)) {
+            return;
+        }
+
+        Vec3 targetVec = Vec3.atCenterOf(jumpPos);
+        Vec3 jumpVec = this.calculateOptimalJumpVector(this.mob, targetVec);
+
+        if (jumpVec != null) {
+            this.posToJump = jumpPos;
+            this.chosenJump = jumpVec;
+            this.phase = JumpPhases.JUMP;
         }
     }
 
     private boolean isAcceptableLandingPosition(Mob pEntity, BlockPos pPos) {
-        BlockPos blockpos = pEntity.blockPosition();
-        int i = blockpos.getX();
-        int j = blockpos.getZ();
-        return (i != pPos.getX() || j != pPos.getZ()) && this.acceptableLandingSpot.test(pEntity, pPos);
+        BlockPos blockpos = this.cachedMobPos;
+        if (blockpos.getX() == pPos.getX() && blockpos.getZ() == pPos.getZ()) {
+            return false;
+        }
+        return this.acceptableLandingSpot.test(pEntity, pPos);
     }
 
     @Nullable
-    protected Optional<Vec3> calculateOptimalJumpVector(Mob pMob, Vec3 pTarget) {
-        List<Integer> list = Lists.newArrayList(ALLOWED_ANGLES);
-        Collections.shuffle(list);
+    protected Vec3 calculateOptimalJumpVector(Mob pMob, Vec3 pTarget) {
+        int len = JUMP_ANGLES.length;
+        int startOffset = pMob.getRandom().nextInt(len);
+        float maxVel = this.maxJumpVelocity;
 
-        for (int i : list) {
-            Optional<Vec3> vec3 = calculateJumpVectorForAngle(pMob, pTarget, this.maxJumpVelocity, i, false);
-            if (vec3.isPresent()) {
-                return vec3;
+        for (int i = 0; i < len; i++) {
+            int angle = JUMP_ANGLES[(startOffset + i) % len];
+            Optional<Vec3> vec3Opt = calculateJumpVectorForAngle(pMob, pTarget, maxVel, angle, false);
+            if (vec3Opt.isPresent()) {
+                return vec3Opt.get();
             }
         }
-
-        return Optional.empty();
-    }
-
-    private void leapTowards(LivingEntity entity, Vec3 target, double horzVel, double yVel) {
-        Vec3 dir = target.subtract(entity.position()).normalize();
-        Vec3 leap = new Vec3(dir.x, 0.0, dir.z).normalize().scale(horzVel).yRot((float) yVel);
-        float clampedYVelocity = (float) (entity.getDeltaMovement().y() < 0.1D ? leap.y : 0.0D);
-
-        // Normalize to make sure the velocity doesn't go beyond what we expect
-        Vec3 horzVelocity = entity.getDeltaMovement().add(leap.x, 0.0, leap.z);
-        double scale = horzVel / horzVelocity.length();
-        if (scale < 1.0D) {
-            horzVelocity = horzVelocity.scale(scale);
-        }
-        ((Mob) entity).getLookControl().setLookAt(target);
-        entity.setDeltaMovement(horzVelocity.yRot(clampedYVelocity));
+        return null;
     }
 
     public static Optional<Vec3> calculateJumpVectorForAngle(Mob mob, Vec3 target, float maxJumpVelocity, int angle, boolean requireClearTransition) {
@@ -259,9 +227,49 @@ public class ParkourGoal extends Goal {
         return true;
     }
 
+    private void leapTowards(LivingEntity entity, Vec3 target, double horzVel, double yVel) {
+        Vec3 currentMovement = entity.getDeltaMovement();
+        Vec3 entityPos = entity.position();
+
+        double targetX = target.x - entityPos.x;
+        double targetZ = target.z - entityPos.z;
+        double distanceSq = targetX * targetX + targetZ * targetZ;
+
+        if (distanceSq < 1.0E-7D) return;
+
+        double invLength = 1.0D / Math.sqrt(distanceSq);
+        double dirX = targetX * invLength;
+        double dirZ = targetZ * invLength;
+
+        double leapX = dirX * horzVel;
+        double leapZ = dirZ * horzVel;
+
+        if (yVel != 0.0F) {
+            float rad = (float) (yVel * (Math.PI / 180.0D));
+            float cos = (float) Math.cos(rad);
+            float sin = (float) Math.sin(rad);
+            double rx = leapX * cos + leapZ * sin;
+            double rz = leapZ * cos - leapX * sin;
+            leapX = rx;
+            leapZ = rz;
+        }
+
+        double curY = currentMovement.y;
+        float clampedYVelocity = (float) (curY < 0.1D ? 0.0D : 0.0D);
+        double horzVelocityX = currentMovement.x + leapX;
+        double horzVelocityZ = currentMovement.z + leapZ;
+        double horzLen = Math.sqrt(horzVelocityX * horzVelocityX + horzVelocityZ * horzVelocityZ);
+        double scale = horzVel / horzLen;
+        if (scale < 1.0D) {
+            horzVelocityX *= scale;
+            horzVelocityZ *= scale;
+        }
+        entity.setDeltaMovement(new Vec3(horzVelocityX, clampedYVelocity, horzVelocityZ));
+    }
+
     public enum JumpPhases {
         NONE,
-        LOOK_AT_BLOCK,
+        SEARCHING,
         JUMP,
         END
     }
