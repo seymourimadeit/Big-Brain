@@ -28,7 +28,7 @@ jobs:
           file: gradle.properties
           property: mod_version
       - name: mc-publish
-        uses: Kir-Antipov/mc-publish@v3.3.0
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 421179
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
