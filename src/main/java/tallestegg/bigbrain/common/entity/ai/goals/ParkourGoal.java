@@ -121,11 +121,9 @@ public class ParkourGoal extends Goal {
     protected void pickNextCandidateTick() {
         BlockPos jumpPos = this.cachedMobPos.relative(this.searchDirection, this.currentSearchDistance++);
         Level level = this.mob.level();
-
         if (!level.getBlockState(jumpPos).isAir() || !this.isAcceptableLandingPosition(this.mob, jumpPos)) {
             return;
         }
-
         Vec3 targetVec = Vec3.atCenterOf(jumpPos);
         Vec3 jumpVec = this.calculateOptimalJumpVector(this.mob, targetVec);
 
@@ -137,8 +135,7 @@ public class ParkourGoal extends Goal {
     }
 
     private boolean isAcceptableLandingPosition(Mob pEntity, BlockPos pPos) {
-        BlockPos blockpos = this.cachedMobPos;
-        if (blockpos.getX() == pPos.getX() && blockpos.getZ() == pPos.getZ()) {
+        if (this.cachedMobPos.getX() == pPos.getX() && this.cachedMobPos.getZ() == pPos.getZ()) {
             return false;
         }
         return this.acceptableLandingSpot.test(pEntity, pPos);
