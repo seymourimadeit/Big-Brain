@@ -39,7 +39,6 @@ public class ArmadilloCrackLayer extends RenderLayer<Armadillo, ArmadilloModel> 
         if (renderType(pLivingEntity) == null || !BigBrainConfig.COMMON.armadilloShell.get())
             return;
         VertexConsumer vertexconsumer = pBuffer.getBuffer(this.renderType(pLivingEntity));
-        int armor = pLivingEntity.getData(BigBrainCapabilities.SHELL_HEALTH.get());
         this.getParentModel().renderToBuffer(pPoseStack, vertexconsumer, 15728640, OverlayTexture.NO_OVERLAY);
     }
 }
