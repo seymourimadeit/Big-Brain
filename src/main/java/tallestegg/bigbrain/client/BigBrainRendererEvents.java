@@ -1,6 +1,7 @@
 package tallestegg.bigbrain.client;
 
 import net.minecraft.client.renderer.entity.DrownedRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -14,8 +15,9 @@ public class BigBrainRendererEvents {
     @SubscribeEvent
     public static void addRenderLayers(EntityRenderersEvent.AddLayers event) {
         if (BigBrainConfig.CLIENT.drownedGlow.get()) {
-            DrownedRenderer renderer = event.getRenderer(EntityType.DROWNED);
-            renderer.addLayer(new DrownedGlowLayer<>(renderer));
+            LivingEntityRenderer renderer = event.getRenderer(EntityType.DROWNED);
+            if (renderer instanceof DrownedRenderer drownedRenderer)
+                drownedRenderer.addLayer(new DrownedGlowLayer<>(renderer));
         }
     }
 }
