@@ -1,2 +1,1 @@
 
-- [CHANGE] fix crash with GOETY by making sure layer is being added to the right renderer
