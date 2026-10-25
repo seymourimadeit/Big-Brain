@@ -1,1 +1,1 @@
-CHANGELOG:
+CHANGELOG:- [CHANGE] fix buggy husk burrow behavior
