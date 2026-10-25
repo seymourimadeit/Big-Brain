@@ -5,7 +5,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import tallestegg.bigbrain.BigBrainConfig;
@@ -30,8 +30,8 @@ public class FindShelterGoal extends Goal {
     @Override
     public boolean canUse() {
         long gameTime = this.level.getGameTime();
-        boolean raining = !this.level.isDay() && !BigBrainConfig.COMMON.NightCoverBlackList.get().contains(this.mob.getEncodeId()) || !BigBrainConfig.COMMON.RainAnimalBlackList.get().contains(mob.getEncodeId()) && mob.level().isRainingAt(mob.blockPosition());
-        boolean isTamed = this.mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
+        boolean raining = !this.level.isBrightOutside() && !BigBrainConfig.COMMON.NightCoverBlackList.get().contains(this.mob.getEncodeId()) || !BigBrainConfig.COMMON.RainAnimalBlackList.get().contains(mob.getEncodeId()) && mob.level().isRainingAt(mob.blockPosition());
+        boolean isTamed = this.mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame() || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerReference() != null;
         if (this.setWantedPos())
             return raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null && this.mob.level().canSeeSky(mob.blockPosition());
         return (gameTime - this.canUseCheck) > 2400L;

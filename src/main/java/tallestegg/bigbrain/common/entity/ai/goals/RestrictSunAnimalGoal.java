@@ -4,7 +4,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.RestrictSunGoal;
 import net.minecraft.world.entity.ai.util.GoalUtils;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import tallestegg.bigbrain.BigBrainConfig;
 
 public class RestrictSunAnimalGoal extends RestrictSunGoal {
@@ -17,12 +17,12 @@ public class RestrictSunAnimalGoal extends RestrictSunGoal {
 
     @Override
     public boolean canUse() {
-        boolean raining = mob.getCommandSenderWorld().isNight()
+        boolean raining = !mob.level().isBrightOutside()
                 && !BigBrainConfig.COMMON.NightCoverBlackList.get().contains(mob.getEncodeId())
                 || !BigBrainConfig.COMMON.RainAnimalBlackList.get().contains(mob.getEncodeId())
-                        && mob.getCommandSenderWorld().isRainingAt(mob.blockPosition());
+                        && mob.level().isRainingAt(mob.blockPosition());
         boolean isTamed = mob instanceof TamableAnimal && ((TamableAnimal) mob).isTame()
-                || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerUUID() != null;
+                || mob instanceof AbstractHorse && ((AbstractHorse) mob).getOwnerReference() != null;
         return GoalUtils.hasGroundPathNavigation(this.mob) && raining && !isTamed && !mob.isVehicle() && mob.getTarget() == null;
     }
 }

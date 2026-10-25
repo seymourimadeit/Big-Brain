@@ -21,7 +21,7 @@ public class BigBrain {
     public static final String MODID = "bigbrain";
 
     public BigBrain(IEventBus modEventBus, Dist dist, ModContainer container) {
-        container.registerConfig(ModConfig.Type.COMMON, BigBrainConfig.COMMON_SPEC);
+        container.registerConfig(ModConfig.Type.LOCAL, BigBrainConfig.COMMON_SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, BigBrainConfig.CLIENT_SPEC);
         BigBrainSounds.SOUNDS.register(modEventBus);
         BigBrainCapabilities.ATTACHMENT_TYPES.register(modEventBus);

@@ -2,7 +2,7 @@ package tallestegg.bigbrain.common.entity.ai.goals;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.monster.illager.Pillager;
 import net.minecraft.world.item.SpyglassItem;
 
 public class ZoomInAtRandomGoal extends Goal {

@@ -68,7 +68,7 @@ public class ParkourGoal extends Goal {
     public boolean canContinueToUse() {
         return (this.phase == JumpPhases.SEARCHING || this.chosenJump != null)
                 && this.findJumpTries > 0
-                && !mob.isInWaterOrBubble();
+                && !mob.isInWater();
     }
 
     @Override

@@ -12,13 +12,13 @@ import java.util.function.Supplier;
 public class BigBrainCapabilities {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, BigBrain.MODID);
     public static final Supplier<AttachmentType<Boolean>> BURROWING = ATTACHMENT_TYPES.register(
-            "burrowing", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
+            "burrowing", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL.fieldOf("burrowing")).build());
     public static final Supplier<AttachmentType<Boolean>> CARRYING = ATTACHMENT_TYPES.register(
-            "carrying", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
+            "carrying", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL.fieldOf("carrying")).build());
     public static final Supplier<AttachmentType<Boolean>> DIGGING = ATTACHMENT_TYPES.register(
-            "digging", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
+            "digging", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL.fieldOf("digging")).build());
     public static final Supplier<AttachmentType<Integer>> SHELL_HEALTH = ATTACHMENT_TYPES.register(
-            "shell_health", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).build());
+            "shell_health", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT.fieldOf("shell_health")).build());
     public static final Supplier<AttachmentType<Integer>> SAW_HUNT = ATTACHMENT_TYPES.register(
-            "saw_hunt", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).build());
+            "saw_hunt", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT.fieldOf("saw_hunt")).build());
 }

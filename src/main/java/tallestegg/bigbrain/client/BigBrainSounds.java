@@ -2,7 +2,7 @@ package tallestegg.bigbrain.client;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -15,6 +15,6 @@ public class BigBrainSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ARMADILLO_CRACK = createVariableRangeSound("entity.armadillo.crack");
 
     public static DeferredHolder<SoundEvent, SoundEvent> createVariableRangeSound(String path) {
-        return SOUNDS.register(path, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(BigBrain.MODID, path)));
+        return SOUNDS.register(path, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(BigBrain.MODID, path)));
     }
 }

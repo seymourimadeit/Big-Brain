@@ -14,26 +14,39 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.GoalUtils;
-import net.minecraft.world.entity.animal.*;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.armadillo.Armadillo;
-import net.minecraft.world.entity.monster.*;
+import net.minecraft.world.entity.animal.feline.Ocelot;
+import net.minecraft.world.entity.animal.fish.AbstractFish;
+import net.minecraft.world.entity.animal.parrot.Parrot;
+import net.minecraft.world.entity.animal.polarbear.PolarBear;
+import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
+import net.minecraft.world.entity.monster.illager.Pillager;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
+import net.minecraft.world.entity.monster.zombie.Husk;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpyglassItem;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
@@ -44,7 +57,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
-import net.neoforged.neoforge.event.entity.living.*;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -89,8 +105,8 @@ public class BigBrainEvents {
         Player player = event.getEntity();
         if (BigBrainConfig.COMMON.snowGolemSlow.get()) {
             if (item == Items.SNOWBALL) {
-                player.swing(event.getHand(), true);
-                player.getCooldowns().addCooldown(item, 4);
+                player.swing(event.getHand(), SwingAnimation.DEFAULT, true);
+                player.getCooldowns().addCooldown(stack, 4);
             }
         }
     }
@@ -115,7 +131,7 @@ public class BigBrainEvents {
         if (!blockstate.addRunningEffects(entity.level(), blockpos, entity))
             if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
                 Vec3 vec3 = entity.getDeltaMovement();
-                entity.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate).setPos(blockpos), entity.getX() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).height(), entity.getY() + 0.1D, entity.getZ() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).width(), vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
+                entity.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate), entity.getX() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).height(), entity.getY() + 0.1D, entity.getZ() + (entity.getRandom().nextDouble() - 0.5D) * (double) entity.getDimensions(entity.getPose()).width(), vec3.x * -4.0D, 1.5D, vec3.z * -4.0D);
             }
     }
 
@@ -124,7 +140,7 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof LivingEntity entity) {
             if (entity instanceof Husk husk) {
                 boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING.get());
-                if (!husk.level().isClientSide)
+                if (!husk.level().isClientSide())
                     PacketDistributor.sendToPlayersTrackingEntity(husk, new BurrowingCapabilityPacket(husk.getId(), burrowing));
                 if (burrowing) {
                     spawnRunningEffectsWhileCharging(entity);
@@ -134,11 +150,7 @@ public class BigBrainEvents {
                     }
                 }
             }
-            if (entity instanceof Dolphin dolphin) {
-                if (dolphin.touchingUnloadedChunk())
-                    dolphin.setAirSupply(300);
-            }
-            if (entity instanceof AgeableMob ageableMob && !ageableMob.level().isClientSide && BigBrainConfig.COMMON.babyNerf.get()) {
+            if (entity instanceof AgeableMob ageableMob && !ageableMob.level().isClientSide() && BigBrainConfig.COMMON.babyNerf.get()) {
                 if (ageableMob.getAge() == -1 && !BigBrainConfig.COMMON.babiesExemptFromNerf.get().contains(ageableMob.getEncodeId())) {
                     ageableMob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(ageableMob.getMaxHealth() * 2F);
                     ageableMob.setHealth(ageableMob.getMaxHealth());
@@ -150,7 +162,7 @@ public class BigBrainEvents {
     @SubscribeEvent
     public static void startTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof Husk husk) {
-            if (!event.getTarget().level().isClientSide) {
+            if (!event.getTarget().level().isClientSide()) {
                 boolean burrowing = husk.getData(BigBrainCapabilities.BURROWING.get());
                 PacketDistributor.sendToPlayersTrackingEntity(husk, new BurrowingCapabilityPacket(husk.getId(), burrowing));
             }
@@ -209,10 +221,10 @@ public class BigBrainEvents {
             }
             if (entity instanceof PolarBear polar) {
                 if (BigBrainConfig.COMMON.PolarBearFish.get())
-                    polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, (Predicate<LivingEntity>) null));
+                    polar.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(polar, AbstractFish.class, 10, true, true, null));
             }
 
-            if (BigBrainConfig.COMMON.animalShelter.get() && entity instanceof Animal animal && BigBrainConfig.COMMON.AnimalCoverWhiteList.get().contains(entity.getEncodeId()) && !(entity instanceof FlyingAnimal)) {
+            if (BigBrainConfig.COMMON.animalShelter.get() && entity instanceof Animal animal && BigBrainConfig.COMMON.AnimalCoverWhiteList.get().contains(entity.getEncodeId()) && !((animal.getMoveControl() instanceof FlyingMoveControl<?>))) {
                 animal.goalSelector.addGoal(7, new RestrictSunAnimalGoal(animal));
                 animal.goalSelector.addGoal(8, new FindShelterGoal(animal));
                 animal.goalSelector.addGoal(1, new AnimalFearPlayerGoal<>(animal, Player.class, 16.0F, 1.8D, 2.8D));
@@ -225,11 +237,11 @@ public class BigBrainEvents {
 
             if (entity instanceof Ocelot ocelot) {
                 if (BigBrainConfig.COMMON.ocelotPhantom.get())
-                    ocelot.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(ocelot, Phantom.class, 10, true, true, (Predicate<LivingEntity>) null));
+                    ocelot.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(ocelot, Phantom.class, 10, true, true,  null));
                 if (BigBrainConfig.COMMON.ocelotCreeper.get())
-                    ocelot.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(ocelot, Creeper.class, 10, true, true, (Predicate<LivingEntity>) null));
+                    ocelot.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(ocelot, Creeper.class, 10, true, true, null));
                 if (BigBrainConfig.COMMON.ocelotParrot.get())
-                    ocelot.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(ocelot, Parrot.class, 10, true, true, (Predicate<LivingEntity>) null));
+                    ocelot.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(ocelot, Parrot.class, 10, true, true, null));
             }
 
             if (entity instanceof Parrot parrot)
@@ -246,7 +258,7 @@ public class BigBrainEvents {
                 armadillo.playSound(BigBrainSounds.ARMADILLO_CRACK.get());
                 if (armadillo.level() instanceof ServerLevel serverlevel) {
                     serverlevel.sendParticles(
-                            new ItemParticleOption(ParticleTypes.ITEM, Items.ARMADILLO_SCUTE.getDefaultInstance()),
+                            new ItemParticleOption(ParticleTypes.ITEM, Items.ARMADILLO_SCUTE.getDefaultInstance().getItem()),
                             armadillo.getX(),
                             armadillo.getY() + 1.0,
                             armadillo.getZ(),
@@ -274,7 +286,7 @@ public class BigBrainEvents {
         if (event.getEntity() instanceof Animal animal && BigBrainConfig.COMMON.animalPanic.get()) {
             if (event.getSource().is(DamageTypeTags.PANIC_CAUSES)) {
                 for (Animal nearbyEntities : animal.level().getEntitiesOfClass(animal.getClass(), animal.getBoundingBox().inflate(5.0D))) {
-                    if ((nearbyEntities.getSpawnType() != null) && nearbyEntities.getSpawnType() != (MobSpawnType.STRUCTURE))
+                    if ((nearbyEntities.getSpawnType() != null) && nearbyEntities.getSpawnType() != (EntitySpawnReason.STRUCTURE))
                         nearbyEntities.setData(BigBrainCapabilities.SAW_HUNT.get(), nearbyEntities.getData(BigBrainCapabilities.SAW_HUNT.get()) + 600);
                 }
             }
@@ -297,7 +309,7 @@ public class BigBrainEvents {
                 // aggressive.
                 if (pillager.getNavigation().isDone())
                     pillager.getNavigation().moveTo(event.getOriginalAboutToBeSetTarget(), 1.0D);
-                for (Raider raider : pillager.level().getNearbyEntities(Raider.class, TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting(), pillager, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
+                for (Raider raider : pillager.level().getEntitiesOfClass(Raider.class, pillager.getBoundingBox().inflate(8.0D, 8.0D, 8.0D))) {
                     raider.setAggressive(true);
                     if (!(raider.getUseItem().getItem() instanceof SpyglassItem) && !raider.isPatrolling())
                         raider.setTarget(event.getOriginalAboutToBeSetTarget());
@@ -316,12 +328,12 @@ public class BigBrainEvents {
 
     @SubscribeEvent
     public static void finalizeSpawn(FinalizeSpawnEvent event) {
-        MobSpawnType spawnType = event.getSpawnType();
+        EntitySpawnReason spawnType = event.getSpawnType();
         RandomSource rSource = event.getLevel().getRandom();
         if (event.getEntity() instanceof Armadillo armadillo && BigBrainConfig.COMMON.armadilloShell.get())
             armadillo.setData(BigBrainCapabilities.SHELL_HEALTH.get(), 13);
         if (event.getEntity() instanceof Pillager pillager) {
-            if (spawnType == MobSpawnType.PATROL) {
+            if (spawnType == EntitySpawnReason.PATROL) {
                 float chance = BigBrainConfig.COMMON.pillagerSpyGlass.get().floatValue();
                 if (pillager.isPatrolLeader() && rSource.nextFloat() < chance)
                     pillager.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SPYGLASS));

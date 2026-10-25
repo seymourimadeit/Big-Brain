@@ -5,7 +5,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import tallestegg.bigbrain.BigBrainConfig;
@@ -33,7 +33,7 @@ public abstract class PigMixin extends Animal {
             }
             if (ageablemob != null) {
                 ageablemob.setBaby(true);
-                ageablemob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
+                ageablemob.snapTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
                 this.finalizeSpawnChildFromBreeding(level, mate, ageablemob);
                 level.addFreshEntityWithPassengers(ageablemob);
             }

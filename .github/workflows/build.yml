@@ -19,7 +19,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           arguments: build
-          gradle-version: 8.9
+          gradle-version: 9.1.0
       - uses: BrycensRanch/read-properties-action@v1
         id: version
         with:
@@ -38,8 +38,8 @@ jobs:
           files-primary: build/libs/!(*-@(javadoc|sources)).jar
           version-type: release
           loaders: neoforge
-          game-versions: 1.21.1
-          java: 21
+          game-versions: 26.3.0
+          java: 25
           name: ""
           changelog-file: changelog-1.21.*
       - name: Nuke Changelog dot txt
