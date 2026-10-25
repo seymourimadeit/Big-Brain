@@ -38,21 +38,29 @@ public class HuskBurrowGoal extends Goal {
     public boolean canUse() {
         long gameTime = this.husk.level().getGameTime();
         LivingEntity target = this.husk.getTarget();
-        return (gameTime - canUseCheck > 100L) && !this.husk.isBaby() && target != null && target.getVehicle() == null && target.distanceTo(this.husk) >= 5.0D && target instanceof Player && this.husk.getBlockStateOn().is(BlockTags.SAND);
+        boolean noOthersBurrowing = false; // Original intent was to prevent situations where a player can't escape a horde of husks
+        for (Husk nearbyEntities : husk.level().getEntitiesOfClass(husk.getClass(), husk.getBoundingBox().inflate(5.0D))) {
+            boolean burrowing = nearbyEntities.getData(BigBrainCapabilities.BURROWING);
+            noOthersBurrowing = burrowing && nearbyEntities != husk;
+        }
+        return !noOthersBurrowing && (gameTime - canUseCheck > 100L) && !this.husk.isBaby() && target != null && target.getVehicle() == null && target.distanceTo(this.husk) >= 5.0D && target instanceof Player && this.husk.getBlockStateOn().is(BlockTags.SAND);
     }
 
     @Override
     public boolean canContinueToUse() {
         LivingEntity target = this.husk.getTarget();
+        boolean noOthersBurrowing = false; // Original intent was to prevent situations where a player can't escape a horde of husks
         for (Husk nearbyEntities : husk.level().getEntitiesOfClass(husk.getClass(), husk.getBoundingBox().inflate(5.0D))) {
             boolean burrowing = nearbyEntities.getData(BigBrainCapabilities.BURROWING);
-            return !burrowing && nearbyEntities != husk;
+            noOthersBurrowing = burrowing && nearbyEntities != husk;
         }
-        return target != null && burrowTime > 0 &&
+        return !noOthersBurrowing && target != null && burrowTime > 0 &&
                 this.phase != BurrowPhases.STOP
                 || this.entityInWall(this.husk) && this.phase == BurrowPhases.DIG_OUT
                 && this.phase != BurrowPhases.STOP || this.husk.getLastDamageSource() != null && this.husk.lastHurt >= (this.husk.getMaxHealth() / 2.0F) || target != null && !this.husk.getSensing().hasLineOfSight(target) && this.seeTime > -60 || !this.husk.isEyeInFluidType(this.husk.getEyeInFluidType());
     }
+
+
 
     @Override
     public void start() {
