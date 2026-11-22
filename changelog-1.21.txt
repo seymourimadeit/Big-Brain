@@ -1,1 +1,1 @@
-CHANGELOG:- [CHANGE] fix #82 pigs don't breed at all when min and max litter sizes set to zero
+CHANGELOG:
