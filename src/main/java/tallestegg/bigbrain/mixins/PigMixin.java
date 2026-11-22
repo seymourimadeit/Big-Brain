@@ -16,10 +16,12 @@ public abstract class PigMixin extends Animal {
     }
 
     @Override
-    public void spawnChildFromBreeding(ServerLevel level, Animal animal) {
+    public void spawnChildFromBreeding(ServerLevel level, Animal mate) {
         RandomSource randomSource = this.getRandom();
-        for (int i = 0; i < BigBrainConfig.COMMON.minPigBabiesBred.get() + randomSource.nextInt(BigBrainConfig.COMMON.maxPigBabiesBred.get() + 1); ++i) {
-            super.spawnChildFromBreeding(level, animal);
+        super.spawnChildFromBreeding(level, mate);
+        for (int i = 0; i < randomSource.nextIntBetweenInclusive(BigBrainConfig.COMMON.minPigBabiesBred.get(), BigBrainConfig.COMMON.maxPigBabiesBred.get()); i++) {
+            super.spawnChildFromBreeding(level, mate);
         }
     }
 }
+
