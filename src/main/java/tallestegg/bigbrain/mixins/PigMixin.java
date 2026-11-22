@@ -19,24 +19,9 @@ public abstract class PigMixin extends Animal {
     @Override
     public void spawnChildFromBreeding(ServerLevel level, Animal mate) {
         RandomSource randomSource = this.getRandom();
-        for (int i = 0; i < BigBrainConfig.COMMON.minPigBabiesBred.get() + randomSource.nextInt(BigBrainConfig.COMMON.maxPigBabiesBred.get() + 1); ++i) {
-            AgeableMob ageablemob = this.getBreedOffspring(level, mate);
-            final net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent event = new net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent(this, mate, ageablemob);
-            final boolean cancelled = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event).isCanceled();
-            ageablemob = event.getChild();
-            if (cancelled) {
-                this.setAge(6000);
-                mate.setAge(6000);
-                this.resetLove();
-                mate.resetLove();
-                return;
-            }
-            if (ageablemob != null) {
-                ageablemob.setBaby(true);
-                ageablemob.snapTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
-                this.finalizeSpawnChildFromBreeding(level, mate, ageablemob);
-                level.addFreshEntityWithPassengers(ageablemob);
-            }
+        super.spawnChildFromBreeding(level, mate);
+        for (int i = 0; i < randomSource.nextIntBetweenInclusive(BigBrainConfig.COMMON.minPigBabiesBred.get(), BigBrainConfig.COMMON.maxPigBabiesBred.get()); i++) {
+            super.spawnChildFromBreeding(level, mate);
         }
     }
 }
